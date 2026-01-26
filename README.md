@@ -196,5 +196,5 @@
   - ransack
   - CarrierWave (本リリース)
 
-### 画面遷移図
+## 画面遷移図
 Figma：https://www.figma.com/design/IPuZKnOO8Oj3byb8qIBjl7/Get-The-Time?node-id=0-1&p=f&t=kPar2A1oObmgWZZ5-0
