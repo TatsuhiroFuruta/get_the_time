@@ -200,4 +200,4 @@
 Figma：https://www.figma.com/design/IPuZKnOO8Oj3byb8qIBjl7/Get-The-Time?node-id=0-1&p=f&t=kPar2A1oObmgWZZ5-0
 
 ## ER図
-[![Image from Gyazo](https://i.gyazo.com/b76c2edf5ad4365f908494a0872c8d78.png)](https://gyazo.com/b76c2edf5ad4365f908494a0872c8d78)
+[![Image from Gyazo](https://i.gyazo.com/0a3ad26e8462b6cca660b2dd366c26a4.png)](https://gyazo.com/0a3ad26e8462b6cca660b2dd366c26a4)
