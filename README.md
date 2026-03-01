@@ -184,7 +184,7 @@
 
 ## 使用する技術スタック
 - Ruby 3.3.6
-- フレームワーク（バックエンド）：Ruby on Rails 7.2.3
+- フレームワーク（バックエンド）：Ruby on Rails 8.x.x
 - フレームワーク（フロントエンド）：Hotwire
 - CSSフレームワーク：Tailwind CSS
 - データベース：PostgreSQL (Neon)
@@ -192,7 +192,6 @@
 - グラフ表示：chart.js
 - 使用予定のライブラリ
   - devise
-  - SendGrid
   - ransack
   - CarrierWave (本リリース)
 
