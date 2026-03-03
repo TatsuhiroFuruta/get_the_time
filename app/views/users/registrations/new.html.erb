@@ -1,0 +1,40 @@
+<div class="bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center min-h-screen">
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-2xl shadow-2xl p-8">
+
+      <h2 class="text-center text-2xl font-bold mb-6">アカウント作成</h2>
+
+      <%= form_with(model: resource, as: resource_name, url: registration_path(resource_name), class: "space-y-4") do |f| %>
+
+        <div>
+          <%= f.label :name, "名前", class: "block text-sm font-medium mb-1" %>
+          <%= f.text_field :name, class: "w-full bg-white rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+        </div>
+
+        <div>
+          <%= f.label :email, "メールアドレス", class: "block text-sm font-medium mb-1" %>
+          <%= f.email_field :email, autocomplete: "email", class: "w-full bg-white rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+        </div>
+
+        <div>
+          <%= f.label :password, "パスワード", class: "block text-sm font-medium mb-1" %>
+          <%= f.password_field :password, autocomplete: "new-password", class: "w-full bg-white rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+        </div>
+
+        <div>
+          <%= f.label :password_confirmation, "パスワード確認", class: "block text-sm font-medium mb-1" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full bg-white rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+        </div>
+
+        <div>
+          <%= f.submit "アカウント作成", class: "w-full py-2 rounded-md bg-blue-500 text-white font-semibold hover:bg-blue-600 shadow-md" %>
+        </div>
+      <% end %>
+
+      <div class="mt-4 text-md text-center">
+        <%= link_to "ログインはこちら", new_session_path(resource_name), class: "text-blue-600 hover:underline" %>
+      </div>
+
+    </div>
+  </div>
+</div>
