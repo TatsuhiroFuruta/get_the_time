@@ -1,0 +1,37 @@
+<div class="bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center min-h-screen">
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-2xl shadow-2xl p-8">
+
+      <h2 class="text-center text-2xl font-bold mb-6">ログイン</h2>
+
+      <%= form_with(model: resource, as: resource_name, url: session_path(resource_name), class: "space-y-4") do |f| %>
+
+        <div>
+          <%= f.label :email, "メールアドレス", class: "block text-sm font-medium mb-1" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full bg-white rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+        </div>
+
+        <div>
+          <%= f.label :password, "パスワード", class: "block text-sm font-medium mb-1" %>
+          <%= f.password_field :password, autocomplete: "current-password", class: "w-full bg-white rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+        </div>
+
+        <% if devise_mapping.rememberable? %>
+          <div class="flex items-center">
+            <%= f.check_box :remember_me, class: "mr-2 rounded border-gray-400" %>
+            <%= f.label :remember_me, "ログイン状態を保持する", class: "text-sm" %>
+          </div>
+        <% end %>
+
+        <div>
+          <%= f.submit "ログイン", class: "w-full py-2 rounded-md bg-blue-500 text-white font-semibold hover:bg-blue-600 shadow-md" %>
+        </div>
+      <% end %>
+
+      <div class="mt-4 text-md text-center">
+        <%= link_to "新規登録はこちら", new_registration_path(resource_name), class: "text-blue-600 hover:underline" %>
+      </div>
+
+    </div>
+  </div>
+</div>
