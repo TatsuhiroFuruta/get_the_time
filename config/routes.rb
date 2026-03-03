@@ -15,5 +15,5 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-  root "static_pages#mypage" # マイページの設定
+  root "static_pages#home" # マイページの設定
 end
