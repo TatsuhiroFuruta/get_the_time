@@ -18,4 +18,5 @@ Rails.application.routes.draw do
   # root "static_pages#home" # ホームページの設定
   root "mypages#show" # ログイン後はマイページへ遷移
   resource :mypage, only: %i[show]
+  resource :dark_time, only: %i[new create]
 end
