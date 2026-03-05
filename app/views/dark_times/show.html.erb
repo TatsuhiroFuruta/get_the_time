@@ -1,0 +1,42 @@
+<div class="min-h-screen bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100%">
+
+<!-- 戻るボタン -->
+    <%= link_to "← マイページに戻る", mypage_path, class: "mt-6 ml-6 mb-20 inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition" %>
+
+  <div class="flex-col items-center justify-center w-full max-w-2xl px-10 text-white mx-auto">
+
+    <h1 class="text-2xl font-bold text-center mb-10">
+      闇の時間での活動内容詳細
+    </h1>
+
+    <!-- 闇の時間での行動 -->
+    <div class="mb-8">
+      <p class="mb-2 text-sm opacity-80">闇の時間での行動</p>
+      <div class="bg-violet-800 rounded-lg px-6 py-4">
+        <%= @dark_time.behavior %>
+      </div>
+    </div>
+
+    <!-- 避けたい未来 -->
+    <div class="mb-8">
+      <p class="mb-2 text-sm opacity-80">避けたい未来</p>
+      <div class="bg-violet-800 rounded-lg px-6 py-4">
+        <%= @dark_time.unwanted_future.presence || "これから考える" %>
+      </div>
+    </div>
+
+    <!-- 闇の時間の特徴 -->
+    <div class="mb-16">
+      <p class="mb-2 text-sm opacity-80">闇の時間の特徴</p>
+      <div class="bg-violet-800 rounded-lg px-6 py-4">
+        <%= @dark_time.characteristic.presence || "これから見つけていく" %>
+      </div>
+    </div>
+
+    <!-- 編集ボタン -->
+    <div class="text-center">
+      <%= link_to "編集", "#", class: "bg-green-700 hover:bg-green-800 px-6 py-3 rounded-full text-white font-semibold transition" %>
+    </div>
+
+  </div>
+</div>

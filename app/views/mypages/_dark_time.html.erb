@@ -1,5 +1,5 @@
 <% if dark_time.present? %>
-  <div class="bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% rounded-3xl shadow-2xl p-10 w-80 text-white">
+  <%= link_to dark_time_path, class: "block bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% rounded-3xl shadow-2xl p-10 w-80 text-white" do %>
     <div class="mb-4 p-4 rounded-xl text-center">
       <p class="text-sm opacity-80 mb-1">
         闇の時間での行動
@@ -15,7 +15,7 @@
         <%= dark_time.unwanted_future.presence || "これから考える" %>
       </p>
     </div>
-  </div>
+  <% end %>
 <% else %>
   <div class="bg-stone-300/67 rounded-3xl shadow-2xl p-10 w-80 text-center text-white">
     <div>

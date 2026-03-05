@@ -2,7 +2,7 @@ class DarkTimesController < ApplicationController
   before_action :authenticate_user!
 
   def new
-    @dark_time = DarkTime.new
+    @dark_time = current_user.build_dark_time
   end
 
   def create
@@ -12,6 +12,10 @@ class DarkTimesController < ApplicationController
     else
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def show
+    @dark_time = current_user.dark_time
   end
 
   def dark_time_params
