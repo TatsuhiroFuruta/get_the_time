@@ -2,7 +2,7 @@ class DarkTimesController < ApplicationController
   before_action :authenticate_user!
 
   def new
-    @dark_time = DarkTime.new
+    @dark_time = current_user.build_dark_time
   end
 
   def create
