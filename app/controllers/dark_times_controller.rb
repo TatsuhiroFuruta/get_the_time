@@ -18,6 +18,19 @@ class DarkTimesController < ApplicationController
     @dark_time = current_user.dark_time
   end
 
+  def edit
+    @dark_time = current_user.dark_time
+  end
+
+  def update
+    @dark_time = current_user.dark_time
+    if @dark_time.update(dark_time_params)
+      redirect_to dark_time_path
+    else
+      render :edit
+    end
+  end
+
   def dark_time_params
     params.require(:dark_time).permit(:behavior, :unwanted_future, :characteristic)
   end
