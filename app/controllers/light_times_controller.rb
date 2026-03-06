@@ -12,6 +12,10 @@ class LightTimesController < ApplicationController
     end
   end
 
+  def show
+    @light_time = current_user.light_times.find(params[:id])
+  end
+
   private
 
   def light_time_params
