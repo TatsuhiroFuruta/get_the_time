@@ -35,7 +35,7 @@
     <!-- 編集ボタン -->
     <div class="flex justify-center gap-10 text-center">
       <%= link_to "編集", edit_light_time_path(@light_time), class: "bg-green-700 hover:bg-green-800 px-6 py-3 rounded-full text-white font-semibold transition" %>
-      <%= link_to "削除", "#", class: "bg-red-500 hover:bg-red-600 px-6 py-3 rounded-full text-white font-semibold transition" %>
+      <%= link_to "削除", light_time_path(@light_time), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "bg-red-500 hover:bg-red-600 px-6 py-3 rounded-full text-white font-semibold transition" %>
     </div>
 
   </div>
