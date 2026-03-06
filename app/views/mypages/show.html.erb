@@ -22,16 +22,7 @@
       <%= render "dark_time", dark_time: @dark_time %>
 
       <!-- ☀ 光側カード -->
-      <div class="flex items-center justify-center bg-stone-300/67 rounded-3xl shadow-2xl p-10 w-80 text-center text-black">
-        <div>
-          <p class="mb-8 text-lg leading-relaxed">
-            光の時間での行動が<br>
-            登録されていません<br>
-            新規登録しましょう
-          </p>
-          <%= link_to "新規登録", "#", class: "inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 text-black font-semibold transition" %>
-        </div>
-      </div>
+      <%= render "light_time", light_time: @light_time %>
 
     </div>
   </div>
