@@ -1,5 +1,6 @@
 class DarkTimesController < ApplicationController
   before_action :authenticate_user!
+  before_action :set_dark_time, only: [:show, :edit, :update]
 
   def new
     @dark_time = current_user.build_dark_time
@@ -14,21 +15,22 @@ class DarkTimesController < ApplicationController
     end
   end
 
-  def show
-    @dark_time = current_user.dark_time
-  end
+  def show; end
 
-  def edit
-    @dark_time = current_user.dark_time
-  end
+  def edit; end
 
   def update
-    @dark_time = current_user.dark_time
     if @dark_time.update(dark_time_params)
       redirect_to dark_time_path
     else
       render :edit
     end
+  end
+
+  private
+
+  def set_dark_time
+    @dark_time = current_user.dark_time
   end
 
   def dark_time_params
