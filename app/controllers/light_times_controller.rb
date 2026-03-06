@@ -1,4 +1,7 @@
 class LightTimesController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_light_time, only: [:show, :edit, :update, :destroy]
+
   def new
     @light_time = current_user.light_times.build
   end
@@ -12,16 +15,11 @@ class LightTimesController < ApplicationController
     end
   end
 
-  def show
-    @light_time = current_user.light_times.find(params[:id])
-  end
+  def show; end
 
-  def edit
-    @light_time = current_user.light_times.find(params[:id])
-  end
+  def edit; end
 
   def update
-    @light_time = current_user.light_times.find(params[:id])
     if @light_time.update(light_time_params)
       redirect_to light_time_path(@light_time)
     else
@@ -29,7 +27,16 @@ class LightTimesController < ApplicationController
     end
   end
 
+  def destroy
+    @light_time.destroy!
+    redirect_to mypage_path, status: :see_other
+  end
+
   private
+
+  def set_light_time
+    @light_time = current_user.light_times.find(params[:id])
+  end
 
   def light_time_params
     params.require(:light_time).permit(:action, :desired_self, :characteristic)
