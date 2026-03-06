@@ -23,7 +23,7 @@ class DarkTimesController < ApplicationController
     if @dark_time.update(dark_time_params)
       redirect_to dark_time_path
     else
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 

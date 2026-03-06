@@ -16,6 +16,19 @@ class LightTimesController < ApplicationController
     @light_time = current_user.light_times.find(params[:id])
   end
 
+  def edit
+    @light_time = current_user.light_times.find(params[:id])
+  end
+
+  def update
+    @light_time = current_user.light_times.find(params[:id])
+    if @light_time.update(light_time_params)
+      redirect_to light_time_path(@light_time)
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def light_time_params
