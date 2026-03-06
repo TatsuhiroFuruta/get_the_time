@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_04_145037) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_06_062120) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,6 +22,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_04_145037) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_dark_times_on_user_id", unique: true
+  end
+
+  create_table "light_times", force: :cascade do |t|
+    t.text "action", null: false
+    t.text "characteristic"
+    t.datetime "created_at", null: false
+    t.text "desired_self"
+    t.boolean "is_current", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_light_times_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -38,4 +49,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_04_145037) do
   end
 
   add_foreign_key "dark_times", "users"
+  add_foreign_key "light_times", "users"
 end

@@ -1,0 +1,13 @@
+<div class="min-h-screen flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
+
+  <div class="w-full max-w-2xl px-10 py-12">
+
+    <!-- タイトル -->
+    <h2 class="text-center text-2xl md:text-3xl font-semibold text-black mb-10">
+      光の時間での活動内容登録
+    </h2>
+
+    <%= render "form", light_time: @light_time, button_text: "登録する", button_class: "bg-blue-500 hover:bg-blue-600", cancel_path: mypage_path %>
+
+  </div>
+</div>

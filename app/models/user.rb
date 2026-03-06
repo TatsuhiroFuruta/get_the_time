@@ -7,4 +7,5 @@ class User < ApplicationRecord
   validates :name, presence: true, length: { maximum: 30 }
 
   has_one :dark_time, dependent: :destroy
+  has_many :light_times, dependent: :destroy
 end

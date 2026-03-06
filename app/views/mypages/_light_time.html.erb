@@ -1,0 +1,30 @@
+<% if light_time.present? %>
+  <%= link_to "#", class: "block flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-3xl shadow-2xl p-10 w-80" do %>
+    <div class="mb-4 p-4 rounded-xl text-center">
+      <p class="text-sm mb-1">
+        光の時間での行動
+      </p>
+      <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+        <%= light_time.action %>
+      </p>
+
+      <p class="text-sm mt-3 mb-1">
+        なりたい自分
+      </p>
+      <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+        <%= light_time.desired_self.presence || "まだ見ぬ可能性に満ちた新しい自分に出会うため" %>
+      </p>
+    </div>
+  <% end %>
+<% else %>
+  <div class="flex items-center justify-center bg-stone-300/67 rounded-3xl shadow-2xl p-10 w-80 text-center">
+    <div>
+      <p class="mb-8 text-lg leading-relaxed">
+        光の時間での行動が<br>
+        登録されていません<br>
+        新規登録しましょう
+      </p>
+      <%= link_to "新規登録", new_light_time_path, class: "inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition" %>
+    </div>
+  </div>
+<% end %>
