@@ -1,0 +1,45 @@
+<%= form_with model: dark_time, url: dark_time_path, class: "space-y-8" do |f| %>
+
+  <!-- 闇の時間での行動 -->
+  <div>
+    <%= f.label :behavior, "闇の時間での行動", class: "block text-white text-lg mb-2" %>
+    <%= f.text_field :behavior, class: "w-full rounded-lg bg-gray-200 border-2 border-black px-4 py-2 focus:outline-none focus:ring-4 focus:ring-purple-300" %>
+  </div>
+
+  <!-- 避けたい未来 -->
+  <div>
+    <%= f.label :unwanted_future, "避けたい未来（任意）", class: "block text-white text-lg mb-2" %>
+
+    <p class="text-sm text-purple-100 leading-relaxed mb-3">
+      闇の時間での行動を習慣的にやり続けることで待っている絶望の未来とは？
+    </p>
+
+    <%= f.text_area :unwanted_future, rows: 3, class: "w-full rounded-lg bg-gray-200 border-2 border-black px-4 py-2 focus:outline-none focus:ring-4 focus:ring-purple-300" %>
+  </div>
+
+  <!-- 闇の時間の特徴 -->
+  <div>
+    <%= f.label :characteristic, "闇の時間の特徴（任意）", class: "block text-white text-lg mb-2" %>
+
+    <p class="text-sm text-purple-100 leading-relaxed mb-3">
+      望んでいないのについやってしまう行動をしている前後や最中に、
+      思うことや感じること、気づいていること、
+      動機となりうること、対処法について書いていきます。
+    </p>
+
+    <p class="text-xs text-purple-200 mb-4">
+      記入例：闇の時間での行動が「SNSや動画をつい見てしまう」である場合<br>
+      → 闇の時間の特徴：<br>
+      「仕事や家事を終えたとき、無意識にスマホを触ってアプリを開いてしまっている」
+    </p>
+
+    <%= f.text_area :characteristic, rows: 4, class: "w-full rounded-lg bg-gray-200 border-2 border-black px-4 py-2 focus:outline-none focus:ring-4 focus:ring-purple-300" %>
+  </div>
+
+  <!-- ボタン -->
+  <div class="flex justify-center gap-10 pt-6">
+    <%= f.submit button_text, class: "#{button_class} px-8 py-2 rounded-full text-white text-lg transition duration-200 shadow-md" %>
+    <%= link_to "キャンセル", cancel_path, class: "px-8 py-2 rounded-full bg-red-500 text-white text-lg hover:bg-red-600 transition duration-200 shadow-md" %>
+  </div>
+
+<% end %>
