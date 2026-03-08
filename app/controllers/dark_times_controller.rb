@@ -1,6 +1,6 @@
 class DarkTimesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_dark_time, only: [:show, :edit, :update]
+  before_action :set_dark_time, only: %i[show edit update]
 
   def new
     @dark_time = current_user.build_dark_time
