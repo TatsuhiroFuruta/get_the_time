@@ -1,0 +1,16 @@
+<%= link_to light_time_path(light_time), class: "block flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-3xl shadow-2xl p-10 w-80" do %>
+  <div class="mb-4 p-4 rounded-xl text-center">
+    <p class="text-sm mb-1">
+      光の時間での行動
+    </p>
+    <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+      <%= light_time.action %>
+    </p>
+    <p class="text-sm mt-3 mb-1">
+      なりたい自分
+    </p>
+    <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+      <%= light_time.desired_self.presence || "まだ見ぬ可能性に満ちた新しい自分に出会うため" %>
+    </p>
+  </div>
+<% end %>
