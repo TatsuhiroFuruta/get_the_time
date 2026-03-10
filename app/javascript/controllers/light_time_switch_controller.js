@@ -9,8 +9,6 @@ export default class extends Controller {
     const currentId = Number(this.element.dataset.currentId)
     this.index = this.light_times.indexOf(currentId)
 
-    console.log(this.light_times);
-    console.log(currentId);
     this.keyHandler = this.handleKey.bind(this)
     window.addEventListener("keydown", this.keyHandler)
   }
@@ -57,7 +55,6 @@ export default class extends Controller {
 
   switch() {
     const id = this.light_times[this.index]
-    console.log(id);
 
     fetch(`/light_times/${id}/switch`, {
       method: "PATCH",

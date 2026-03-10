@@ -3,15 +3,10 @@ class LightTimesController < ApplicationController
   before_action :set_light_time, only: %i[show edit update destroy switch]
 
   def switch
-    logger.debug("switchメソッドに入りました")
-    logger.debug(params[:id])
-    logger.debug(@light_time)
     return head :not_found unless @light_time
 
-    logger.debug(@light_time.is_current)
     LightTime.switch_current!(current_user, @light_time)
 
-    logger.debug(@light_time.is_current)
     respond_to do |format|
       format.turbo_stream
     end
