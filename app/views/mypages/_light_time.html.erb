@@ -1,10 +1,14 @@
+<% light_times = current_user.light_times.order(:created_at).pluck(:id) %>
+
 <% if light_time.present? %>
-  <div id="light-time-switch" data-controller="light-time-switch" data-light_times="<%= current_user.light_times.order(:created_at).pluck(:id).to_json %>" data-current-id="<%= @light_time.id %>">
+  <div id="light-time-switch" data-controller="light-time-switch" data-light_times="<%= light_times.to_json %>" data-current-id="<%= @light_time.id %>">
     <div class="flex flex-row md:flex-col items-center justify-center gap-6">
 
-      <button data-action="click->light-time-switch#prev" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
-        &lt;
-      </button>
+      <% if light_times.size > 1 %>
+        <button data-action="click->light-time-switch#prev" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
+          &lt;
+        </button>
+      <% end %>
 
       <!-- 固定幅コンテナ -->
       <div class="w-80 flex justify-center">
@@ -26,9 +30,11 @@
         <% end %>
       </div>
 
-      <button data-action="click->light-time-switch#next" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
-        &gt;
-      </button>
+      <% if light_times.size > 1 %>
+        <button data-action="click->light-time-switch#next" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
+          &gt;
+        </button>
+      <% end %>
 
     </div>
   </div>
