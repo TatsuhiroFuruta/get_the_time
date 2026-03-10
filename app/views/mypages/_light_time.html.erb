@@ -2,28 +2,31 @@
   <div id="light-time-switch" data-controller="light-time-switch" data-light_times="<%= current_user.light_times.order(:created_at).pluck(:id).to_json %>" data-current-id="<%= @light_time.id %>">
     <div class="flex flex-row md:flex-col items-center justify-center gap-6">
 
-      <button data-action="click->light-time-switch#prev" class="w-12 h-12 flex items-center justify-center text-blue-500 text-9xl rounded-full md:rotate-90">
+      <button data-action="click->light-time-switch#prev" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
         &lt;
       </button>
 
-      <%= link_to light_time_path(light_time), class: "block flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-3xl shadow-2xl p-10 w-80" do %>
-        <div class="mb-4 p-4 rounded-xl text-center">
-          <p class="text-sm mb-1">
-            光の時間での行動
-          </p>
-          <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
-            <%= light_time.action %>
-          </p>
-          <p class="text-sm mt-3 mb-1">
-            なりたい自分
-          </p>
-          <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
-            <%= light_time.desired_self.presence || "まだ見ぬ可能性に満ちた新しい自分に出会うため" %>
-          </p>
-        </div>
-      <% end %>
+      <!-- 固定幅コンテナ -->
+      <div class="w-80 flex justify-center">
+        <%= link_to light_time_path(light_time), class: "block w-full flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-3xl shadow-2xl p-10" do %>
+          <div class="mb-4 p-4 rounded-xl text-center">
+            <p class="text-sm mb-1">
+              光の時間での行動
+            </p>
+            <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+              <%= light_time.action %>
+            </p>
+            <p class="text-sm mt-3 mb-1">
+              なりたい自分
+            </p>
+            <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+              <%= light_time.desired_self.presence || "まだ見ぬ可能性に満ちた新しい自分に出会うため" %>
+            </p>
+          </div>
+        <% end %>
+      </div>
 
-      <button data-action="click->light-time-switch#next" class="w-12 h-12 flex items-center justify-center text-blue-500 text-9xl rounded-full md:rotate-90">
+      <button data-action="click->light-time-switch#next" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
         &gt;
       </button>
 
