@@ -1,21 +1,23 @@
 <% if dark_time.present? %>
-  <%= link_to dark_time_path, class: "block flex items-center justify-center bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% rounded-3xl shadow-2xl p-10 w-80 text-white" do %>
-    <div class="mb-4 p-4 rounded-xl text-center">
-      <p class="text-sm opacity-80 mb-1">
-        闇の時間での行動
-      </p>
-      <p class="font-semibold  bg-violet-800 px-1 py-4 rounded-2xl">
-        <%= dark_time.behavior %>
-      </p>
+  <div class="w-80 flex justify-center">
+    <%= link_to dark_time_path, class: "block w-full flex items-center justify-center bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% rounded-3xl shadow-2xl p-10 text-white" do %>
+      <div class="mb-4 p-4 rounded-xl text-center">
+        <p class="text-sm opacity-80 mb-1">
+          闇の時間での行動
+        </p>
+        <p class="font-semibold  bg-violet-800 px-1 py-4 rounded-2xl">
+          <%= dark_time.behavior %>
+        </p>
 
-      <p class="text-sm mt-3 opacity-80 mb-1">
-        避けたい未来
-      </p>
-      <p class="font-semibold  bg-violet-800 px-1 py-4 rounded-2xl">
-        <%= dark_time.unwanted_future.presence || "これから考える" %>
-      </p>
-    </div>
-  <% end %>
+        <p class="text-sm mt-3 opacity-80 mb-1">
+          避けたい未来
+        </p>
+        <p class="font-semibold  bg-violet-800 px-1 py-4 rounded-2xl">
+          <%= dark_time.unwanted_future.presence || "これから考える" %>
+        </p>
+      </div>
+    <% end %>
+  </div>
 <% else %>
   <div class="flex items-center justify-center bg-stone-300/67 rounded-3xl shadow-2xl p-10 w-80 text-center text-white">
     <div>

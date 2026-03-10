@@ -1,6 +1,16 @@
 class LightTimesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_light_time, only: [:show, :edit, :update, :destroy]
+  before_action :set_light_time, only: %i[show edit update destroy switch]
+
+  def switch
+    return head :not_found unless @light_time
+
+    LightTime.switch_current!(current_user, @light_time)
+
+    respond_to do |format|
+      format.turbo_stream
+    end
+  end
 
   def new
     @light_time = current_user.light_times.build
@@ -9,6 +19,7 @@ class LightTimesController < ApplicationController
   def create
     @light_time = current_user.light_times.build(light_time_params)
     if @light_time.save
+      LightTime.switch_current!(current_user, @light_time)
       redirect_to mypage_path
     else
       render :new, status: :unprocessable_entity
@@ -28,7 +39,14 @@ class LightTimesController < ApplicationController
   end
 
   def destroy
+    was_current = @light_time.is_current
     @light_time.destroy!
+
+    if was_current
+      next_light_time = current_user.light_times.order(:created_at).first
+      LightTime.switch_current!(current_user, next_light_time) if next_light_time
+    end
+
     redirect_to mypage_path, status: :see_other
   end
 
@@ -39,6 +57,7 @@ class LightTimesController < ApplicationController
   end
 
   def light_time_params
+    # is_currentはフォームから渡さないため、追加しない。むしろ追加しない方が安全
     params.require(:light_time).permit(:action, :desired_self, :characteristic)
   end
 end

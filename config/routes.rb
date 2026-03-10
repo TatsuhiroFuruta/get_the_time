@@ -19,5 +19,9 @@ Rails.application.routes.draw do
   root "mypages#show" # ログイン後はマイページへ遷移
   resource :mypage, only: %i[show]
   resource :dark_time, only: %i[new create show edit update]
-  resources :light_times, only: %i[new create show edit update destroy]
+  resources :light_times, only: %i[new create show edit update destroy] do
+    member do
+      patch :switch   # is_current切り替え用
+    end
+  end
 end

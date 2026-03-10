@@ -1,7 +1,7 @@
-<div class="relative min-h-screen bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center">
+<div class="min-h-screen bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center">
 
   <!-- 🔹 右上ユーザーメニュー -->
-  <div class="absolute top-6 right-6">
+  <div class="flex justify-end px-6 pt-6">
     <div class="flex gap-6">
 
       <% if @dark_time && @light_time %>
@@ -25,7 +25,7 @@
 
   <!-- 🔹 メインエリア -->
   <div class="flex items-center justify-center min-h-screen px-10">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-80">
+    <div class="flex flex-col my-10 md:my-0 md:flex-row items-center justify-center gap-80">
 
       <!-- 🌑 闇側カード -->
       <%= render "dark_time", dark_time: @dark_time %>
