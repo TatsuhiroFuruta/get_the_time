@@ -18,10 +18,18 @@ Rails.application.routes.draw do
   # root "static_pages#home" # ホームページの設定
   root "mypages#show" # ログイン後はマイページへ遷移
   resource :mypage, only: %i[show]
+  # 闇の時間の活動内容
   resource :dark_time, only: %i[new create show edit update]
+  # 光の時間の活動内容
   resources :light_times, only: %i[new create show edit update destroy] do
     member do
       patch :switch   # is_current切り替え用
+    end
+  end
+  # 光の時間の活動記録
+  resources :activity_records do
+    collection do
+      get :timer    # タイマーページ
     end
   end
 end
