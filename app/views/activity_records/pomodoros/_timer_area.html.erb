@@ -1,0 +1,31 @@
+<div class="text-center mb-8">
+
+  <div class="text-7xl font-bold">
+    25:00
+  </div>
+
+  <div class="mt-2 text-lg text-gray-700">
+    ポモドーロ数：<%= @pomodoro_count || "X" %>
+  </div>
+
+  <div class="mt-4">
+    <p class="text-sm mb-2">やること</p>
+
+    <div class="bg-amber-500 rounded-lg px-6 py-4 text-lg font-semibold">
+      <%= @task || "やること内容" %>
+    </div>
+
+  </div>
+
+  <div class="mt-4 flex justify-center gap-4">
+
+    <input type="text"
+      class="rounded px-3 py-2 w-48 bg-gray-200 border-2 focus:outline-none focus:ring-4 focus:ring-blue-400">
+
+    <button class="bg-green-700 text-white px-4 py-2 rounded-full hover:bg-green-800">
+      更新する
+    </button>
+
+  </div>
+
+</div>

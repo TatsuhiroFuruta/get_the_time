@@ -25,10 +25,13 @@
 
   <!-- 🔹 メインエリア -->
   <div class="flex items-center justify-center min-h-screen px-10">
-    <div class="flex flex-col my-10 md:my-0 md:flex-row items-center justify-center gap-80">
+    <div class="flex flex-col my-10 md:my-0 md:flex-row items-center justify-center gap-20">
 
       <!-- 🌑 闇側カード -->
       <%= render "dark_time", dark_time: @dark_time %>
+
+      <!-- 今日の合計時間&スタートボタン -->
+      <%= render "pomodoro_start" %>
 
       <!-- ☀ 光側カード -->
       <%= render "light_time", light_time: @light_time %>
