@@ -2,6 +2,7 @@ class LightTime < ApplicationRecord
   validates :action, presence: true
 
   belongs_to :user
+  has_many :activity_records, dependent: :destroy
 
   def self.switch_current!(user, light_time)
     transaction do

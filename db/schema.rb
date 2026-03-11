@@ -10,9 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_06_062120) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_11_052422) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "activity_records", force: :cascade do |t|
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.decimal "desired_self_percentage", precision: 5, scale: 2
+    t.datetime "ended_at"
+    t.integer "fatigue"
+    t.integer "focus"
+    t.integer "idle_duration"
+    t.bigint "light_time_id", null: false
+    t.integer "progress"
+    t.integer "quality"
+    t.integer "satisfaction"
+    t.datetime "started_at"
+    t.text "task"
+    t.integer "total_duration"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["light_time_id"], name: "index_activity_records_on_light_time_id"
+    t.index ["user_id"], name: "index_activity_records_on_user_id"
+  end
 
   create_table "dark_times", force: :cascade do |t|
     t.text "behavior", null: false
@@ -48,6 +69,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_06_062120) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "activity_records", "light_times"
+  add_foreign_key "activity_records", "users"
   add_foreign_key "dark_times", "users"
   add_foreign_key "light_times", "users"
 end

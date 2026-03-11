@@ -1,0 +1,19 @@
+<div class="text-center mb-6">
+
+  <p class="text-sm mb-2">
+    光の時間での行動
+  </p>
+
+  <div class="bg-amber-500 rounded-lg px-6 py-4 font-semibold mb-4">
+    <%= light_time.action %>
+  </div>
+
+  <p class="text-sm mb-2">
+    なりたい自分
+  </p>
+
+  <div class="bg-amber-500 rounded-lg px-6 py-4 font-semibold">
+    <%= @light_time.desired_self.presence || "まだ見ぬ可能性に満ちた新しい自分に出会うため" %>
+  </div>
+
+</div>

@@ -9,3 +9,6 @@ application.register("hello", HelloController)
 
 import LightTimeSwitchController from "./light_time_switch_controller"
 application.register("light-time-switch", LightTimeSwitchController)
+
+import PomodoroController from "./pomodoro_controller"
+application.register("pomodoro", PomodoroController)
