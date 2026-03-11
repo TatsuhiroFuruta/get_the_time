@@ -1,0 +1,15 @@
+<div class="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
+
+  <div data-controller="pomodoro" data-pomodoro-work-duration-value="120" class="w-full max-w-2xl p-10">
+
+    <%= render "activity_records/pomodoro/timer_area" %>
+
+    <%= render "activity_records/pomodoro/light_time_info", light_time: @light_time %>
+
+    <%= render "activity_records/pomodoro/dark_message_button" %>
+
+    <%= render "activity_records/pomodoro/timer_buttons" %>
+
+  </div>
+
+</div>

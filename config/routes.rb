@@ -29,7 +29,7 @@ Rails.application.routes.draw do
   # 光の時間の活動記録
   resources :activity_records do
     collection do
-      get :timer    # タイマーページ
+      get :pomodoro_timer    # タイマーページ
     end
   end
 end
