@@ -79,6 +79,7 @@ export default class extends Controller {
 
     this.updateTimeDisplay()
     this.showWorkScreen()
+    this.startButtonTarget.classList.remove("hidden")
     // ✅ チャイム音を再生
     this.playSound('/sounds/notification.mp3')
   }
@@ -90,7 +91,6 @@ export default class extends Controller {
 
     this.updateTimeDisplay()
     this.showBreakScreen()
-    // this.startButtonTarget.classList.add("hidden")
     // ✅ チャイム音を再生
     this.playSound('/sounds/notification.mp3')
     this.startTimer()
