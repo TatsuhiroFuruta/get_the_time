@@ -142,8 +142,7 @@ export default class extends Controller {
     audio.volume = 0.5
 
     // 再生
-    audio.play().catch(error => {
-      console.log('音声再生に失敗しました:', error)
+    audio.play().catch(() => {
       // ユーザーがまだページと対話していない場合に失敗することがある
     })
   }
