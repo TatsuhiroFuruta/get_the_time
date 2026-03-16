@@ -2,10 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="pomodoro"
 export default class extends Controller {
-  static targets = ["workScreen", "breakScreen", "display", "startButton", "pomodoroCount"]
+  static targets = ["workScreen", "breakScreen", "display", "savedTask", "taskInput", "startButton", "pomodoroCount"]
   static values = {
     workDuration: { type: Number, default: 1500 },
-    breakDuration: { type: Number, default: 300 }
+    breakDuration: { type: Number, default: 300 },
+    task: {type: String, default: null}
   }
 
   connect() {
@@ -14,6 +15,9 @@ export default class extends Controller {
     this.remainingTime = this.workDurationValue
     this.timerInterval = null
     this.endedAt = null
+    this.task = this.taskValue
+    // 追記して修正できるように、マイページで入力した内容をやることの入力フォームに残しておく。
+    this.taskInputTarget.value = this.task
 
     // ✅ 最初のタイマー開始時刻を保持
     this.firstStartedAt = null
@@ -26,6 +30,14 @@ export default class extends Controller {
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
     }
+  }
+
+  // タイトル更新（デバウンス付き）
+  updateTaskDisplay() {
+    this.task = this.taskInputTarget.value
+    this.savedTaskTarget.textContent = this.task ? this.task : "フォームに入力して「更新する」をクリック！"
+    // 前に入力した内容をinputタグに残すことに！
+    // this.taskInputTarget.value = ''
   }
 
   start() {
@@ -130,8 +142,7 @@ export default class extends Controller {
     audio.volume = 0.5
 
     // 再生
-    audio.play().catch(error => {
-      console.log('音声再生に失敗しました:', error)
+    audio.play().catch(() => {
       // ユーザーがまだページと対話していない場合に失敗することがある
     })
   }

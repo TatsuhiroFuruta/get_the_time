@@ -1,20 +1,19 @@
 <div class="text-center mb-8">
 
   <div class="mt-4">
-    <p class="text-sm mb-2">やること</p>
+    <p class="text-sm mb-2">やること(任意)</p>
 
-    <div class="bg-amber-500 rounded-lg px-6 py-4 text-lg font-semibold">
-      <%= @task || "やること内容" %>
+    <div data-pomodoro-target="savedTask" class="bg-amber-500 rounded-lg px-6 py-4 text-lg font-semibold">
+      <%= @activity_record.task.presence || "フォームに入力して「更新する」をクリック！" %>
     </div>
 
   </div>
 
   <div class="mt-4 flex justify-center gap-4">
 
-    <input type="text"
-      class="rounded px-3 py-2 w-48 bg-gray-200 border-2 focus:outline-none focus:ring-4 focus:ring-blue-400">
+    <input type="text" data-pomodoro-target="taskInput" placeholder="やることを入力" class="rounded px-3 py-2 w-48 bg-gray-200 border-2 focus:outline-none focus:ring-4 focus:ring-blue-400">
 
-    <button class="bg-green-700 text-white px-4 py-2 rounded-full hover:bg-green-800">
+    <button data-action="click->pomodoro#updateTaskDisplay" class="bg-green-700 text-white px-4 py-2 rounded-full hover:bg-green-800">
       更新する
     </button>
 
