@@ -2,12 +2,15 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="pomodoro"
 export default class extends Controller {
-  static targets = ["display", "startButton"]
+  static targets = ["workScreen", "breakScreen", "display", "startButton", "pomodoroCount"]
   static values = {
-    workDuration: { type: Number, default: 1500 }
+    workDuration: { type: Number, default: 1500 },
+    breakDuration: { type: Number, default: 300 }
   }
 
   connect() {
+    this.mode = "work"
+    this.pomodoroCount = 0
     this.remainingTime = this.workDurationValue
     this.timerInterval = null
     this.endedAt = null
@@ -16,6 +19,7 @@ export default class extends Controller {
     this.firstStartedAt = null
 
     this.updateTimeDisplay()
+    this.updatePomodoroCount()
   }
 
   disconnect() {
@@ -32,7 +36,9 @@ export default class extends Controller {
       this.firstStartedAt = new Date()
     }
 
-    this.endedAt = this.getEndedAt(new Date(), this.workDurationValue)
+    if (this.mode === "work") {
+      this.endedAt = this.getEndedAt(new Date(), this.workDurationValue)
+    }
 
     this.startTimer()
     this.startButtonTarget.classList.add("hidden")
@@ -58,18 +64,62 @@ export default class extends Controller {
     clearInterval(this.timerInterval)
     this.timerInterval = null
 
+    if (this.mode === "work") {
+      this.pomodoroCount++
+      this.updatePomodoroCount()
+      this.switchToBreakMode()
+    } else {
+      this.switchToWorkMode()
+    }
+  }
+
+  switchToWorkMode() {
+    this.mode = "work"
     this.remainingTime = this.workDurationValue
 
     this.updateTimeDisplay()
-    this.startButtonTarget.classList.remove("hidden")
+    this.showWorkScreen()
     // ✅ チャイム音を再生
     this.playSound('/sounds/notification.mp3')
+  }
+
+  switchToBreakMode() {
+    this.mode = "break"
+    this.remainingTime = this.breakDurationValue
+    this.endedAt = this.getEndedAt(new Date(), this.breakDurationValue)
+
+    this.updateTimeDisplay()
+    this.showBreakScreen()
+    // this.startButtonTarget.classList.add("hidden")
+    // ✅ チャイム音を再生
+    this.playSound('/sounds/notification.mp3')
+    this.startTimer()
+  }
+
+  showWorkScreen() {
+    this.breakScreenTarget.classList.add("hidden")
+    this.workScreenTarget.classList.remove("hidden")
+  }
+
+  showBreakScreen() {
+    this.workScreenTarget.classList.add("hidden")
+    this.breakScreenTarget.classList.remove("hidden")
   }
 
   updateTimeDisplay() {
     const minutes = Math.floor(this.remainingTime / 60)
     const seconds = this.remainingTime % 60
-    this.displayTarget.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+
+    const text = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    this.displayTargets.forEach(el => {
+      el.textContent = text
+    })
+  }
+
+  updatePomodoroCount() {
+    this.pomodoroCountTargets.forEach(el => {
+      el.textContent = this.pomodoroCount
+    })
   }
 
   // ✅ 音声を再生するメソッド

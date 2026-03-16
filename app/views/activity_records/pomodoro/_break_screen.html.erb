@@ -1,0 +1,13 @@
+<div data-pomodoro-target="breakScreen" class="hidden min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-green-800 from-0% via-lime-300 via-80% to-green-50 to-100%">
+
+  <div class="text-white">
+    <%= render "activity_records/pomodoro/timer_display" %>
+  </div>
+
+  <%= image_tag "timer.png", class: "w-100 my-6" %>
+
+  <%= render "activity_records/pomodoro/dark_message_button" %>
+
+  <%= button_to "終了する", "#", method: :post, class: "bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
+
+</div>
