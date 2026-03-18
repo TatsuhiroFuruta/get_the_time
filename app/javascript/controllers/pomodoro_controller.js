@@ -28,21 +28,14 @@ export default class extends Controller {
     // popstateイベントのリスナーを登録
     this.boundBackHandler = this.handleBack.bind(this)
 
-    // ✅ 履歴エントリーを追加（戻るボタンを検知できるようにする）
-    history.pushState(null, null, location.href)
-    // window.addEventListener("popstate", this.boundBackHandler)
-
     this.updateTimeDisplay()
     this.updatePomodoroCount()
   }
 
   disconnect() {
-    // クリーンアップ
-    window.removeEventListener("popstate", this.boundBackHandler)
-    // this.cleanup()
     // ✅ コントローラーが破棄される時にイベントリスナーを削除
     this.removeBeforeUnloadListener()
-    // this.removePopStateListener() // ✅ 追加
+    window.removeEventListener("popstate", this.boundBackHandler)
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
@@ -65,6 +58,8 @@ export default class extends Controller {
       this.firstStartedAt = new Date()
       // ✅ 離脱警告を有効化
       this.addBeforeUnloadListener()
+      // ✅ 履歴エントリーを追加（戻るボタンを検知できるようにする）
+      history.pushState({ pomodoro: true }, "", location.href)
       window.addEventListener("popstate", this.boundBackHandler)
     }
 
@@ -172,28 +167,10 @@ export default class extends Controller {
     window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler)
   }
 
-  handleBack(event) {
-    if (this.timerInterval || this.firstStartedAt) {
-      const leave = confirm("タイマーが動いています。本当に戻りますか？")
-
-      if (!leave) {
-        // history.pushState(null, null, location.href)
-        return
-      } else {
-        this.removeBeforeUnloadListener()
-        window.removeEventListener("popstate", this.boundBackHandler)
-        // ここを変更
-        window.location.href = "/mypage"
-      }
-    }
+  handleBack() {
+    alert("タイマー実行中は戻れません")
+    history.pushState({ pomodoro: true }, "", location.href)
   }
-
-  // handleBack(event) {
-  //   if (this.timerInterval || this.firstStartedAt) {
-  //     alert("タイマー実行中は戻れません")
-  //     history.pushState(null, null, location.href)
-  //   }
-  // }
 
   // ✅ 音声を再生するメソッド
   playSound(soundPath) {
