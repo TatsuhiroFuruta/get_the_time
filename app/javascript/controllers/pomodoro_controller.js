@@ -25,17 +25,15 @@ export default class extends Controller {
     // ✅ beforeunload イベントリスナーを追加
     this.boundBeforeUnloadHandler = this.handleBeforeUnload.bind(this)
 
-    // popstateイベントのリスナーを登録
-    this.boundBackHandler = this.handleBack.bind(this)
-
     this.updateTimeDisplay()
     this.updatePomodoroCount()
+
+    this.startButtonTarget.classList.remove("hidden")
   }
 
   disconnect() {
     // ✅ コントローラーが破棄される時にイベントリスナーを削除
     this.removeBeforeUnloadListener()
-    window.removeEventListener("popstate", this.boundBackHandler)
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
@@ -58,9 +56,6 @@ export default class extends Controller {
       this.firstStartedAt = new Date()
       // ✅ 離脱警告を有効化
       this.addBeforeUnloadListener()
-      // ✅ 履歴エントリーを追加（戻るボタンを検知できるようにする）
-      history.pushState({ pomodoro: true }, "", location.href)
-      window.addEventListener("popstate", this.boundBackHandler)
     }
 
     if (this.mode === "work") {
@@ -102,6 +97,8 @@ export default class extends Controller {
 
   switchToWorkMode() {
     this.mode = "work"
+
+    this.endedAt = this.getEndedAt(new Date(), this.workDurationValue)
     this.remainingTime = this.workDurationValue
 
     this.updateTimeDisplay()
@@ -152,7 +149,7 @@ export default class extends Controller {
   // ✅ beforeunload イベントハンドラー
   handleBeforeUnload(event) {
     event.preventDefault()
-    // モダンブラウザでは戻り値は無視されますが、互換性のため設定
+    // モダンブラウザでは戻り値は無視されるが、互換性のため設定
     event.returnValue = ''
     return ''
   }
@@ -165,11 +162,6 @@ export default class extends Controller {
   // ✅ イベントリスナーを削除
   removeBeforeUnloadListener() {
     window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler)
-  }
-
-  handleBack() {
-    alert("タイマー実行中は戻れません")
-    history.pushState({ pomodoro: true }, "", location.href)
   }
 
   // ✅ 音声を再生するメソッド
