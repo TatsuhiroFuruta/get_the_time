@@ -22,11 +22,28 @@ export default class extends Controller {
     // ✅ 最初のタイマー開始時刻を保持
     this.firstStartedAt = null
 
+    // ✅ beforeunload イベントリスナーを追加
+    this.boundBeforeUnloadHandler = this.handleBeforeUnload.bind(this)
+
+    // popstateイベントのリスナーを登録
+    this.boundBackHandler = this.handleBack.bind(this)
+
+    // ✅ 履歴エントリーを追加（戻るボタンを検知できるようにする）
+    history.pushState(null, null, location.href)
+    // window.addEventListener("popstate", this.boundBackHandler)
+
     this.updateTimeDisplay()
     this.updatePomodoroCount()
   }
 
   disconnect() {
+    // クリーンアップ
+    window.removeEventListener("popstate", this.boundBackHandler)
+    // this.cleanup()
+    // ✅ コントローラーが破棄される時にイベントリスナーを削除
+    this.removeBeforeUnloadListener()
+    // this.removePopStateListener() // ✅ 追加
+
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
     }
@@ -46,6 +63,9 @@ export default class extends Controller {
     // ✅ 最初のスタート時のみ記録
     if (this.firstStartedAt === null) {
       this.firstStartedAt = new Date()
+      // ✅ 離脱警告を有効化
+      this.addBeforeUnloadListener()
+      window.addEventListener("popstate", this.boundBackHandler)
     }
 
     if (this.mode === "work") {
@@ -133,6 +153,47 @@ export default class extends Controller {
       el.textContent = this.pomodoroCount
     })
   }
+
+  // ✅ beforeunload イベントハンドラー
+  handleBeforeUnload(event) {
+    event.preventDefault()
+    // モダンブラウザでは戻り値は無視されますが、互換性のため設定
+    event.returnValue = ''
+    return ''
+  }
+
+  // ✅ イベントリスナーを追加
+  addBeforeUnloadListener() {
+    window.addEventListener('beforeunload', this.boundBeforeUnloadHandler)
+  }
+
+  // ✅ イベントリスナーを削除
+  removeBeforeUnloadListener() {
+    window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler)
+  }
+
+  handleBack(event) {
+    if (this.timerInterval || this.firstStartedAt) {
+      const leave = confirm("タイマーが動いています。本当に戻りますか？")
+
+      if (!leave) {
+        // history.pushState(null, null, location.href)
+        return
+      } else {
+        this.removeBeforeUnloadListener()
+        window.removeEventListener("popstate", this.boundBackHandler)
+        // ここを変更
+        window.location.href = "/mypage"
+      }
+    }
+  }
+
+  // handleBack(event) {
+  //   if (this.timerInterval || this.firstStartedAt) {
+  //     alert("タイマー実行中は戻れません")
+  //     history.pushState(null, null, location.href)
+  //   }
+  // }
 
   // ✅ 音声を再生するメソッド
   playSound(soundPath) {
