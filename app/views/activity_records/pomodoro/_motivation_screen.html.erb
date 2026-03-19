@@ -1,0 +1,42 @@
+<!-- motivation画面（通常フローに入れる） -->
+<div
+  data-pomodoro-target="motivationScreen"
+  class="hidden min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% p-8 text-center text-white"
+>
+  <div class="w-full max-w-2xl p-10">
+    <p class="text-sm mb-2">
+      闇の時間での行動
+    </p>
+
+    <div class="bg-violet-800 rounded-lg px-6 py-4 font-semibold mb-4">
+      <%= @dark_time.behavior %>
+    </div>
+
+    <p class="text-sm mb-2">
+      避けたい未来
+    </p>
+
+    <div class="bg-violet-800 rounded-lg px-6 py-4 font-semibold mb-6">
+      <%= @dark_time.unwanted_future.presence || "これから考える" %>
+    </div>
+
+    <p class="text-lg leading-relaxed mb-6">
+      私は、上記に書かれている<br>
+      「<span class="text-2xl font-semibold"><%= @dark_time.behavior %></span>」<br>
+      を今後もやり続け<br>
+      「<span class="text-2xl font-semibold"><%= @dark_time.unwanted_future.presence || "毎日繰り返して、本来やりたいことができなくなり、結果的に自分の人生を台無しにしてしまう方向" %></span>」<br>
+      に向かう人物像を目指すことに満足しています。<br>
+      本当にそれでいいですか？
+    </p>
+
+    <button data-action="click->pomodoro#toggleMotivation" class="bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% text-black px-8 py-2 rounded-full mb-6 hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 transition">
+      いいえ、もう少し頑張ります！
+    </button>
+
+    <br>
+
+    <button class="bg-red-500 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
+      それでいいもん
+    </button>
+  </div>
+</div>
