@@ -22,6 +22,17 @@ export default class extends Controller {
     // ✅ 最初のタイマー開始時刻を保持
     this.firstStartedAt = null
 
+    // 寝落ちチェックのための時刻
+    this.lastActivityAt = null
+
+    // ✅ 本番用の設定
+    // this.inactivityTimeout = 5 * 60 * 1000  // 5分
+    // this.checkInterval = 60 * 1000  // 1分ごとにチェック
+
+    // ✅ テスト用の設定（動作確認時はこちらを使用）
+    this.inactivityTimeout = 30 * 1000  // 30秒
+    this.checkInterval = 5 * 1000  // 5秒ごとにチェック
+
     // ✅ beforeunload イベントリスナーを追加
     this.boundBeforeUnloadHandler = this.handleBeforeUnload.bind(this)
 
@@ -57,6 +68,9 @@ export default class extends Controller {
       // ✅ 離脱警告を有効化
       this.addBeforeUnloadListener()
     }
+
+    // ✅ タイマー開始時は無操作チェックを停止
+    this.stopInactivityCheck()
 
     if (this.mode === "work") {
       this.endedAt = this.getEndedAt(new Date(), this.workDurationValue)
@@ -106,6 +120,8 @@ export default class extends Controller {
     this.startButtonTarget.classList.remove("hidden")
     // ✅ チャイム音を再生
     this.playSound('/sounds/notification.mp3')
+    this.updateLastActivity()
+    this.startInactivityCheck()
   }
 
   switchToBreakMode() {
@@ -162,6 +178,100 @@ export default class extends Controller {
   // ✅ イベントリスナーを削除
   removeBeforeUnloadListener() {
     window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler)
+  }
+
+  // ✅ 無操作チェックの開始
+  startInactivityCheck() {
+    if (this.inactivityCheckInterval) return
+
+    this.inactivityCheckInterval = setInterval(() => {
+      this.checkInactivity()
+    }, this.checkInterval)
+  }
+
+   // ✅ 無操作チェックの停止
+  stopInactivityCheck() {
+    if (this.inactivityCheckInterval) {
+      clearInterval(this.inactivityCheckInterval)
+      this.inactivityCheckInterval = null
+    }
+  }
+
+  // ✅ 無操作チェック
+  checkInactivity() {
+    // タイマーが動いている時はチェックしない
+    // ✅ this.isRunning の代わりに this.timerInterval を使用
+    if (this.timerInterval) return
+
+
+    if (!this.lastActivityAt) return
+
+    const now = new Date()
+    const timeSinceLastActivity = now - this.lastActivityAt
+
+    // 5分以上操作がない場合
+    if (timeSinceLastActivity >= this.inactivityTimeout) {
+      // console.log("休憩後5分経過: 自動的に記録を保存します")
+
+      this.stopInactivityCheck()
+      this.removeBeforeUnloadListener()
+
+      this.saveActivityRecordWithInactivityTimeout()
+    }
+  }
+
+  // ✅ 最終操作時刻を更新
+  updateLastActivity() {
+    this.lastActivityAt = new Date()
+  }
+
+  // ✅ 無操作タイムアウト時の記録保存
+  saveActivityRecordWithInactivityTimeout() {
+    if (!this.firstStartedAt || !this.lastActivityAt) {
+      alert("記録を保存できませんでした")
+      return
+    }
+
+    // 最終操作時刻を終了時刻として使用
+    const lastEndedAt = this.lastActivityAt
+
+    // const params = this.saveActivityRecord(lastEndedAt)
+
+    // 確認ダイアログを表示
+    const confirmed = confirm(
+      `5分間操作がなかったため、自動的に記録を保存します。\n\n` +
+      `このまま保存してもよろしいですか？`
+    )
+
+    if (confirmed) {
+      // window.location.href = `/activity_records/new?${params.toString()}`
+      window.location.href = `/activity_records/new`
+    } else {
+      // キャンセルされた場合は、タイマーをリセット
+      this.resetTimer()
+    }
+  }
+
+  // ✅ タイマーをリセット
+  resetTimer() {
+    this.remainingTime = this.workDurationValue
+    this.firstStartedAt = null
+    this.lastActivityAt = null
+    this.endedAt = null
+    this.mode = "work"
+    this.pomodoroCount = 0
+
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval)
+      this.timerInterval = null
+    }
+
+    this.stopInactivityCheck()
+
+    this.updateTimeDisplay()
+    this.updatePomodoroCount()
+
+    this.startButtonTarget.classList.remove("hidden")
   }
 
   // ✅ 音声を再生するメソッド
