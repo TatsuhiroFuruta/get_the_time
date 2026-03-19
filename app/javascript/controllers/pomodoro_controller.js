@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="pomodoro"
 export default class extends Controller {
-  static targets = ["workScreen", "breakScreen", "display", "savedTask", "taskInput", "startButton", "pomodoroCount"]
+  static targets = ["workScreen", "breakScreen", "motivationScreen", "display", "savedTask", "taskInput", "startButton", "pomodoroCount"]
   static values = {
     workDuration: { type: Number, default: 1500 },
     breakDuration: { type: Number, default: 300 },
@@ -24,6 +24,8 @@ export default class extends Controller {
 
     // 寝落ちチェックのための時刻
     this.lastActivityAt = null
+
+    this.isMotivationOpen = false
 
     // ✅ 本番用の設定
     // this.inactivityTimeout = 5 * 60 * 1000  // 5分
@@ -162,6 +164,19 @@ export default class extends Controller {
     })
   }
 
+  // ✅ 音声を再生するメソッド
+  playSound(soundPath) {
+    const audio = new Audio(soundPath)
+
+    // 音量を設定（0.0 〜 1.0）
+    audio.volume = 0.5
+
+    // 再生
+    audio.play().catch(() => {
+      // ユーザーがまだページと対話していない場合に失敗することがある
+    })
+  }
+
   // ✅ beforeunload イベントハンドラー
   handleBeforeUnload(event) {
     event.preventDefault()
@@ -274,16 +289,18 @@ export default class extends Controller {
     this.startButtonTarget.classList.remove("hidden")
   }
 
-  // ✅ 音声を再生するメソッド
-  playSound(soundPath) {
-    const audio = new Audio(soundPath)
+  updateUI() {
+    // 通常画面
+    this.workScreenTarget.classList.toggle("hidden", this.mode !== "work" || this.isMotivationOpen)
 
-    // 音量を設定（0.0 〜 1.0）
-    audio.volume = 0.5
+    this.breakScreenTarget.classList.toggle( "hidden", this.mode !== "break" || this.isMotivationOpen)
 
-    // 再生
-    audio.play().catch(() => {
-      // ユーザーがまだページと対話していない場合に失敗することがある
-    })
+    // motivation画面
+    this.motivationScreenTarget.classList.toggle("hidden", !this.isMotivationOpen)
+  }
+
+  toggleMotivation() {
+    this.isMotivationOpen = !this.isMotivationOpen
+    this.updateUI()
   }
 }
