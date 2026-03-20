@@ -41,6 +41,9 @@ export default class extends Controller {
     this.updateTimeDisplay()
     this.updatePomodoroCount()
 
+    // 初期画面の表示でセット
+    this.updateUI()
+
     this.startButtonTarget.classList.remove("hidden")
   }
 
@@ -118,7 +121,8 @@ export default class extends Controller {
     this.remainingTime = this.workDurationValue
 
     this.updateTimeDisplay()
-    this.showWorkScreen()
+    // this.showWorkScreen()
+    this.updateUI()
     this.startButtonTarget.classList.remove("hidden")
     // ✅ チャイム音を再生
     this.playSound('/sounds/notification.mp3')
@@ -132,7 +136,8 @@ export default class extends Controller {
     this.endedAt = this.getEndedAt(new Date(), this.breakDurationValue)
 
     this.updateTimeDisplay()
-    this.showBreakScreen()
+    // this.showBreakScreen()
+    this.updateUI()
     // ✅ チャイム音を再生
     this.playSound('/sounds/notification.mp3')
     this.startTimer()
@@ -276,6 +281,8 @@ export default class extends Controller {
     this.mode = "work"
     this.pomodoroCount = 0
 
+    this.isMotivationOpen = false
+
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
       this.timerInterval = null
@@ -286,6 +293,9 @@ export default class extends Controller {
     this.updateTimeDisplay()
     this.updatePomodoroCount()
 
+    // ポモドーロタイマー画面(workScreen)を表示
+    this.updateUI()
+
     this.startButtonTarget.classList.remove("hidden")
   }
 
@@ -293,7 +303,7 @@ export default class extends Controller {
     // 通常画面
     this.workScreenTarget.classList.toggle("hidden", this.mode !== "work" || this.isMotivationOpen)
 
-    this.breakScreenTarget.classList.toggle( "hidden", this.mode !== "break" || this.isMotivationOpen)
+    this.breakScreenTarget.classList.toggle("hidden", this.mode !== "break" || this.isMotivationOpen)
 
     // motivation画面
     this.motivationScreenTarget.classList.toggle("hidden", !this.isMotivationOpen)
