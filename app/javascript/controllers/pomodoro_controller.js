@@ -255,7 +255,7 @@ export default class extends Controller {
     // 最終操作時刻を終了時刻として使用
     const lastEndedAt = this.lastActivityAt
 
-    // const params = this.saveActivityRecord(lastEndedAt)
+    const params = this.saveActivityRecord(lastEndedAt)
 
     // 確認ダイアログを表示
     const confirmed = confirm(
@@ -264,8 +264,9 @@ export default class extends Controller {
     )
 
     if (confirmed) {
+      window.location.replace(`/activity_records/new?${params.toString()}`)
       // window.location.href = `/activity_records/new?${params.toString()}`
-      window.location.href = `/activity_records/new`
+      // window.location.href = `/activity_records/new`
     } else {
       // キャンセルされた場合は、タイマーをリセット
       this.resetTimer()
@@ -312,5 +313,45 @@ export default class extends Controller {
   toggleMotivation() {
     this.isMotivationOpen = !this.isMotivationOpen
     this.updateUI()
+  }
+
+  finish() {
+    const lastEndedAt = new Date()
+
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval)
+      this.timerInterval = null
+    }
+
+    // ✅ タイマー終了時に離脱警告を無効化
+    this.removeBeforeUnloadListener()
+
+
+    if (this.firstStartedAt) {
+      // ✅ 最初のスタート時刻からの差分を計算
+      const params = this.saveActivityRecord(lastEndedAt)
+      // ✅ 確認フォーム画面に遷移
+      // window.location.href = `/activity_records/new?${params.toString()}`
+      window.location.replace(`/activity_records/new?${params.toString()}`)
+      // ブラウザの戻るボタンを押しても、タイマーがフリーズせず、リセットした状態で表示
+      // this.isFinished = true
+      // this.resetTimer()
+    } else {
+      alert("最初の開始時刻が登録されていません")
+    }
+  }
+
+  saveActivityRecord(lastEndedAt) {
+    // ✅ 最初のスタート時刻からの差分を計算
+    const durationInSeconds = ((lastEndedAt - this.firstStartedAt) / 1000).toFixed(2)
+
+    // ✅ URLパラメータとして渡す
+    const params = new URLSearchParams({
+      'activity_record[title]': this.title,
+      'activity_record[started_at]': this.firstStartedAt.toISOString(),
+      'activity_record[ended_at]': lastEndedAt.toISOString(),
+      'activity_record[duration]': durationInSeconds
+    })
+    return params
   }
 }
