@@ -220,9 +220,7 @@ export default class extends Controller {
   // ✅ 無操作チェック
   checkInactivity() {
     // タイマーが動いている時はチェックしない
-    // ✅ this.isRunning の代わりに this.timerInterval を使用
     if (this.timerInterval) return
-
 
     if (!this.lastActivityAt) return
 
@@ -265,8 +263,6 @@ export default class extends Controller {
 
     if (confirmed) {
       window.location.replace(`/activity_records/new?${params.toString()}`)
-      // window.location.href = `/activity_records/new?${params.toString()}`
-      // window.location.href = `/activity_records/new`
     } else {
       // キャンセルされた場合は、タイマーをリセット
       this.resetTimer()
@@ -331,11 +327,7 @@ export default class extends Controller {
       // ✅ 最初のスタート時刻からの差分を計算
       const params = this.saveActivityRecord(lastEndedAt)
       // ✅ 確認フォーム画面に遷移
-      // window.location.href = `/activity_records/new?${params.toString()}`
       window.location.replace(`/activity_records/new?${params.toString()}`)
-      // ブラウザの戻るボタンを押しても、タイマーがフリーズせず、リセットした状態で表示
-      // this.isFinished = true
-      // this.resetTimer()
     } else {
       alert("最初の開始時刻が登録されていません")
     }
