@@ -339,10 +339,10 @@ export default class extends Controller {
 
     // ✅ URLパラメータとして渡す
     const params = new URLSearchParams({
-      'activity_record[title]': this.title,
+      'activity_record[task]': this.task,
       'activity_record[started_at]': this.firstStartedAt.toISOString(),
       'activity_record[ended_at]': lastEndedAt.toISOString(),
-      'activity_record[duration]': durationInSeconds
+      'activity_record[total_duration]': durationInSeconds
     })
     return params
   }
