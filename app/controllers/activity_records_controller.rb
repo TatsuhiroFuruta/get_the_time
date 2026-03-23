@@ -4,7 +4,11 @@ class ActivityRecordsController < ApplicationController
   def index; end
 
   def new
-    logger.debug(form_params)
+    unless params[:activity_record_form].present?
+      # redirect_to pomodoro_timer_activity_records_path, alert: "ポモドーロタイマーからアクセスしてください"
+      redirect_to pomodoro_timer_activity_records_path
+      return
+    end
     # @activity_record = current_user.activity_records.build(activity_record_params)
     @form = ActivityRecordForm.new(form_params)
     @light_time = current_user.light_times.find_by(is_current: true)
