@@ -335,14 +335,15 @@ export default class extends Controller {
 
   saveActivityRecord(lastEndedAt) {
     // ✅ 最初のスタート時刻からの差分を計算
-    const durationInSeconds = ((lastEndedAt - this.firstStartedAt) / 1000).toFixed(2)
+    // const durationInSeconds = Math.floor((lastEndedAt - this.firstStartedAt) / 1000)
+    const durationInMinutes = Math.floor((lastEndedAt - this.firstStartedAt) / 60000)
 
     // ✅ URLパラメータとして渡す
     const params = new URLSearchParams({
-      'activity_record[task]': this.task,
-      'activity_record[started_at]': this.firstStartedAt.toISOString(),
-      'activity_record[ended_at]': lastEndedAt.toISOString(),
-      'activity_record[total_duration]': durationInSeconds
+      'activity_record_form[task]': this.task,
+      'activity_record_form[started_at]': this.firstStartedAt.toISOString(),
+      'activity_record_form[ended_at]': lastEndedAt.toISOString(),
+      'activity_record_form[total_duration]': durationInMinutes
     })
     return params
   }
