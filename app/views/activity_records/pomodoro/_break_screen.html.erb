@@ -8,6 +8,8 @@
 
   <%= render "activity_records/pomodoro/motivation_button" %>
 
-  <%= button_to "終了する", "#", method: :post, class: "bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
+  <button type="submit" data-action="click->pomodoro#finish" class="bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
+    終了する
+  </button>
 
 </div>
