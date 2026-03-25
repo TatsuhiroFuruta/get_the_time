@@ -1,7 +1,7 @@
 class ActivityRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_light_and_dark_times, only: %i[new create]
-  before_action :set_activity_record, only: %i[show edit update]
+  before_action :set_activity_record, only: %i[show edit update destroy]
 
   def index
     @activity_records = current_user.activity_records.includes(:light_time).order(created_at: :desc)
@@ -37,6 +37,11 @@ class ActivityRecordsController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @activity_record.destroy!
+    redirect_to activity_records_path, status: :see_other
   end
 
   def pomodoro_timer

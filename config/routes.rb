@@ -27,7 +27,7 @@ Rails.application.routes.draw do
     end
   end
   # 光の時間の活動記録
-  resources :activity_records, only: %i[index new create show edit update] do
+  resources :activity_records do
     collection do
       get :pomodoro_timer    # タイマーページ
     end
