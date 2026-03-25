@@ -1,6 +1,6 @@
 class ActivityRecordsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_times, only: %i[new create]
+  before_action :set_light_and_dark_times, only: %i[new create]
   before_action :set_activity_record, only: %i[show edit update]
 
   def index
@@ -22,8 +22,7 @@ class ActivityRecordsController < ApplicationController
     if @form.save(current_user)
       redirect_to activity_records_path
     else
-      @light_time = current_user.light_times.find_by(is_current: true)
-      @dark_time = current_user.dark_time
+      set_light_and_dark_times
       render :new, status: :unprocessable_entity
     end
   end
@@ -53,7 +52,7 @@ class ActivityRecordsController < ApplicationController
     @activity_record = current_user.activity_records.find(params[:id])
   end
 
-  def set_times
+  def set_light_and_dark_times
     @light_time = current_user.light_times.find_by(is_current: true)
     @dark_time = current_user.dark_time
   end
