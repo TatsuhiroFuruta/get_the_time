@@ -41,7 +41,7 @@ class ActivityRecordsController < ApplicationController
 
   def pomodoro_timer
     # タスク内容を登録のためこちらでインスタンス化
-    @activity_record = current_user.activity_records.build(task: params[:task])
+    @activity_record = current_user.activity_records.build(task: params.permit(:task)[:task])
     @light_time = current_user.light_times.find_by(is_current: true)
     @dark_time = current_user.dark_time
   end
@@ -67,7 +67,7 @@ class ActivityRecordsController < ApplicationController
   end
 
   def activity_record_params
-    params.require(:activity_record_form).permit(
+    params.require(:activity_record).permit(
     :started_at, :ended_at, :task, :total_duration,
     :idle_duration, :satisfaction, :progress,
     :quality, :focus, :fatigue, :comment
