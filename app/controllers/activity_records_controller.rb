@@ -1,6 +1,7 @@
 class ActivityRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_times, only: %i[new create]
+  before_action :set_activity_record, only: %i[show edit update]
 
   def index
     @activity_records = current_user.activity_records.includes(:light_time).order(created_at: :desc)
@@ -27,8 +28,16 @@ class ActivityRecordsController < ApplicationController
     end
   end
 
-  def show
-    @activity_record = current_user.activity_records.find(params[:id])
+  def show; end
+
+  def edit; end
+
+  def update
+    if @activity_record.update(activity_record_params)
+      redirect_to activity_record_path(@activity_record)
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def pomodoro_timer
@@ -39,6 +48,10 @@ class ActivityRecordsController < ApplicationController
   end
 
   private
+
+  def set_activity_record
+    @activity_record = current_user.activity_records.find(params[:id])
+  end
 
   def set_times
     @light_time = current_user.light_times.find_by(is_current: true)
@@ -51,6 +64,14 @@ class ActivityRecordsController < ApplicationController
     :idle_duration, :satisfaction, :progress,
     :quality, :focus, :fatigue, :comment,
     :light_time_characteristic, :dark_time_characteristic
+    )
+  end
+
+  def activity_record_params
+    params.require(:activity_record_form).permit(
+    :started_at, :ended_at, :task, :total_duration,
+    :idle_duration, :satisfaction, :progress,
+    :quality, :focus, :fatigue, :comment
     )
   end
 end
