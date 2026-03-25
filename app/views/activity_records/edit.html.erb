@@ -1,0 +1,68 @@
+<div class="min-h-screen flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
+  <div class="w-full max-w-2xl py-10">
+
+    <!-- タイトル -->
+    <h1 class="text-center text-xl font-bold mb-2">
+      光の時間の活動記録編集
+    </h1>
+
+    <%= form_with model: @activity_record, class: "space-y-4" do |f| %>
+
+      <% if @activity_record.errors[:idle_duration].any? %>
+        <p class="text-red-500 text-sm">
+          <%= @activity_record.errors[:idle_duration].first %>
+        </p>
+      <% end %>
+
+      <!-- 時間 -->
+      <p class="text-center text-sm mb-6">
+        <%= format_datetime(@activity_record.started_at) %> ~ <%= format_datetime(@activity_record.ended_at) %>
+      </p>
+
+      <!-- 光の時間の活動内容 -->
+      <div class="text-center mb-6">
+        <div class="bg-amber-500 px-6 py-4 rounded-lg">
+          <%= @activity_record.light_time&.action %>
+        </div>
+      </div>
+
+      <!-- やること -->
+      <div class="mb-4">
+        <%= f.label :task, "やること（任意）", class: "text-sm" %>
+        <%= f.text_field :task, class: "w-full mt-1 p-2 border rounded bg-gray-200" %>
+      </div>
+
+      <!-- 計測時間 -->
+      <p class="text-center mb-4">
+        計測時間: <%= @activity_record.total_duration %> 分
+      </p>
+
+      <!-- サボった時間 -->
+      <div class="flex items-center justify-center gap-2 mb-6">
+        <span>サボった時間: 約</span>
+        <%= f.number_field :idle_duration, value: 0, min: 0, max: @activity_record.total_duration, class: "text-center w-20 mt-1 p-2 border rounded bg-gray-200" %>
+        <span>分</span>
+      </div>
+
+      <!-- 評価 -->
+      <%= rating_field(f, :satisfaction, "満足度", left_label: "不満", right_label: "満足") %>
+      <%= rating_field(f, :progress, "進行度", left_label: "あまり進まなかった", right_label: "思ったより進んだ") %>
+      <%= rating_field(f, :quality, "作業の質", left_label: "理解の深掘りが進まなかった", right_label: "理解を深めることができた") %>
+      <%= rating_field(f, :focus, "集中度", left_label: "集中できなかった", right_label: "集中できた") %>
+      <%= rating_field(f, :fatigue, "疲労感", left_label: "元気", right_label: "疲れている") %>
+
+      <!-- コメント -->
+      <div class="mt-6">
+        <label class="text-sm">コメント（任意）</label>
+        <%= f.text_area :comment, class: "w-full mt-1 p-2 border rounded bg-gray-200" %>
+      </div>
+
+      <!-- ボタン -->
+      <div class="flex justify-center gap-6 mt-10">
+        <%= f.submit "更新する", class: "bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-full duration" %>
+        <%= link_to "キャンセル", activity_record_path(@activity_record), class: "bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full duration" %>
+      </div>
+
+    <% end %>
+  </div>
+</div>
