@@ -27,6 +27,10 @@ class ActivityRecordsController < ApplicationController
     end
   end
 
+  def show
+    @activity_record = current_user.activity_records.find(params[:id])
+  end
+
   def pomodoro_timer
     # タスク内容を登録のためこちらでインスタンス化
     @activity_record = current_user.activity_records.build(task: params[:task])

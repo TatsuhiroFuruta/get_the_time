@@ -1,6 +1,6 @@
 <div class="bg-orange-400 text-black rounded-lg px-4 py-3 shadow">
 
-  <div class="flex flex-wrap gap-6 text-lg">
+  <%= link_to activity_record_path(activity_record), class: "block flex flex-wrap gap-6 text-lg" do %>
 
     <!-- 日時 -->
     <span>
@@ -17,6 +17,6 @@
       <%= activity_record.comment.presence || "コメント記入なし" %>
     </span>
 
-  </div>
+  <% end %>
 
 </div>
