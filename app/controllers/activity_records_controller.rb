@@ -1,7 +1,10 @@
 class ActivityRecordsController < ApplicationController
   before_action :authenticate_user!
+  before_action :set_times, only: %i[new create]
 
-  def index; end
+  def index
+    @activity_records = current_user.activity_records.includes(:light_time).order(created_at: :desc)
+  end
 
   def new
     unless params[:activity_record_form].present?
@@ -9,10 +12,19 @@ class ActivityRecordsController < ApplicationController
       redirect_to pomodoro_timer_activity_records_path
       return
     end
-    # @activity_record = current_user.activity_records.build(activity_record_params)
-    @form = ActivityRecordForm.new(form_params)
-    @light_time = current_user.light_times.find_by(is_current: true)
-    @dark_time = current_user.dark_time
+    @form = ActivityRecordForm.new(activity_record_form_params)
+  end
+
+  def create
+    @form = ActivityRecordForm.new(activity_record_form_params)
+
+    if @form.save(current_user)
+      redirect_to activity_records_path
+    else
+      @light_time = current_user.light_times.find_by(is_current: true)
+      @dark_time = current_user.dark_time
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def pomodoro_timer
@@ -24,12 +36,13 @@ class ActivityRecordsController < ApplicationController
 
   private
 
-  def activity_record_params
-    params.require(:activity_record).permit(:started_at, :ended_at, :task, :total_duration, :idle_duration, :satisfaction, :progress, :quality, :focus, :fatigue, :comment)
+  def set_times
+    @light_time = current_user.light_times.find_by(is_current: true)
+    @dark_time = current_user.dark_time
   end
 
-  def form_params
-    params.fetch(:activity_record_form, {}).permit(
+  def activity_record_form_params
+    params.require(:activity_record_form).permit(
     :started_at, :ended_at, :task, :total_duration,
     :idle_duration, :satisfaction, :progress,
     :quality, :focus, :fatigue, :comment,

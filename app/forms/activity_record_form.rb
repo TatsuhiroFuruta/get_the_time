@@ -30,6 +30,8 @@ class ActivityRecordForm
     return false unless valid?
 
     ActiveRecord::Base.transaction do
+      light_time = user.light_times.find_by(is_current: true)
+
       # ActivityRecord 作成
       user.activity_records.create!(
         started_at: started_at,
@@ -42,22 +44,25 @@ class ActivityRecordForm
         quality: quality,
         focus: focus,
         fatigue: fatigue,
-        comment: comment
+        comment: comment,
+        light_time: light_time
       )
 
       # LightTime 更新
       user.light_times.find_by(is_current: true)&.update!(
-        feature: light_time_characteristic
+        characteristic: light_time_characteristic
       )
 
       # DarkTime 更新
       user.dark_time&.update!(
-        feature: dark_time_characteristic
+        characteristic: dark_time_characteristic
       )
+
     end
 
     true
-  rescue ActiveRecord::RecordInvalid
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error e.full_message
     false
   end
 

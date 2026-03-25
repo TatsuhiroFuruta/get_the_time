@@ -1,0 +1,22 @@
+<div class="bg-orange-400 text-black rounded-lg px-4 py-3 shadow">
+
+  <div class="flex flex-wrap gap-6 text-lg">
+
+    <!-- 日時 -->
+    <span>
+      <%= format_datetime(activity_record.started_at) %>
+    </span>
+
+    <!-- 光の時間の活動内容 -->
+    <span>
+      <%= activity_record.light_time&.action %>
+    </span>
+
+    <!-- コメント -->
+    <span class="text-gray-800">
+      <%= activity_record.comment.presence || "コメント記入なし" %>
+    </span>
+
+  </div>
+
+</div>
