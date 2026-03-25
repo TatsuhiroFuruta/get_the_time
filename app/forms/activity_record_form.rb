@@ -48,27 +48,21 @@ class ActivityRecordForm
         light_time: light_time
       )
 
-      # Rails.logger.debug "ActivityRecord OK"
-
       # LightTime 更新
       user.light_times.find_by(is_current: true)&.update!(
         characteristic: light_time_characteristic
       )
-
-      # Rails.logger.debug "LightTime OK"
 
       # DarkTime 更新
       user.dark_time&.update!(
         characteristic: dark_time_characteristic
       )
 
-      # Rails.logger.debug "DarkTime OK"
     end
 
     true
-  rescue ActiveRecord::RecordInvalid
-  # rescue => e
-    # Rails.logger.debug "SAVE ERROR: #{e.message}"
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error e.full_message
     false
   end
 
