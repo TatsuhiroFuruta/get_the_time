@@ -40,7 +40,7 @@
       <!-- サボった時間 -->
       <div class="flex items-center justify-center gap-2 mb-6">
         <span>サボった時間: 約</span>
-        <%= f.number_field :idle_duration, value: 0, min: 0, max: @activity_record.total_duration, class: "text-center w-20 mt-1 p-2 border rounded bg-gray-200" %>
+        <%= f.number_field :idle_duration, min: 0, max: @activity_record.total_duration, class: "text-center w-20 mt-1 p-2 border rounded bg-gray-200" %>
         <span>分</span>
       </div>
 
