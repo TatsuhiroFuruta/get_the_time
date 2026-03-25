@@ -12,7 +12,6 @@ class ActivityRecordsController < ApplicationController
       redirect_to pomodoro_timer_activity_records_path
       return
     end
-    # @activity_record = current_user.activity_records.build(activity_record_params)
     @form = ActivityRecordForm.new(form_params)
   end
 
@@ -40,10 +39,6 @@ class ActivityRecordsController < ApplicationController
   def set_times
     @light_time = current_user.light_times.find_by(is_current: true)
     @dark_time = current_user.dark_time
-  end
-
-  def activity_record_params
-    params.require(:activity_record).permit(:started_at, :ended_at, :task, :total_duration, :idle_duration, :satisfaction, :progress, :quality, :focus, :fatigue, :comment)
   end
 
   def form_params
