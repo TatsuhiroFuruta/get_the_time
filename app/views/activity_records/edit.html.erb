@@ -3,31 +3,26 @@
 
     <!-- タイトル -->
     <h1 class="text-center text-xl font-bold mb-2">
-      光の時間の活動記録登録
+      光の時間の活動記録編集
     </h1>
 
-    <%= form_with model: @form, url: activity_records_path, class: "space-y-4" do |f| %>
+    <%= form_with model: @activity_record, class: "space-y-4" do |f| %>
 
-      <% if @form.errors[:idle_duration].any? %>
+      <% if @activity_record.errors[:idle_duration].any? %>
         <p class="text-red-500 text-sm">
-          <%= @form.errors[:idle_duration].first %>
+          <%= @activity_record.errors[:idle_duration].first %>
         </p>
       <% end %>
 
       <!-- 時間 -->
       <p class="text-center text-sm mb-6">
-        <%= format_datetime(@form.started_at) %> ~ <%= format_datetime(@form.ended_at) %>
+        <%= format_datetime(@activity_record.started_at) %> ~ <%= format_datetime(@activity_record.ended_at) %>
       </p>
-
-      <%= f.hidden_field :started_at %>
-      <%= f.hidden_field :ended_at %>
-      <%= f.hidden_field :task %>
-      <%= f.hidden_field :total_duration %>
 
       <!-- 光の時間の活動内容 -->
       <div class="text-center mb-6">
         <div class="bg-amber-500 px-6 py-4 rounded-lg">
-          <%= @light_time.action %>
+          <%= @activity_record.light_time&.action %>
         </div>
       </div>
 
@@ -39,13 +34,13 @@
 
       <!-- 計測時間 -->
       <p class="text-center mb-4">
-        計測時間: <%= @form.total_duration %> 分
+        計測時間: <%= @activity_record.total_duration %> 分
       </p>
 
       <!-- サボった時間 -->
       <div class="flex items-center justify-center gap-2 mb-6">
         <span>サボった時間: 約</span>
-        <%= f.number_field :idle_duration, value: 0, min: 0, max: @form.total_duration, class: "text-center w-20 mt-1 p-2 border rounded bg-gray-200" %>
+        <%= f.number_field :idle_duration, value: 0, min: 0, max: @activity_record.total_duration, class: "text-center w-20 mt-1 p-2 border rounded bg-gray-200" %>
         <span>分</span>
       </div>
 
@@ -62,22 +57,10 @@
         <%= f.text_area :comment, class: "w-full mt-1 p-2 border rounded bg-gray-200" %>
       </div>
 
-      <!-- 光の特徴 -->
-      <div>
-        <h2 class="mb-1">光の時間の特徴（任意）</h2>
-        <%= f.text_area :light_time_characteristic, value: @light_time&.characteristic, class: "w-full bg-gray-200 border rounded p-2" %>
-      </div>
-
-      <!-- 闇の特徴 -->
-      <div>
-        <h2 class="mb-1">闇の時間の特徴（任意）</h2>
-        <%= f.text_area :dark_time_characteristic, value: @dark_time&.characteristic, class: "w-full bg-gray-200 border rounded p-2" %>
-      </div>
-
       <!-- ボタン -->
-      <div class="flex justify-center gap-6 mt-8">
-        <%= f.submit "記録する", class: "bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full duration" %>
-        <%= link_to "記録しない", mypage_path, class: "bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full duration" %>
+      <div class="flex justify-center gap-6 mt-10">
+        <%= f.submit "更新する", class: "bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-full duration" %>
+        <%= link_to "キャンセル", activity_record_path(@activity_record), class: "bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full duration" %>
       </div>
 
     <% end %>
