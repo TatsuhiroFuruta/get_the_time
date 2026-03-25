@@ -81,7 +81,7 @@
     <!-- 編集ボタン -->
     <div class="flex justify-center gap-10">
       <%= link_to "編集", edit_activity_record_path(@activity_record), class: "bg-green-700 hover:bg-green-800 px-6 py-2 rounded-full text-white font-semibold transition" %>
-      <%= link_to "削除", "#", data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "bg-red-500 hover:bg-red-600 px-6 py-2 rounded-full text-white font-semibold transition" %>
+      <%= link_to "削除", activity_record_path(@activity_record), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "bg-red-500 hover:bg-red-600 px-6 py-2 rounded-full text-white font-semibold transition" %>
     </div>
 
   </div>
