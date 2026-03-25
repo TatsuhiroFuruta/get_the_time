@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
+
+<!-- 戻るボタン -->
+    <%= link_to "← 活動記録一覧", activity_records_path, class: "mt-6 ml-6 mb-20 inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition" %>
+
+  <div class="flex-col items-center justify-center w-full max-w-2xl px-10 pb-20 mx-auto text-center">
+    <h1 class="text-2xl font-bold mb-10">
+      光の時間の活動記録詳細
+    </h1>
+
+    <!-- 時間 -->
+    <p class="text-lg mb-6">
+      <%= format_datetime(@activity_record.started_at) %> ~ <%= format_datetime(@activity_record.ended_at) %>
+    </p>
+
+    <!-- 光の時間での行動 -->
+    <div class="mb-6">
+      <div class="bg-amber-500 rounded-lg px-6 py-4">
+        <%= @activity_record.light_time&.action %>
+      </div>
+    </div>
+
+    <!-- やること -->
+    <div class="mb-6">
+      <p class="mb-2">やること</p>
+      <div class="bg-amber-500 rounded-lg px-6 py-4">
+        <%= @activity_record.task.presence || "未入力" %>
+      </div>
+    </div>
+
+    <!-- 計測時間 -->
+    <p class="mb-6">
+      計測時間: <%= @activity_record.total_duration %> 分
+    </p>
+
+    <!-- サボった時間 -->
+    <p class="mb-6">
+      サボった時間: 約 <span class="bg-amber-500 px-3 py-1 rounded"><%= @activity_record.idle_duration %></span> 分
+    </p>
+
+    <!-- 今日の本来の自分 -->
+    <p class="mb-6">
+      今日の本来の自分: <span class="bg-amber-500 px-3 py-1 rounded"><%= (@activity_record.desired_self_percentage * 100).round %></span> %
+    </p>
+
+    <!-- 満足度、進行度、作業の質、集中度、疲労感 -->
+    <div class="space-y-2 mb-6">
+      <% [
+        ["満足度", @activity_record.satisfaction],
+        ["進行度", @activity_record.progress],
+        ["作業の質", @activity_record.quality],
+        ["集中度", @activity_record.focus],
+        ["疲労感", @activity_record.fatigue]
+      ].each do |label, value| %>
+
+        <div class="flex justify-center items-center">
+
+          <!-- ラベル（幅固定） -->
+          <span class="w-24 text-right mr-2">
+            <%= label %>:
+          </span>
+
+          <!-- 値 -->
+          <span class="bg-amber-500 px-3 py-1 rounded w-10">
+            <%= value %>
+          </span>
+
+        </div>
+
+      <% end %>
+    </div>
+
+    <!-- コメント -->
+    <div class="mb-12">
+      <p class="mb-2">コメント</p>
+      <div class="bg-amber-500 rounded-lg px-6 py-4">
+        <%= @activity_record.comment.presence || "なし" %>
+      </div>
+    </div>
+
+    <!-- 編集ボタン -->
+    <div class="flex justify-center gap-10">
+      <%= link_to "編集", "#", class: "bg-green-700 hover:bg-green-800 px-6 py-2 rounded-full text-white font-semibold transition" %>
+      <%= link_to "削除", "#", data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "bg-red-500 hover:bg-red-600 px-6 py-2 rounded-full text-white font-semibold transition" %>
+    </div>
+
+  </div>
+</div>
