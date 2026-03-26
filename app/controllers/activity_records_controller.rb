@@ -4,7 +4,9 @@ class ActivityRecordsController < ApplicationController
   before_action :set_activity_record, only: %i[show edit update destroy]
 
   def index
-    @activity_records = current_user.activity_records.includes(:light_time).order(created_at: :desc)
+    # @activity_records = current_user.activity_records.includes(:light_time).order(created_at: :desc)
+    @q = current_user.activity_records.ransack(params[:q])
+    @activity_records = @q.result(distinct: true).includes(:light_time).order(created_at: :desc)
   end
 
   def new

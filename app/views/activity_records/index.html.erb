@@ -2,6 +2,12 @@
   <h1 class="text-2xl font-bold text-center mb-10 pt-10">
     光の時間の活動記録
   </h1>
+
+  <!-- 検索フォーム -->
+  <div class="max-w-2xl mx-auto">
+    <%= render 'search_form', q: @q, url: activity_records_path %>
+  </div>
+
   <% if @activity_records.present? %>
     <div class="max-w-2xl mx-auto">
       <!-- 一覧 -->
