@@ -1,0 +1,20 @@
+<%# Link showing page number
+  - available local variables
+    page:          a page object for "this" page
+    url:           url to this page
+    current_page:  a page object for the currently displayed page
+    total_pages:   total number of pages
+    per_page:      number of items to fetch per page
+    remote:        data-remote
+-%>
+<% if page.current? %>
+  <li>
+    <span class="px-3 py-1 bg-blue-600 text-white rounded">
+      <%= page %>
+    </span>
+  </li>
+<% else %>
+  <li>
+    <%= link_to page, url, class: "px-3 py-1 bg-blue-400 text-white rounded hover:bg-blue-500" %>
+  </li>
+<% end %>
