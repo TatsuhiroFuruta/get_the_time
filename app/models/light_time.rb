@@ -10,4 +10,8 @@ class LightTime < ApplicationRecord
       light_time.update!(is_current: true)
     end
   end
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["action"]  # 検索可能なカラム
+  end
 end

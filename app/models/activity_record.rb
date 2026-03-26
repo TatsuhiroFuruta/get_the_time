@@ -10,4 +10,14 @@ class ActivityRecord < ApplicationRecord
     self.desired_self_percentage =
       (total_duration - idle_duration).to_f / total_duration
   end
+
+  # 検索可能カラムの登録
+  def self.ransackable_attributes(auth_object = nil)
+    ["comment"]  # 検索可能なカラム
+  end
+
+  # 検索可能な関連付けをホワイトリスト化
+  def self.ransackable_associations(auth_object = nil)
+    ["light_time"]
+  end
 end
