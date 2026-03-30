@@ -1,0 +1,38 @@
+/* ハンバーガーボタンの線 */
+.hamburger-line {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: #1f2937; /* gray-800 */
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out;
+  position: absolute;
+}
+
+.hamburger-line:nth-child(1) {
+  top: 8px;
+}
+
+.hamburger-line:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hamburger-line:nth-child(3) {
+  bottom: 8px;
+}
+
+/* アクティブ状態（✕に変形） */
+.hamburger-button.active .hamburger-line:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.hamburger-button.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-button.active .hamburger-line:nth-child(3) {
+  bottom: 50%;
+  transform: translateY(50%) rotate(-45deg);
+}
