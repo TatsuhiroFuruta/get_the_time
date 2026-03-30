@@ -14,6 +14,8 @@ module ApplicationHelper
     active = "bg-linear-to-b from-yellow-200 from-0% via-yellow-300 via-80% to-yellow-600 to-100%"
     inactive = "bg-yellow-200"
 
-    current_page?(path) ? "#{base} #{active}" : "#{base} #{inactive}"
+    is_active = current_page?(path) || (path == mypage_path && current_page?(root_path))
+
+    "#{base} #{is_active ? active : inactive}"
   end
 end
