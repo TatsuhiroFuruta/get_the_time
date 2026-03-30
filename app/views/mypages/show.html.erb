@@ -1,5 +1,10 @@
 <div class="min-h-screen bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center">
 
+  <!-- 🔹 ハンバーガーメニュー -->
+  <% if @dark_time && @light_time %>
+    <%= render "shared/hamburger_menu" %>
+  <% end %>
+
   <!-- 🔹 右上ユーザーメニュー -->
   <div class="flex justify-end px-6 pt-6">
     <div class="flex gap-6">
