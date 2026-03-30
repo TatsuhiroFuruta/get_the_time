@@ -26,8 +26,8 @@
     data-hamburger-target="menu" 
     class="fixed top-0 left-0 h-full w-1/3 bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% z-50 transform -translate-x-full transition-transform duration-300">
     <ul class="pt-30 last:border-b last:border-amber-500">
-      <li><%= link_to "マイページ", mypage_path, data: { action: "click->hamburger#close" }, class: "block py-2 text-center bg-yellow-200 border-t border-amber-500" %></li>
-      <li><%= link_to "活動記録", activity_records_path, data: { action: "click->hamburger#close" }, class: "block py-2 text-center bg-yellow-200 border-t border-amber-500" %></li>
+      <li><%= link_to "マイページ", mypage_path, data: { action: "click->hamburger#close" }, class: nav_link_class(mypage_path) %></li>
+      <li><%= link_to "活動記録", activity_records_path, data: { action: "click->hamburger#close" }, class: nav_link_class(activity_records_path) %></li>
     </ul>
   </nav>
 </div>
