@@ -9,4 +9,5 @@ class User < ApplicationRecord
   has_one :dark_time, dependent: :destroy
   has_many :light_times, dependent: :destroy
   has_many :activity_records, dependent: :destroy
+  has_one :purification_time, dependent: :destroy
 end
