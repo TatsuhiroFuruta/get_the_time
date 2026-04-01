@@ -32,4 +32,9 @@ Rails.application.routes.draw do
       get :pomodoro_timer    # タイマーページ
     end
   end
+
+  resource :purification_time, only: [] do
+    patch :start
+    patch :finish
+  end
 end
