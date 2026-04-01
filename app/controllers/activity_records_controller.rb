@@ -22,6 +22,13 @@ class ActivityRecordsController < ApplicationController
     @form = ActivityRecordForm.new(activity_record_form_params)
 
     if @form.save(current_user)
+      minutes = ActivityRecord.calculate_purification_time(@form.total_duration)
+
+      # 0分のとき以外のみ追加！
+      if minutes > 0
+        flash[:purification_time] = "浄化タイマーを#{minutes}分獲得！"
+      end
+
       redirect_to activity_records_path
     else
       set_light_and_dark_times
