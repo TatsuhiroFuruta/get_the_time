@@ -33,8 +33,8 @@ Rails.application.routes.draw do
     end
   end
 
-  resource :purification_time, only: [] do
+  resource :purification_time, only: %i[show] do
     patch :start
-    patch :finish
+    patch :stop
   end
 end
