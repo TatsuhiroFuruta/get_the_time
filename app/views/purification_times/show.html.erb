@@ -34,13 +34,13 @@
     </div>
   <% elsif @purification_time.idle? || @purification_time.paused? %>
   <div class="flex justify-center gap-6">
-      <button type="submit" data-action="click->purification-timer#start" class="bg-green-700 text-white text-lg px-8 py-2 rounded-full hover:bg-green-800 transition">
+      <button type="button" data-action="click->purification-timer#start" class="bg-green-700 text-white text-lg px-8 py-2 rounded-full hover:bg-green-800 transition">
           スタート
         </button>
         <%= link_to "キャンセル", mypage_path, class: "bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
       </div>
   <% elsif @purification_time.running? %>
-    <button type="submit" data-action="click->purification-timer#stop" class="bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
+    <button type="button" data-action="click->purification-timer#stop" class="bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
       終了する
     </button>
   <% end %>

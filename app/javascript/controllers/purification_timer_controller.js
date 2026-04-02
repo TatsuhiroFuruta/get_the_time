@@ -59,6 +59,12 @@ export default class extends Controller {
     this.request("/purification_time/stop", redirect)
   }
 
+  reset() {
+    if (!confirm("本当にタイマーをリセットしてもよろしいでしょうか？")) return
+
+    this.request("/purification_time/reset")
+  }
+
   request(url, redirect = false) {
     fetch(url, {
       method: "PATCH",

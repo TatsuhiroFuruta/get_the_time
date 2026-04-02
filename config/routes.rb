@@ -36,5 +36,6 @@ Rails.application.routes.draw do
   resource :purification_time, only: %i[show] do
     patch :start
     patch :stop
+    patch :reset
   end
 end

@@ -14,6 +14,11 @@ class PurificationTimesController < ApplicationController
     head :ok
   end
 
+  def reset
+    @purification_time.reset!
+    head :ok
+  end
+
   private
 
   def set_purification_time

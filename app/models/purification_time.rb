@@ -30,6 +30,16 @@ class PurificationTime < ApplicationRecord
     end
   end
 
+  def reset!
+    update!(
+      status: :idle,
+      remaining_time: 0,
+      total_time: 0,
+      started_at: nil,
+      paused_at: nil
+    )
+  end
+
   private
 
   def pause!(remaining)

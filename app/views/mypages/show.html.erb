@@ -16,7 +16,7 @@
       <% end %>
 
       <% if @purification_time %>
-        <div class="bg-linear-to-b from-blue-800 from-0% via-sky-400 via-80% to-blue-50 to-100% rounded-2xl px-4 py-3 shadow-xl w-40 text-white">
+        <div data-controller="purification-timer" class="bg-linear-to-b from-blue-800 from-0% via-sky-400 via-80% to-blue-50 to-100% rounded-2xl px-4 py-3 shadow-xl w-40 text-white">
 
           <div class="flex items-center justify-center gap-3 mb-3">
             <%= image_tag "timer.png", class: "w-8" %>
@@ -34,8 +34,9 @@
             <%= link_to "メッセージ", purification_time_path, class: "block text-xs bg-green-700 text-center rounded-full py-1 mb-2 hover:bg-green-800 transition" %>
           <% else %>
             <%= link_to "スタート", purification_time_path, class: "block text-xs bg-green-700 text-center rounded-full py-1 mb-2 hover:bg-green-800 transition" %>
-
-            <%= button_to "リセット", "#", class: "w-full text-xs text-center bg-red-500 rounded-full py-1 hover:bg-red-600 transition" %>
+            <button type="button" data-action="click->purification-timer#reset" class="w-full text-xs text-center bg-red-500 rounded-full py-1 hover:bg-red-600 transition">
+              リセット
+            </button>
             <% end %>
         </div>
       <% end %>
