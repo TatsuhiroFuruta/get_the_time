@@ -18,3 +18,6 @@ application.register("modal", ModalController)
 
 import PomodoroController from "./pomodoro_controller"
 application.register("pomodoro", PomodoroController)
+
+import PurificationTimerController from "./purification_timer_controller"
+application.register("purification-timer", PurificationTimerController)
