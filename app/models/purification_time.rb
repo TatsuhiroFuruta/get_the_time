@@ -3,6 +3,10 @@ class PurificationTime < ApplicationRecord
 
   enum :status, { idle: 0, running: 1, paused: 2 }
 
+  def finished?
+    remaining_time.to_i <= 0
+  end
+
   def start!
     return unless idle? || paused?
 

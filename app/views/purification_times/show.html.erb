@@ -9,9 +9,17 @@
   <div class="text-white">
     <div class="text-center">
 
-      <div class="text-7xl font-bold" data-purification-timer-target="display">
-        00:00
-      </div>
+      <% if @purification_time.finished? %>
+        <div class="text-white text-2xl">
+          浄化が完了しました ✨ <br>
+          また、活動時間を計測してから来てね ❤️ <br>
+          30分毎に10分よ ✨ 忘れないでね ❤️
+        </div>
+      <% else %>
+        <div class="text-7xl font-bold" data-purification-timer-target="display">
+          00:00
+        </div>
+      <% end %>
 
     </div>
   </div>
@@ -19,16 +27,19 @@
   <%= image_tag "timer.png", class: "w-100 my-12" %>
 
   <!-- ボタン -->
-  <% if @purification_time.idle? || @purification_time.paused? %>
+
+  <% if @purification_time.finished? %>
+    <div class="flex justify-center">
+      <%= link_to "マイページに戻る", mypage_path, class: "bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
+    </div>
+  <% elsif @purification_time.idle? || @purification_time.paused? %>
   <div class="flex justify-center gap-6">
-      <button type="button" data-action="click->purification-timer#start" class="bg-green-700 text-white text-lg px-8 py-2 rounded-full hover:bg-green-800 transition">
+      <button type="submit" data-action="click->purification-timer#start" class="bg-green-700 text-white text-lg px-8 py-2 rounded-full hover:bg-green-800 transition">
           スタート
         </button>
         <%= link_to "キャンセル", mypage_path, class: "bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
       </div>
-  <% end %>
-
-  <% if @purification_time.running? %>
+  <% elsif @purification_time.running? %>
     <button type="submit" data-action="click->purification-timer#stop" class="bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
       終了する
     </button>
