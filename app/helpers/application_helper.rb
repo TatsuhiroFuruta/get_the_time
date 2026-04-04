@@ -3,6 +3,12 @@ module ApplicationHelper
     dt&.in_time_zone("Tokyo")&.strftime("%Y-%m-%d %H:%M")
   end
 
+  def format_time(elapsed_seconds)
+    minutes = elapsed_seconds / 60
+    seconds = elapsed_seconds % 60
+    "#{minutes} 分 #{seconds.to_s.rjust(2, '0')} 秒"
+  end
+
   def display_percentage(value)
     return "未設定" if value.blank?
 

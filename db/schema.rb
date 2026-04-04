@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_074958) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_01_143806) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,7 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_074958) do
     t.datetime "paused_at"
     t.integer "remaining_time", default: 0, null: false
     t.datetime "started_at"
-    t.integer "status"
+    t.integer "status", default: 0, null: false
     t.integer "total_time", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false

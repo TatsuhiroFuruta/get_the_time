@@ -43,7 +43,7 @@ class ActivityRecord < ApplicationRecord
     user.with_lock do
       purification_time = user.purification_time || user.build_purification_time
 
-      purification_time.remaining_time += minutes
+      purification_time.remaining_time += minutes * 60
 
       purification_time.save!
     end
