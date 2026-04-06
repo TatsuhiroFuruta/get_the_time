@@ -32,12 +32,14 @@
 
           <% if @purification_time.finished? %>
             <%= link_to "メッセージ", purification_time_path, class: "block text-xs bg-green-700 text-center rounded-full py-1 mb-2 hover:bg-green-800 transition" %>
+          <% elsif @purification_time.running? %>
+            <%= link_to "実行中", purification_time_path, class: "block text-xs bg-green-700 text-center rounded-full py-1 mb-2 hover:bg-green-800 transition" %>
           <% else %>
             <%= link_to "スタート", purification_time_path, class: "block text-xs bg-green-700 text-center rounded-full py-1 mb-2 hover:bg-green-800 transition" %>
             <button type="button" data-action="click->purification-timer#reset" class="w-full text-xs text-center bg-red-500 rounded-full py-1 hover:bg-red-600 transition">
               リセット
             </button>
-            <% end %>
+          <% end %>
         </div>
       <% end %>
 
