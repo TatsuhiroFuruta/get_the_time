@@ -45,6 +45,12 @@ export default class extends Controller {
     this.updateUI()
 
     this.startButtonTarget.classList.remove("hidden")
+
+    this.isNavigatingToForm = false
+
+    // this.isNavigatingToForm = localStorage.getItem("navigatingToForm") === "true"
+
+    // localStorage.removeItem("navigatingToForm")
   }
 
   disconnect() {
@@ -53,6 +59,12 @@ export default class extends Controller {
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
+    }
+
+    console.log(this.isNavigatingToForm)
+
+    if (!this.isNavigatingToForm) {
+      this.cancelActivity()
     }
   }
 
@@ -262,6 +274,8 @@ export default class extends Controller {
     )
 
     if (confirmed) {
+      this.isNavigatingToForm = true
+      // localStorage.setItem("navigatingToForm", "true")
       window.location.replace(`/activity_records/new?${params.toString()}`)
     } else {
       // キャンセルされた場合は、タイマーをリセット
@@ -326,6 +340,8 @@ export default class extends Controller {
     if (this.firstStartedAt) {
       // ✅ 最初のスタート時刻からの差分を計算
       const params = this.saveActivityRecord(lastEndedAt)
+      this.isNavigatingToForm = true
+      // localStorage.setItem("navigatingToForm", "true")
       // ✅ 確認フォーム画面に遷移
       window.location.replace(`/activity_records/new?${params.toString()}`)
     } else {
@@ -346,5 +362,14 @@ export default class extends Controller {
       'activity_record_form[total_duration]': durationInMinutes
     })
     return params
+  }
+
+  cancelActivity() {
+    fetch("/activity/cancel", {
+      method: "POST",
+      headers: {
+        "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content
+      }
+    })
   }
 }

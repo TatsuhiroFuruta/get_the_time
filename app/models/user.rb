@@ -10,4 +10,14 @@ class User < ApplicationRecord
   has_many :light_times, dependent: :destroy
   has_many :activity_records, dependent: :destroy
   has_one :purification_time, dependent: :destroy
+
+  enum :current_mode, { idle: 0, purification: 1, activity: 2 }
+
+  def can_start_purification?
+    idle?
+  end
+
+  def can_start_activity?
+    idle?
+  end
 end
