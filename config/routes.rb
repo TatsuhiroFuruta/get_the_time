@@ -38,4 +38,6 @@ Rails.application.routes.draw do
     patch :stop
     patch :reset
   end
+
+  post "activity/cancel", to: "activities#cancel"
 end

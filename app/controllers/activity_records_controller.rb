@@ -2,6 +2,7 @@ class ActivityRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_light_and_dark_times, only: %i[new create]
   before_action :set_activity_record, only: %i[show edit update destroy]
+  before_action :ensure_can_start_activity, only: %i[pomodoro_timer]
 
   def index
     # @activity_records = current_user.activity_records.includes(:light_time).order(created_at: :desc)
@@ -22,6 +23,7 @@ class ActivityRecordsController < ApplicationController
     @form = ActivityRecordForm.new(activity_record_form_params)
 
     if @form.save(current_user)
+      current_user.update!(current_mode: :idle)
       minutes = ActivityRecord.calculate_purification_time(@form.total_duration)
 
       # 0分のとき以外のみ追加！
@@ -58,6 +60,7 @@ class ActivityRecordsController < ApplicationController
     @activity_record = current_user.activity_records.build(task: params.permit(:task)[:task])
     @light_time = current_user.light_times.find_by(is_current: true)
     @dark_time = current_user.dark_time
+    current_user.update_column(:current_mode, "activity")
   end
 
   private
@@ -86,5 +89,12 @@ class ActivityRecordsController < ApplicationController
     :idle_duration, :satisfaction, :progress,
     :quality, :focus, :fatigue, :comment
     )
+  end
+
+  def ensure_can_start_activity
+    return if current_user.can_start_activity?
+    Rails.logger.debug "current_mode: #{current_user.current_mode}"
+    redirect_to mypage_path, alert: "タイマー実行中です"
+    return
   end
 end
