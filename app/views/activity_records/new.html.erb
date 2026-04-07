@@ -7,12 +7,7 @@
     </h1>
 
     <%= form_with model: @form, url: activity_records_path, class: "space-y-4" do |f| %>
-
-      <% if @form.errors[:idle_duration].any? %>
-        <p class="text-red-500 text-sm">
-          <%= @form.errors[:idle_duration].first %>
-        </p>
-      <% end %>
+      <%= render "shared/error_messages", object: @form %>
 
       <!-- 時間 -->
       <p class="text-center text-sm mb-6">

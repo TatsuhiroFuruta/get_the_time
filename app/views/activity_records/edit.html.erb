@@ -7,6 +7,7 @@
     </h1>
 
     <%= form_with model: @activity_record, class: "space-y-4" do |f| %>
+      <%= render "shared/error_messages", object: @activity_record %>
 
       <% if @activity_record.errors[:idle_duration].any? %>
         <p class="text-red-500 text-sm">

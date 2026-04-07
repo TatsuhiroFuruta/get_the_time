@@ -1,0 +1,31 @@
+ja:
+  activemodel:
+    models:
+      activity_record_form: 光の時間の活動記録フォーム
+    attributes:
+      activity_record_form:
+        started_at: 開始時刻
+        ended_at: 終了時刻
+        task: やること
+        total_duration: 計測時間
+        idle_duration: サボった時間
+        satisfaction: 満足度
+        progress: 進行度
+        quality: 作業の質
+        focus: 集中度
+        fatigue: 疲労感
+        comment: コメント
+  errors:
+    models:
+      activity_record_form:
+    attributes:
+      satisfaction:
+        inclusion: について、1から5のいずれかを選択してください
+      progress:
+        inclusion: について、1から5のいずれかを選択してください
+      quality:
+        inclusion: について、1から5のいずれかを選択してください
+      focus:
+        inclusion: について、1から5のいずれかを選択してください
+      fatigue:
+        inclusion: について、1から5のいずれかを選択してください
