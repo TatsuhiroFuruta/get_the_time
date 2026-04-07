@@ -2,7 +2,16 @@ class PurificationTimesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_purification_time
 
-  def show; end
+  def show
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          running: @purification_time.running?
+        }
+      end
+    end
+  end
 
   def start
     @purification_time.start!
@@ -15,12 +24,8 @@ class PurificationTimesController < ApplicationController
   end
 
   def reset
-    unless @purification_time.running?
-      @purification_time.reset!
-      head :ok
-    else
-      redirect_to mypage_path, alert: "タイマー実行中です"
-    end
+    @purification_time.reset!
+    head :ok
   end
 
   private
