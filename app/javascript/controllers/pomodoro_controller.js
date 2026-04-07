@@ -255,18 +255,12 @@ export default class extends Controller {
 
     const params = this.saveActivityRecord(lastEndedAt)
 
-    // 確認ダイアログを表示
-    const confirmed = confirm(
-      `5分間操作がなかったため、自動的に記録を保存します。\n\n` +
-      `このまま保存してもよろしいですか？`
-    )
+    // アラート文を表示
+    alert(`操作がなかったため、自動的に記録を保存します。`)
 
-    if (confirmed) {
-      window.location.replace(`/activity_records/new?${params.toString()}`)
-    } else {
-      // キャンセルされた場合は、タイマーをリセット
-      this.resetTimer()
-    }
+    setTimeout(() => {
+      location.replace(`/activity_records/new?${params.toString()}`)
+    }, 300)
   }
 
   // ✅ タイマーをリセット
@@ -327,7 +321,7 @@ export default class extends Controller {
       // ✅ 最初のスタート時刻からの差分を計算
       const params = this.saveActivityRecord(lastEndedAt)
       // ✅ 確認フォーム画面に遷移
-      window.location.replace(`/activity_records/new?${params.toString()}`)
+      location.replace(`/activity_records/new?${params.toString()}`)
     } else {
       alert("最初の開始時刻が登録されていません")
     }
