@@ -45,6 +45,12 @@ gem "image_processing", "~> 1.2"
 # 認証を導入するため、deviseをインストール
 gem "devise"
 
+# deviseの日本語化
+gem "devise-i18n"
+
+# activerecord、activemodelの日本語化
+gem "rails-i18n"
+
 # 検索機能
 gem "ransack"
 

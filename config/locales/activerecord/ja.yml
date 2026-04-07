@@ -1,0 +1,55 @@
+ja:
+  activerecord:
+    models:
+      dark_time: 闇の時間
+      light_time: 光の時間
+      activity_record: 光の時間の活動記録
+      purification_time: 浄化タイマー
+    attributes:
+      dark_time:
+        behavior: 闇の時間での行動
+        unwanted_future: 避けたい未来
+        characteristic: 闇の時間の特徴
+      light_time:
+        action: 光の時間での行動
+        desired_self: なりたい自分
+        characteristic: 光の時間の特徴
+      activity_record:
+        started_at: 開始時刻
+        ended_at: 終了時刻
+        task: やること
+        total_duration: 計測時間
+        idle_duration: サボった時間
+        desired_self_percentage: 今日の本来の自分
+        satisfaction: 満足度
+        progress: 進行度
+        quality: 作業の質
+        focus: 集中度
+        fatigue: 疲労感
+        comment: コメント
+      purification_time:
+        status: タイマーの状態
+        remaining_time : 残り時間
+        total_time : 設定された合計時間
+        started_at : 開始時刻
+        paused_at : 一時停止時刻
+  enums:
+    purification_time:
+      status:
+        idle: アイドル状態
+        running: 動作中
+        paused: 停止中
+  errors:
+    models:
+      activity_record:
+    attributes:
+      satisfaction:
+        inclusion: について、1から5のいずれかを選択してください
+      progress:
+        inclusion: について、1から5のいずれかを選択してください
+      quality:
+        inclusion: について、1から5のいずれかを選択してください
+      focus:
+        inclusion: について、1から5のいずれかを選択してください
+      fatigue:
+        inclusion: について、1から5のいずれかを選択してください

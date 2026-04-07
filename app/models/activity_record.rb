@@ -5,6 +5,12 @@ class ActivityRecord < ApplicationRecord
   before_save :calculate_desired_self_percentage
   after_create :grant_purification_time
 
+  # ===== バリデーション =====
+  validates :idle_duration, numericality: { greater_than_or_equal_to: 0 }
+  validate :idle_duration_cannot_exceed_total_duration
+
+  validates :satisfaction, :progress, :quality, :focus, :fatigue, inclusion: { in: 1..5 }
+
   # 浄化タイマーの時間計算メソッド
   def self.calculate_purification_time(total_duration)
     # return 0 if total_duration.blank? || total_duration < 10
@@ -33,6 +39,14 @@ class ActivityRecord < ApplicationRecord
     return if total_duration.to_i == 0
 
     self.desired_self_percentage = (total_duration - idle_duration).to_f / total_duration
+  end
+
+  def idle_duration_cannot_exceed_total_duration
+    return if idle_duration.blank? || total_duration.blank?
+
+    if idle_duration > total_duration
+      errors.add(:idle_duration, "は合計時間以下にしてください")
+    end
   end
 
   # 浄化タイマーの時間を付与するメソッド

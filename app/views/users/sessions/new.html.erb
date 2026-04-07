@@ -5,6 +5,7 @@
       <h2 class="text-center text-2xl font-bold mb-6">ログイン</h2>
 
       <%= form_with(model: resource, as: resource_name, url: session_path(resource_name), class: "space-y-4") do |f| %>
+        <%= render "users/shared/error_messages", resource: resource %>
 
         <div>
           <%= f.label :email, "メールアドレス", class: "block text-sm font-medium mb-1" %>
