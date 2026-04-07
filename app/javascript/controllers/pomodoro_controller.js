@@ -121,7 +121,7 @@ export default class extends Controller {
     this.remainingTime = this.workDurationValue
 
     this.updateTimeDisplay()
-    // this.showWorkScreen()
+    // 活動時間の計測画面へと遷移
     this.updateUI()
     this.startButtonTarget.classList.remove("hidden")
     // ✅ チャイム音を再生
@@ -136,21 +136,11 @@ export default class extends Controller {
     this.endedAt = this.getEndedAt(new Date(), this.breakDurationValue)
 
     this.updateTimeDisplay()
-    // this.showBreakScreen()
+    // 休憩時間の画面へと遷移
     this.updateUI()
     // ✅ チャイム音を再生
     this.playSound('/sounds/notification.mp3')
     this.startTimer()
-  }
-
-  showWorkScreen() {
-    this.breakScreenTarget.classList.add("hidden")
-    this.workScreenTarget.classList.remove("hidden")
-  }
-
-  showBreakScreen() {
-    this.workScreenTarget.classList.add("hidden")
-    this.breakScreenTarget.classList.remove("hidden")
   }
 
   updateTimeDisplay() {
@@ -255,45 +245,12 @@ export default class extends Controller {
 
     const params = this.saveActivityRecord(lastEndedAt)
 
-    // 確認ダイアログを表示
-    const confirmed = confirm(
-      `5分間操作がなかったため、自動的に記録を保存します。\n\n` +
-      `このまま保存してもよろしいですか？`
-    )
+    // アラート文を表示
+    alert(`操作がなかったため、自動的に記録を保存します。`)
 
-    if (confirmed) {
-      window.location.replace(`/activity_records/new?${params.toString()}`)
-    } else {
-      // キャンセルされた場合は、タイマーをリセット
-      this.resetTimer()
-    }
-  }
-
-  // ✅ タイマーをリセット
-  resetTimer() {
-    this.remainingTime = this.workDurationValue
-    this.firstStartedAt = null
-    this.lastActivityAt = null
-    this.endedAt = null
-    this.mode = "work"
-    this.pomodoroCount = 0
-
-    this.isMotivationOpen = false
-
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval)
-      this.timerInterval = null
-    }
-
-    this.stopInactivityCheck()
-
-    this.updateTimeDisplay()
-    this.updatePomodoroCount()
-
-    // ポモドーロタイマー画面(workScreen)を表示
-    this.updateUI()
-
-    this.startButtonTarget.classList.remove("hidden")
+    setTimeout(() => {
+      location.replace(`/activity_records/new?${params.toString()}`)
+    }, 300)
   }
 
   updateUI() {
@@ -327,7 +284,7 @@ export default class extends Controller {
       // ✅ 最初のスタート時刻からの差分を計算
       const params = this.saveActivityRecord(lastEndedAt)
       // ✅ 確認フォーム画面に遷移
-      window.location.replace(`/activity_records/new?${params.toString()}`)
+      location.replace(`/activity_records/new?${params.toString()}`)
     } else {
       alert("最初の開始時刻が登録されていません")
     }

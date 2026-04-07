@@ -2,7 +2,16 @@ class PurificationTimesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_purification_time
 
-  def show; end
+  def show
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          running: @purification_time.running?
+        }
+      end
+    end
+  end
 
   def start
     @purification_time.start!

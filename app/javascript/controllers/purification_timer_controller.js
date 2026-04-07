@@ -60,9 +60,24 @@ export default class extends Controller {
   }
 
   reset() {
-    if (!confirm("本当にタイマーをリセットしてもよろしいでしょうか？")) return
+    fetch("/purification_time", {
+      headers: { "Accept": "application/json" }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.running) {
+          alert("タイマー実行中です")
+          // 軽く待ってからリロード（UX改善）
+          setTimeout(() => {
+            location.reload()
+          }, 300)
+          return
+        }
 
-    this.request("/purification_time/reset")
+        if (!confirm("本当にタイマーをリセットしてもよろしいでしょうか？")) return
+
+        this.request("/purification_time/reset")
+      })
   }
 
   request(url, redirect = false) {
