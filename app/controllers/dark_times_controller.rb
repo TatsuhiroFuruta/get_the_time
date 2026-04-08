@@ -9,8 +9,9 @@ class DarkTimesController < ApplicationController
   def create
     @dark_time = current_user.build_dark_time(dark_time_params)
     if @dark_time.save
-      redirect_to mypage_path
+      redirect_to mypage_path, notice: t('defaults.flash_message.created', item: DarkTime.model_name.human)
     else
+      flash.now[:alert] = t('defaults.flash_message.not_created', item: DarkTime.model_name.human)
       render :new, status: :unprocessable_entity
     end
   end
@@ -21,8 +22,9 @@ class DarkTimesController < ApplicationController
 
   def update
     if @dark_time.update(dark_time_params)
-      redirect_to dark_time_path
+      redirect_to dark_time_path, notice: t('defaults.flash_message.updated', item: DarkTime.model_name.human)
     else
+      flash.now[:alert] = t('defaults.flash_message.not_updated', item: DarkTime.model_name.human)
       render :edit, status: :unprocessable_entity
     end
   end
