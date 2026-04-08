@@ -29,9 +29,10 @@ class ActivityRecordsController < ApplicationController
         flash[:purification_time] = "浄化タイマーを#{minutes}分獲得！"
       end
 
-      redirect_to activity_records_path
+      redirect_to activity_records_path, notice: t('defaults.flash_message.created', item: ActivityRecordForm.model_name.human)
     else
       set_light_and_dark_times
+      flash.now[:alert] = t('defaults.flash_message.not_created', item: ActivityRecordForm.model_name.human)
       render :new, status: :unprocessable_entity
     end
   end
@@ -42,15 +43,16 @@ class ActivityRecordsController < ApplicationController
 
   def update
     if @activity_record.update(activity_record_params)
-      redirect_to activity_record_path(@activity_record)
+      redirect_to activity_record_path(@activity_record), notice: t('defaults.flash_message.updated', item: ActivityRecord.model_name.human)
     else
+      flash.now[:alert] = t('defaults.flash_message.not_updated', item: ActivityRecord.model_name.human)
       render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
     @activity_record.destroy!
-    redirect_to activity_records_path, status: :see_other
+    redirect_to activity_records_path, notice: t('defaults.flash_message.deleted', item: ActivityRecord.model_name.human), status: :see_other
   end
 
   def pomodoro_timer

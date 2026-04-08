@@ -1,8 +1,8 @@
 ja:
   activerecord:
     models:
-      dark_time: 闇の時間
-      light_time: 光の時間
+      dark_time: 闇の時間の活動内容
+      light_time: 光の時間の活動内容
       activity_record: 光の時間の活動記録
       purification_time: 浄化タイマー
     attributes:

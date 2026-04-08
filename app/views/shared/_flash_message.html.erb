@@ -1,0 +1,12 @@
+<% flash.each do |type, message| %>
+  <% case type.to_sym %>
+  <% when :notice %>
+    <div class="p-4 text-sm text-green-800 bg-green-200" role="alert">
+      <%= message %>
+    </div>
+  <% when :alert %>
+    <div class="p-4 text-sm text-red-800 bg-red-200" role="alert">
+      <%= message %>
+    </div>
+  <% end %>
+<% end %>

@@ -1,7 +1,7 @@
 ja:
   activemodel:
     models:
-      activity_record_form: 光の時間の活動記録フォーム
+      activity_record_form: 光の時間の活動記録
     attributes:
       activity_record_form:
         started_at: 開始時刻
