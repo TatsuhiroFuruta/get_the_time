@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center">
+<div class="min-h-screen bg-[url('bg_light_and_darkness_narrow.png')] md:bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center">
 
   <!-- 🔹 ハンバーガーメニュー -->
   <% if @dark_time && @light_time %>
@@ -59,7 +59,7 @@
 
   <!-- 🔹 メインエリア -->
   <div class="flex items-center justify-center min-h-screen px-10">
-    <div class="flex flex-col my-10 md:my-0 md:flex-row items-center justify-center gap-20">
+    <div class="flex flex-col-reverse my-10 md:my-0 md:flex-row items-center justify-center gap-20">
 
       <!-- 🌑 闇側カード -->
       <%= render "dark_time", dark_time: @dark_time %>
