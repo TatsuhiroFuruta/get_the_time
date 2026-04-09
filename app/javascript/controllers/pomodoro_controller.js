@@ -286,7 +286,7 @@ export default class extends Controller {
       // ✅ 確認フォーム画面に遷移
       location.replace(`/activity_records/new?${params.toString()}`)
     } else {
-      alert("最初の開始時刻が登録されていません")
+      alert("スタートボタンを押してください")
     }
   }
 
