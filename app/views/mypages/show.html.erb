@@ -11,12 +11,12 @@
 
       <% if both_times_present?(@dark_time, @light_time) %>
         <div class="flex items-center justify-center bg-stone-300/67 rounded-2xl px-4 py-3 shadow-xl w-40">
-          <%= link_to "新規登録", new_light_time_path, class: "w-full text-xs text-center inline-block py-1 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition" %>
+          <%= link_to "新規登録", new_light_time_path, class: "w-full text-xs text-center text-zinc-800 inline-block py-1 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition" %>
         </div>
       <% end %>
 
       <% if @purification_time %>
-        <div data-controller="purification-timer" class="bg-linear-to-b from-blue-800 from-0% via-sky-400 via-80% to-blue-50 to-100% rounded-2xl px-4 py-3 shadow-xl w-40 h-40 text-white">
+        <div data-controller="purification-timer" class="bg-linear-to-b from-blue-800 from-0% via-sky-400 via-80% to-blue-50 to-100% rounded-2xl px-4 py-3 shadow-xl w-40 h-40 text-white/90">
 
           <div class="flex items-center justify-center gap-3 mb-3">
             <%= image_tag "timer.png", class: "w-8" %>
@@ -46,13 +46,13 @@
       <% end %>
 
       <div class="flex flex-col items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-2xl px-4 py-3 shadow-xl w-40">
-        <div class="text-sm text-center font-semibold mb-4">
+        <div class="text-sm text-center text-zinc-800 font-semibold mb-4">
           <%= current_user.name || "ユーザーA" %>
         </div>
 
-        <%= link_to "使い方(作成中)", "#", class: "w-full block text-xs bg-amber-800 text-white text-center rounded-full py-1 mb-2 hover:bg-amber-900 transition" %>
+        <%= link_to "使い方(作成中)", "#", class: "w-full block text-xs bg-amber-800 text-white/90 text-center rounded-full py-1 mb-2 hover:bg-amber-900 transition" %>
 
-        <%= link_to "ログアウト", destroy_user_session_path, data: { turbo_method: :delete },  class: "w-full text-xs text-center bg-red-500 text-white rounded-full py-1 hover:bg-red-600 transition" %>
+        <%= link_to "ログアウト", destroy_user_session_path, data: { turbo_method: :delete },  class: "w-full text-xs text-center bg-red-500 text-white/90 rounded-full py-1 hover:bg-red-600 transition" %>
       </div>
     </div>
   </div>

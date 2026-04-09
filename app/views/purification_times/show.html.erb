@@ -6,11 +6,11 @@
   class=" min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-blue-800 from-0% via-sky-400 via-80% to-blue-50 to-100%"
 >
   <!-- タイマー表示 -->
-  <div class="text-white">
+  <div class="text-white/90">
     <div class="text-center">
 
       <% if @purification_time.finished? %>
-        <div class="text-white text-2xl">
+        <div class="text-2xl">
           浄化が完了しました ✨ <br>
           また、活動時間を計測してから来てね ❤️ <br>
           30分毎に10分よ ✨ 忘れないでね ❤️
@@ -30,17 +30,17 @@
 
   <% if @purification_time.finished? %>
     <div class="flex justify-center">
-      <%= link_to "マイページに戻る", mypage_path, class: "bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
+      <%= link_to "マイページに戻る", mypage_path, class: "bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
     </div>
   <% elsif @purification_time.idle? || @purification_time.paused? %>
   <div class="flex justify-center gap-6">
-      <button type="button" data-action="click->purification-timer#start" class="bg-green-700 text-white text-lg px-8 py-2 rounded-full hover:bg-green-800 transition">
+      <button type="button" data-action="click->purification-timer#start" class="bg-green-700 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-green-800 transition">
           スタート
         </button>
-        <%= link_to "キャンセル", mypage_path, class: "bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
+        <%= link_to "キャンセル", mypage_path, class: "bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
       </div>
   <% elsif @purification_time.running? %>
-    <button type="button" data-action="click->purification-timer#stop" class="bg-red-500 text-white text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
+    <button type="button" data-action="click->purification-timer#stop" class="bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
       終了する
     </button>
   <% end %>

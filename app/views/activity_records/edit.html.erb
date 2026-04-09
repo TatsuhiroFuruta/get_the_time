@@ -1,4 +1,4 @@
-<div class="min-h-screen flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
+<div class="min-h-screen flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% text-zinc-800">
   <div class="w-full max-w-2xl py-10">
 
     <!-- タイトル -->
@@ -60,8 +60,8 @@
 
       <!-- ボタン -->
       <div class="flex justify-center gap-6 mt-10">
-        <%= f.submit "更新する", class: "bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-full duration" %>
-        <%= link_to "キャンセル", activity_record_path(@activity_record), class: "bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full duration" %>
+        <%= f.submit "更新する", class: "bg-green-700 hover:bg-green-800 text-white/90 px-6 py-2 rounded-full duration" %>
+        <%= link_to "キャンセル", activity_record_path(@activity_record), class: "bg-red-500 hover:bg-red-600 text-white/90 px-6 py-2 rounded-full duration" %>
       </div>
 
     <% end %>

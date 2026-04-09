@@ -2,7 +2,7 @@
 
 <% if light_time.present? %>
   <div id="light-time-switch" data-controller="light-time-switch" data-light_times="<%= light_times.to_json %>" data-current-id="<%= @light_time.id %>">
-    <div class="flex flex-row md:flex-col items-center justify-center gap-6">
+    <div class="flex flex-row md:flex-col items-center justify-center gap-6 text-zinc-800">
 
       <% if light_times.size > 1 %>
         <button data-action="click->light-time-switch#prev" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
