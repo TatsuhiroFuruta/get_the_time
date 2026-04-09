@@ -5,7 +5,7 @@
   </p>
 
   <p class="text-white text-3xl font-bold mb-8">
-    <%= @today_light_time || "X時間XX分" %>
+    <%= format_minutes_to_hm(@today_light_time) %>
   </p>
 
   <p class="mb-2">

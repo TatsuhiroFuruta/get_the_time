@@ -30,7 +30,7 @@
             <%= link_to "実行中", purification_time_path, class: "block text-xs bg-green-700 text-center rounded-full py-1 my-11 hover:bg-green-800 transition" %>
           <% else %>
             <div class="text-sm text-center mb-3">
-              <%= format_time(@purification_time&.remaining_time.to_i) %>
+              <%= format_seconds_to_mmss(@purification_time&.remaining_time.to_i) %>
             </div>
 
             <% if @purification_time.finished? %>
