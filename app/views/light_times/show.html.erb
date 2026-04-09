@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% text-zinc-800">
 
 <!-- 戻るボタン -->
-    <%= link_to "← マイページに戻る", mypage_path, class: "mt-6 ml-6 mb-20 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition" %>
+    <%= link_to "← マイページに戻る", mypage_path, class: "mt-6 ml-6 mb-20 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
 
   <div class="flex-col items-center justify-center w-full max-w-2xl px-10 mx-auto">
     <h1 class="text-2xl font-bold text-center mb-10">
@@ -34,8 +34,8 @@
 
     <!-- 編集ボタン -->
     <div class="flex justify-center gap-10 text-center">
-      <%= link_to "編集", edit_light_time_path(@light_time), class: "bg-green-700 hover:bg-green-800 px-6 py-3 rounded-full text-white/90 font-semibold transition" %>
-      <%= link_to "削除", light_time_path(@light_time), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "bg-red-500 hover:bg-red-600 px-6 py-3 rounded-full text-white/90 font-semibold transition" %>
+      <%= link_to "編集", edit_light_time_path(@light_time), class: "bg-green-700 hover:bg-green-800 px-6 py-3 rounded-full text-white/90 font-semibold transition duration-200" %>
+      <%= link_to "削除", light_time_path(@light_time), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "bg-red-500 hover:bg-red-600 px-6 py-3 rounded-full text-white/90 font-semibold transition duration-200" %>
     </div>
 
   </div>

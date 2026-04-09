@@ -30,17 +30,17 @@
 
   <% if @purification_time.finished? %>
     <div class="flex justify-center">
-      <%= link_to "マイページに戻る", mypage_path, class: "bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
+      <%= link_to "マイページに戻る", mypage_path, class: "bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition duration-200" %>
     </div>
   <% elsif @purification_time.idle? || @purification_time.paused? %>
   <div class="flex justify-center gap-6">
-      <button type="button" data-action="click->purification-timer#start" class="bg-green-700 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-green-800 transition">
+      <button type="button" data-action="click->purification-timer#start" class="bg-green-700 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-green-800 transition duration-200">
           スタート
         </button>
-        <%= link_to "キャンセル", mypage_path, class: "bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition" %>
+        <%= link_to "キャンセル", mypage_path, class: "bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition duration-200" %>
       </div>
   <% elsif @purification_time.running? %>
-    <button type="button" data-action="click->purification-timer#stop" class="bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition">
+    <button type="button" data-action="click->purification-timer#stop" class="bg-red-500 text-white/90 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition duration-200">
       終了する
     </button>
   <% end %>
