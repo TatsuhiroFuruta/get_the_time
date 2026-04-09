@@ -10,13 +10,13 @@
 
     <!-- モーダル本体 -->
     <div class="relative bg-linear-to-b from-blue-800 from-0% via-sky-400 via-80% to-blue-50 to-100% p-6 rounded-xl text-center z-10 w-80 aspect-square flex flex-col justify-center items-center">
-      <p class="text-white mb-2">
+      <p class="text-white/90 mb-2">
         <%= flash[:purification_time] %>
       </p>
 
       <%= image_tag "timer.png", class: "w-32 my-4" %>
 
-      <button data-action="click->modal#close" class="bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 transition px-6 py-2 rounded-full">
+      <button data-action="click->modal#close" class="bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 transition duration-200 px-6 py-2 rounded-full">
         OK
       </button>
     </div>

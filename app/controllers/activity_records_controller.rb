@@ -4,15 +4,13 @@ class ActivityRecordsController < ApplicationController
   before_action :set_activity_record, only: %i[show edit update destroy]
 
   def index
-    # @activity_records = current_user.activity_records.includes(:light_time).order(created_at: :desc)
     @q = current_user.activity_records.ransack(params[:q])
     @activity_records = @q.result(distinct: true).includes(:light_time).order(created_at: :desc).page(params[:page]).per(8)
   end
 
   def new
     unless params[:activity_record_form].present?
-      # redirect_to pomodoro_timer_activity_records_path, alert: "ポモドーロタイマーからアクセスしてください"
-      redirect_to pomodoro_timer_activity_records_path
+      redirect_to pomodoro_timer_activity_records_path, alert: t('activity_records.flash_message.require_timer_access')
       return
     end
     @form = ActivityRecordForm.new(activity_record_form_params)

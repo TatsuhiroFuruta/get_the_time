@@ -13,7 +13,10 @@ export default class extends Controller {
     this.audio = new Audio('/sounds/notification.mp3')
     this.audio.volume = 0.5
 
-    this.update()
+    // displayTargetが存在し、かつ残り時間がある場合のみ更新
+    if (this.hasDisplayTarget && this.remainingValue > 0) {
+      this.update()
+    }
 
     if (this.runningValue) {
       this.startCountdown()

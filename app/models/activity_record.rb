@@ -11,6 +11,17 @@ class ActivityRecord < ApplicationRecord
 
   validates :satisfaction, :progress, :quality, :focus, :fatigue, inclusion: { in: 1..5 }
 
+  scope :today, -> {
+    where(created_at: Time.current.all_day)
+  }
+
+  def self.total_light_time_today(user)
+    where(user: user)
+      .today
+      .sum(:total_duration)
+      .to_i
+  end
+
   # 浄化タイマーの時間計算メソッド
   def self.calculate_purification_time(total_duration)
     # return 0 if total_duration.blank? || total_duration < 10

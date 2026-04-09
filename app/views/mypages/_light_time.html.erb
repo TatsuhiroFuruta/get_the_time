@@ -2,7 +2,7 @@
 
 <% if light_time.present? %>
   <div id="light-time-switch" data-controller="light-time-switch" data-light_times="<%= light_times.to_json %>" data-current-id="<%= @light_time.id %>">
-    <div class="flex flex-row md:flex-col items-center justify-center gap-6">
+    <div class="flex flex-row md:flex-col items-center justify-center gap-6 text-zinc-800">
 
       <% if light_times.size > 1 %>
         <button data-action="click->light-time-switch#prev" class="w-12 h-12 flex items-center justify-center text-blue-500 text-6xl rounded-full md:rotate-90">
@@ -46,7 +46,7 @@
         登録されていません<br>
         新規登録しましょう
       </p>
-      <%= link_to "新規登録", new_light_time_path, class: "inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition" %>
+      <%= link_to "新規登録", new_light_time_path, class: "inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition duration-200" %>
     </div>
   </div>
 <% end %>
