@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-[url('bg_light_and_darkness_narrow.png')] md:bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center">
 
   <!-- 🔹 ハンバーガーメニュー -->
-  <% if @dark_time && @light_time %>
+  <% if both_times_present?(@dark_time, @light_time) %>
     <%= render "shared/hamburger_menu" %>
   <% end %>
 
@@ -9,7 +9,7 @@
   <div class="flex justify-end px-6 pt-6">
     <div class="flex gap-6">
 
-      <% if @dark_time && @light_time %>
+      <% if both_times_present?(@dark_time, @light_time) %>
         <div class="flex items-center justify-center bg-stone-300/67 rounded-2xl px-4 py-3 shadow-xl w-40">
           <%= link_to "新規登録", new_light_time_path, class: "w-full text-xs text-center inline-block py-1 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition" %>
         </div>
@@ -59,13 +59,15 @@
 
   <!-- 🔹 メインエリア -->
   <div class="flex items-center justify-center min-h-screen px-10">
-    <div class="flex flex-col-reverse my-10 md:my-0 md:flex-row items-center justify-center gap-20">
+    <div class="flex flex-col-reverse my-10 md:my-0 md:flex-row items-center justify-center <%= both_times_present?(@dark_time, @light_time) ? 'gap-20' : 'gap-40 md:gap-80' %>">
 
       <!-- 🌑 闇側カード -->
       <%= render "dark_time", dark_time: @dark_time %>
 
-      <!-- 今日の合計時間&スタートボタン -->
-      <%= render "pomodoro_start" %>
+      <% if both_times_present?(@dark_time, @light_time) %>
+        <!-- 今日の合計時間&スタートボタン -->
+        <%= render "pomodoro_start" %>
+      <% end %>
 
       <!-- ☀ 光側カード -->
       <%= render "light_time", light_time: @light_time %>
