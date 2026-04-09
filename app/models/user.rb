@@ -6,6 +6,8 @@ class User < ApplicationRecord
 
   validates :name, presence: true, length: { maximum: 30 }
 
+  validates :password, format: { without: /\s/, message: 'にスペースを含めることはできません' }, if: :password_required?
+
   has_one :dark_time, dependent: :destroy
   has_many :light_times, dependent: :destroy
   has_many :activity_records, dependent: :destroy
