@@ -6,6 +6,6 @@ ja:
       updated: "%{item}を更新しました"
       not_updated: "%{item}を更新できませんでした"
       deleted: "%{item}を削除しました"
-  activity_record:
+  activity_records:
     flash_message:
       require_timer_access: ポモドーロタイマーからアクセスしてください

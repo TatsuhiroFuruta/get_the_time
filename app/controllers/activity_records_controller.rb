@@ -10,7 +10,7 @@ class ActivityRecordsController < ApplicationController
 
   def new
     unless params[:activity_record_form].present?
-      redirect_to pomodoro_timer_activity_records_path, alert: t('activity_record.flash_message.require_timer_access')
+      redirect_to pomodoro_timer_activity_records_path, alert: t('activity_records.flash_message.require_timer_access')
       return
     end
     @form = ActivityRecordForm.new(activity_record_form_params)
