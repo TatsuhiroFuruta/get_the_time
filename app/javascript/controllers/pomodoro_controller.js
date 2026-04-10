@@ -32,7 +32,7 @@ export default class extends Controller {
     // this.checkInterval = 60 * 1000  // 1分ごとにチェック
 
     // ✅ テスト用の設定（動作確認時はこちらを使用）
-    this.inactivityTimeout = 30 * 1000  // 30秒
+    this.inactivityTimeout = 60 * 1000  // 1分
     this.checkInterval = 5 * 1000  // 5秒ごとにチェック
 
     // ✅ beforeunload イベントリスナーを追加
