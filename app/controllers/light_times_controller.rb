@@ -1,5 +1,4 @@
 class LightTimesController < ApplicationController
-  before_action :authenticate_user!
   before_action :set_light_time, only: %i[show edit update destroy switch]
 
   def switch

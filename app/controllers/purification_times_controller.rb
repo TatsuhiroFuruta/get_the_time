@@ -1,5 +1,4 @@
 class PurificationTimesController < ApplicationController
-  before_action :authenticate_user!
   before_action :set_purification_time
 
   def show
