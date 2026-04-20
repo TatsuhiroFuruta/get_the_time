@@ -15,8 +15,15 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-  # root "static_pages#home" # ホームページの設定
-  root "mypages#show" # ログイン後はマイページへ遷移
+
+  # ログイン済みユーザーのルートパス
+  authenticated :user do
+    root "mypages#show", as: :authenticated_root # ログイン後はマイページへ遷移
+  end
+
+  # 未ログインユーザーのルートパス
+  root "static_pages#home" # ホーム画面をルートパスに設定
+
   resource :mypage, only: %i[show]
   # 闇の時間の活動内容
   resource :dark_time, only: %i[new create show edit update]

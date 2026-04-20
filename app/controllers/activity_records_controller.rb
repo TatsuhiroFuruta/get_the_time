@@ -1,5 +1,4 @@
 class ActivityRecordsController < ApplicationController
-  before_action :authenticate_user!
   before_action :set_light_and_dark_times, only: %i[new create]
   before_action :set_activity_record, only: %i[show edit update destroy]
 
