@@ -54,8 +54,11 @@ gem "rails-i18n"
 # 検索機能
 gem "ransack"
 
-# 検索機能
+# ページネーション
 gem "kaminari"
+
+# tailwindcss用のgemをインストール、application.tailwind.css に関するコンソールメッセージの原因を特定するために導入
+gem "tailwindcss-rails"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
