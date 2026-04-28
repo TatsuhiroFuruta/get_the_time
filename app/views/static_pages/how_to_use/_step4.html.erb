@@ -1,0 +1,87 @@
+<details id="step4" class="mt-10 group border border-zinc-800 rounded-lg p-4 open:shadow-lg transition-all duration-300">
+  <summary class="text-2xl font-bold cursor-pointer list-item">
+    Step4: 光の時間の活動記録の登録
+  </summary>
+  <div class="my-6">
+    <p class="mb-2 text-lg">こちらのstep3の続きになります</p>
+  </div>
+  <div class="my-6">
+    <p class="font-bold mb-2 text-lg"> 1. 光の時間の活動記録の登録フォーム</p>
+    <p class="font-bold mb-2 text-lg">
+      フォームで入力しないといけない箇所：サボった時間及び評価項目
+    </p>
+    <%= image_tag "how_to_use/activity_record_new_form_valid.png" %>
+    <p class="my-2 text-lg underline">
+      サボった時間
+    </p>
+    <p class="mb-2 text-md">
+      計測時間のうち自分がサボったと思ったおおよその時間を入力します。計測時間より小さく入力する必要があります。入力内容について、登録後に付与される浄化タイマーには影響しないです。
+    </p>
+    <p class="mb-2 text-lg underline">
+      評価項目: 満足度、進行度、作業の質、集中度、疲労感
+    </p>
+    <p class="mb-2 text-md">
+      評価できる項目のみ、しっかりとチェックを入れましょう。分からない、関係ない項目に対しては、好きなところ（真ん中がオススメ）で大丈夫です。
+    </p>
+    <p class="font-bold mt-8 mb-2 text-lg">
+      入力が任意の箇所：やること、コメント、光の時間の特徴、闇の時間の特徴
+    </p>
+    <p class="my-2 text-lg underline">
+      やること
+    </p>
+    <p class="mb-2 text-md">
+      取り組んだ具体的な活動について記入します。無理に入力しなくても大丈夫です。
+    </p>
+    <p class="my-2 text-lg underline">
+      コメント
+    </p>
+    <p class="mb-2 text-md">
+      取り組んだことに対して何か一言、二言！無理に入力しなくても大丈夫です。
+    </p>
+    <p class="my-2 text-lg underline">
+      光の時間の特徴、闇の時間の特徴
+    </p>
+    <p class="mb-2 text-md">
+      活動を通して、気づいたことや思ったことがあれば記入しましょう。フォームの提出と同時に、上書き保存されます。<br>
+      入力内容は提出後に、各々の時間の活動内容で確認できます。<br>
+      以前登録した内容を消したくない場合は、手を加えず消さないように注意しましょう。
+    </p>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">2. 記録するボタンをクリック、しない場合は記録しないボタンをクリック。記録しないボタンをクリックした場合、保存されずにマイページに移動します</p>
+    <%= image_tag "how_to_use/activity_record_register_buttons.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">3. 記録するボタンをクリック後、浄化タイマーが付与される</p>
+    <p class="mb-2 text-md">※ デモ画像です。実際の付与時間は30分毎に10分です。</p>
+    <%= image_tag "how_to_use/activity_record_granted_purification_time.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">4. 一覧画面で登録されていることを確認</p>
+    <%= image_tag "how_to_use/activity_record_index_display.png" %>
+  </div>
+  <details class="group rounded-lg p-4 open:shadow-lg transition-all duration-300">
+    <!-- タイトル部分 -->
+    <summary class="font-bold cursor-pointer list-item">
+      今日の本来の自分はの確認、登録内容を変更したい場合
+    </summary>
+    <!-- コンテンツ部分 -->
+    <div class="mt-4">
+      <div class="my-6">
+        <p class="mb-2 text-lg">1. オレンジ色の活動記録の内容をクリック</p>
+        <%= image_tag "how_to_use/activity_record_index_display.png" %>
+      </div>
+      <div class="my-6">
+        <p class="mb-2 text-lg">2. 編集する場合は、編集ボタンをクリック</p>
+        <p class="mb-2 text-md">※ 今日の本来の自分は計測時間とサボった時間に基づいて求められます。確認して1セッションの学習を振り返り、気づいたことがあれば、編集ボタンをクリックしてコメントを追記してみましょう。</p>
+        <p class="mb-2 text-md">※ 光の時間の特徴や闇の時間の特徴は各々光の時間の活動内容（詳細は、step2の「登録内容を変更したい場合」を参照）及び闇の時間の活動内容（詳細は、step1の「登録内容を変更したい場合」を参照）で編集できます。</p>
+        <p class="mb-2 text-md text-red-700">※ 削除ボタンをクリックすると、登録内容が削除されるため、注意</p>
+        <%= image_tag "how_to_use/activity_record_show_display.png" %>
+      </div>
+      <div class="my-6">
+        <p class="mb-2 text-lg">3. 内容を変更して更新ボタンをクリックすると、登録内容が変更されます。</p>
+        <%= image_tag "how_to_use/activity_record_edit_display.png" %>
+      </div>
+    </div>
+  </details>
+</details>
