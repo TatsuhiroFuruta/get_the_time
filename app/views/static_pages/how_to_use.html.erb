@@ -4,17 +4,7 @@
     <%= link_to "← マイページに戻る", mypage_path, class: "fixed top-6 left-6 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
   <!-- メインコンテンツ -->
   <main class= "flex flex-col items-center">
-    <div class="w-full max-w-2xl">
-      <div class="mt-30 p-10 flex flex-col items-center border rounded-lg">
-        <ul class="text-lg">
-          <div class="text-center mb-6">目次</div>
-          <li class="mb-2"><%=link_to "Step1: 闇の時間の活動内容の登録","#step1", class: "hover:underline" %></li>
-          <li class="mb-2"><%=link_to "Step2: 光の時間の活動内容の登録","#step2", class: "hover:underline" %></li>
-          <li class="mb-2"><%=link_to "Step3: 光の時間の活動時間の計測","#step3", class: "hover:underline" %></li>
-          <li class="mb-2"><%=link_to "Step4: 光の時間の活動記録の登録","#step4", class: "hover:underline" %></li>
-          <li><%=link_to "Step5: 浄化タイマーの使い方","#step5", class: "hover:underline" %></li>
-        </ul>
-      </div>
+    <div class="w-full max-w-2xl mt-30">
       <%= render "static_pages/how_to_use/step1" %>
       <%= render "static_pages/how_to_use/step2" %>
       <%= render "static_pages/how_to_use/step3" %>
