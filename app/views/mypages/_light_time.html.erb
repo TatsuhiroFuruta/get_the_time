@@ -1,7 +1,7 @@
 <% light_times = current_user.light_times.order(:created_at).pluck(:id) %>
 
 <% if light_time.present? %>
-  <div id="light-time-switch" data-controller="light-time-switch" data-light_times="<%= light_times.to_json %>" data-current-id="<%= @light_time.id %>">
+  <div id="light-time-switch" data-controller="light-time-switch" data-light_times="<%= light_times.to_json %>" data-current-id="<%= @light_time.id %>" class="flex flex-col items-center gap-6 md:block">
     <div class="flex flex-row md:flex-col items-center justify-center gap-6 text-zinc-800">
 
       <% if light_times.size > 1 %>
@@ -11,19 +11,19 @@
       <% end %>
 
       <!-- 固定幅コンテナ -->
-      <div class="w-80 flex justify-center">
-        <%= link_to light_time_path(light_time), class: "block w-full flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-3xl shadow-2xl p-10" do %>
+      <div class="w-50 md:w-80 flex justify-center">
+        <%= link_to light_time_path(light_time), class: "block w-full flex items-center justify-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-3xl shadow-2xl p-2 md:p-10" do %>
           <div class="mb-4 p-4 rounded-xl text-center">
-            <p class="text-sm mb-1">
+            <p class="text-xs md:text-sm mb-1">
               光の時間での行動
             </p>
-            <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+            <p class="font-semibold bg-amber-500 px-1 py-2 md:py-4 rounded-2xl text-sm md:text-base">
               <%= light_time.action %>
             </p>
             <p class="text-sm mt-3 mb-1">
               なりたい自分
             </p>
-            <p class="font-semibold  bg-amber-500 px-1 py-4 rounded-2xl">
+            <p class="font-semibold bg-amber-500 px-1 py-2 md:py-4 rounded-2xl text-sm md:text-base">
               <%= light_time.desired_self.presence || "まだ見ぬ可能性に満ちた新しい自分に出会うため" %>
             </p>
           </div>
@@ -37,11 +37,19 @@
       <% end %>
 
     </div>
+
+    <!-- スマホ対応画面における新規登録ボタン -->
+    <% if both_times_present?(dark_time, light_time) %>
+      <div class="md:hidden">
+        <%= link_to "新規登録", new_light_time_path, class: "text-center text-zinc-800 inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition duration-200" %>
+      </div>
+    <% end %>
+
   </div>
 <% else %>
-  <div class="flex items-center justify-center bg-stone-300/67 rounded-3xl shadow-2xl p-10 w-80 text-center">
+  <div class="flex items-center justify-center bg-stone-300/67 rounded-3xl shadow-2xl p-6 md:p-10 w-50 md:w-80 text-center">
     <div>
-      <p class="mb-8 text-lg leading-relaxed">
+      <p class="mb-4 md:mb-8 text-sm md:text-lg leading-relaxed">
         光の時間での行動が<br>
         登録されていません<br>
         新規登録しましょう
