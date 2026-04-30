@@ -28,12 +28,12 @@ export default class extends Controller {
     this.isMotivationOpen = false
 
     // ✅ 本番用の設定
-    // this.inactivityTimeout = 5 * 60 * 1000  // 5分
-    // this.checkInterval = 60 * 1000  // 1分ごとにチェック
+    this.inactivityTimeout = 20 * 60 * 1000  // 20分
+    this.checkInterval = 60 * 1000  // 1分ごとにチェック
 
     // ✅ テスト用の設定（動作確認時はこちらを使用）
-    this.inactivityTimeout = 60 * 1000  // 1分
-    this.checkInterval = 5 * 1000  // 5秒ごとにチェック
+    // this.inactivityTimeout = 60 * 1000  // 1分
+    // this.checkInterval = 5 * 1000  // 5秒ごとにチェック
 
     // ✅ beforeunload イベントリスナーを追加
     this.boundBeforeUnloadHandler = this.handleBeforeUnload.bind(this)
