@@ -4,7 +4,8 @@
     <%= link_to "← マイページに戻る", mypage_path, class: "fixed top-6 left-6 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
   <!-- メインコンテンツ -->
   <main class= "flex flex-col items-center">
-    <div class="w-full max-w-2xl mt-30">
+    <div class="w-80 md:w-full max-w-2xl mt-30">
+      <%= render "static_pages/how_to_use/abstract" %>
       <%= render "static_pages/how_to_use/step1" %>
       <%= render "static_pages/how_to_use/step2" %>
       <%= render "static_pages/how_to_use/step3" %>
