@@ -28,9 +28,9 @@ class ActivityRecord < ApplicationRecord
     return 0 if total_duration.blank? || total_duration < 1
 
     # 確認用
-    (total_duration / 2).floor * 1
+    # (total_duration / 2).floor * 1
     # 本番用
-    # (total_duration / 30).floor * 10
+    (total_duration / 30).floor * 10
   end
 
   # 検索可能カラムの登録
