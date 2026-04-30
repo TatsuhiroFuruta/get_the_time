@@ -69,8 +69,17 @@
         <%= render "pomodoro_start" %>
       <% end %>
 
-      <!-- ☀ 光側カード -->
-      <%= render "light_time", light_time: @light_time, dark_time: @dark_time %>
+      <div class="flex flex-col items-center gap-6 md:block">
+        <!-- ☀ 光側カード -->
+        <%= render "light_time", light_time: @light_time %>
+
+        <!-- スマホ対応画面における新規登録ボタン -->
+        <% if both_times_present?(@dark_time, @light_time) %>
+          <div class="md:hidden">
+            <%= link_to "新規登録", new_light_time_path, class: "text-center text-zinc-800 inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition duration-200" %>
+          </div>
+        <% end %>
+      </div>
 
     </div>
   </div>
