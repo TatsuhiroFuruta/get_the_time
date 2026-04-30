@@ -11,12 +11,12 @@
   </h1>
 
   <!-- 検索フォーム -->
-  <div class="max-w-xl mx-auto">
+  <div class="w-80 md:w-full max-w-xl mx-auto">
     <%= render 'search_form', q: @q, url: activity_records_path %>
   </div>
 
   <% if @activity_records.present? %>
-    <div class="max-w-2xl mx-auto">
+    <div class="w-80 md:w-full max-w-2xl mx-auto">
       <!-- 一覧 -->
       <div class="space-y-4">
         <%= render @activity_records %>
