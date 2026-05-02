@@ -1,5 +1,10 @@
 # Get The Time ー 本来の自分を手に入れろ ー
 
+![](app/assets/images/ogp.png)
+
+## アプリURL
+https://get-the-time.onrender.com/
+
 ## サービス概要
 **Get The Time** は学校や仕事、家事などで拘束されていない自由時間を
 - 光の時間（本来望んでいる行動をしている時間。例：勉強、副業、読書など）
