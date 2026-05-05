@@ -72,16 +72,25 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # RSpec本体
+  gem "rspec-rails"
+
+  # テストデータ作成用
+  gem "factory_bot_rails"
+
+  # テストデータ生成用
+  gem "faker"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
-  gem 'faker'
 end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
+  # ブラウザ操作のテスト用
   gem "capybara"
   gem "selenium-webdriver"
 end
