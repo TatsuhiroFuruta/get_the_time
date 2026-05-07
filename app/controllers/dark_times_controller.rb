@@ -1,5 +1,7 @@
 class DarkTimesController < ApplicationController
   before_action :set_dark_time, only: %i[show edit update]
+  before_action :redirect_if_dark_time_exists, only: %i[new create]
+  before_action :redirect_if_dark_time_missing, only: %i[edit]
 
   def new
     @dark_time = current_user.build_dark_time
@@ -32,6 +34,20 @@ class DarkTimesController < ApplicationController
 
   def set_dark_time
     @dark_time = current_user.dark_time
+  end
+
+  # 既に DarkTime が存在する場合は edit にリダイレクト
+  def redirect_if_dark_time_exists
+    return unless current_user.dark_time.present?
+
+    redirect_to edit_dark_time_path, alert: t('defaults.flash_message.already_exists', item: DarkTime.model_name.human)
+  end
+
+  # DarkTime が存在しない場合は new にリダイレクト
+  def redirect_if_dark_time_missing
+    return if current_user.dark_time.present?
+
+    redirect_to new_dark_time_path, alert: t('defaults.flash_message.not_found', item: DarkTime.model_name.human)
   end
 
   def dark_time_params

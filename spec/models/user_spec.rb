@@ -10,6 +10,7 @@ RSpec.describe User, type: :model do
     it "nameがないと無効" do
       user = build(:user, name: nil)
       expect(user).to be_invalid
+      expect(user.errors[:name]).to be_present
     end
 
     it "nameが30文字以内なら有効" do
@@ -20,6 +21,7 @@ RSpec.describe User, type: :model do
     it "nameが31文字以上だと無効" do
       user = build(:user, name: "a" * 31)
       expect(user).to be_invalid
+      expect(user.errors[:name]).to be_present
     end
   end
 
