@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe DarkTime, type: :model do
-  describe "validations" do
+  describe "バリデーション" do
     it "behaviorがあれば有効" do
       dark_time = build(:dark_time)
       expect(dark_time).to be_valid
@@ -23,8 +23,8 @@ RSpec.describe DarkTime, type: :model do
     end
   end
 
-  describe "associations" do
-    it "userに属している" do
+  describe "アソシエーション" do
+    it "Userに属していること" do
       association = described_class.reflect_on_association(:user)
       expect(association.macro).to eq(:belongs_to)
     end
