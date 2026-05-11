@@ -7,7 +7,7 @@ RSpec.describe DarkTime, type: :model do
       expect(dark_time).to be_valid
     end
 
-    it "characteristicとunwanted_futureがnilでも有効" do
+    it "behaviorのみで有効" do
       dark_time = build(:dark_time, characteristic: nil, unwanted_future: nil)
       expect(dark_time).to be_valid
     end
