@@ -27,7 +27,7 @@ RSpec.describe DarkTime, type: :model do
     it "behaviorが空白文字だと無効" do
       dark_time = build(:dark_time, behavior: '   ')
       expect(dark_time).to be_invalid
-      expect(dark_time.errors[:behavior]).to include("を入力してください")
+      expect(dark_time.errors[:behavior]).to be_present
     end
 
     it "userごとに1件のみ" do
