@@ -2,15 +2,32 @@ require 'rails_helper'
 
 RSpec.describe DarkTime, type: :model do
   describe "バリデーション" do
-    it "behaviorがあれば有効" do
+    it "behaviorとuserがあれば有効" do
       dark_time = build(:dark_time)
       expect(dark_time).to be_valid
     end
 
-    it "behaviorがないと無効" do
+    it "characteristicとunwanted_futureがnilでも有効" do
+      dark_time = build(:dark_time, characteristic: nil, unwanted_future: nil)
+      expect(dark_time).to be_valid
+    end
+
+    it "behaviorがnilだと無効" do
       dark_time = build(:dark_time, behavior: nil)
       expect(dark_time).to be_invalid
       expect(dark_time.errors[:behavior]).to be_present
+    end
+
+    it "behaviorが空文字列だと無効" do
+      dark_time = build(:dark_time, behavior: "")
+      expect(dark_time).to be_invalid
+      expect(dark_time.errors[:behavior]).to be_present
+    end
+
+    it "behaviorが空白文字だと無効" do
+      dark_time = build(:dark_time, behavior: '   ')
+      expect(dark_time).to be_invalid
+      expect(dark_time.errors[:behavior]).to include("を入力してください")
     end
 
     it "userごとに1件のみ" do
@@ -20,6 +37,12 @@ RSpec.describe DarkTime, type: :model do
       second = build(:dark_time, user: user)
       expect(second).to be_invalid
       expect(second.errors[:user_id]).to be_present
+    end
+
+    it "userが紐付いていないと無効" do
+      dark_time = build(:dark_time, user: nil)
+      expect(dark_time).to be_invalid
+      expect(dark_time.errors[:user]).to be_present
     end
   end
 
