@@ -24,14 +24,22 @@ RSpec.describe "DarkTimes", type: :system do
         # マイページにリダイレクトされる
         expect(page).to have_current_path(mypage_path)
 
-        # 作成したDarkTimeが表示される
-        expect(page).to have_content("スマホを触りすぎる")
-        expect(page).to have_content("生産性が下がる")
-
         # フラッシュメッセージが表示される
         expect(page).to have_content(
           I18n.t('defaults.flash_message.created', item: DarkTime.model_name.human)
         )
+
+        # 作成したDarkTimeが表示される
+        expect(page).to have_content("スマホを触りすぎる")
+        expect(page).to have_content("生産性が下がる")
+      end
+
+      it "キャンセルするとマイページへ戻る" do
+        visit new_dark_time_path
+
+        click_link "キャンセル"
+
+        expect(page).to have_current_path(mypage_path)
       end
     end
 
@@ -45,7 +53,6 @@ RSpec.describe "DarkTimes", type: :system do
 
         # エラーメッセージが表示される
         expect(page).to have_content("闇の時間での行動を入力してください")
-
         expect(page).to have_content(
           I18n.t('defaults.flash_message.not_created', item: DarkTime.model_name.human)
         )
@@ -67,10 +74,18 @@ RSpec.describe "DarkTimes", type: :system do
         click_button "更新する"
 
         expect(page).to have_current_path(dark_time_path)
-        expect(page).to have_content("改善後の行動")
         expect(page).to have_content(
           I18n.t('defaults.flash_message.updated', item: DarkTime.model_name.human)
         )
+        expect(page).to have_content("改善後の行動")
+      end
+
+      it "キャンセルすると詳細画面へ戻る" do
+        visit edit_dark_time_path
+
+        click_link "キャンセル"
+
+        expect(page).to have_current_path(dark_time_path)
       end
     end
 
@@ -99,6 +114,14 @@ RSpec.describe "DarkTimes", type: :system do
       expect(page).to have_content("スマホを触りすぎる")
       expect(page).to have_content(dark_time.unwanted_future)
       expect(page).to have_content(dark_time.characteristic)
+    end
+
+    it "マイページへ戻れる" do
+      visit dark_time_path
+
+      click_link "← マイページに戻る"
+
+      expect(page).to have_current_path(mypage_path)
     end
   end
 
