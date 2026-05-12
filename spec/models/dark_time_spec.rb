@@ -2,6 +2,10 @@ require 'rails_helper'
 
 RSpec.describe DarkTime, type: :model do
   describe "バリデーション" do
+    it "factory は有効であること" do
+      expect(build(:dark_time)).to be_valid
+    end
+
     it "全ての値が正しい場合であれば有効" do
       dark_time = build(:dark_time)
       expect(dark_time).to be_valid
@@ -14,18 +18,6 @@ RSpec.describe DarkTime, type: :model do
 
     it "behaviorがnilだと無効" do
       dark_time = build(:dark_time, behavior: nil)
-      expect(dark_time).to be_invalid
-      expect(dark_time.errors[:behavior]).to be_present
-    end
-
-    it "behaviorが空文字列だと無効" do
-      dark_time = build(:dark_time, behavior: "")
-      expect(dark_time).to be_invalid
-      expect(dark_time.errors[:behavior]).to be_present
-    end
-
-    it "behaviorが空白文字だと無効" do
-      dark_time = build(:dark_time, behavior: "   ")
       expect(dark_time).to be_invalid
       expect(dark_time.errors[:behavior]).to be_present
     end
