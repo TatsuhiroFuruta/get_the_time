@@ -13,6 +13,11 @@ RSpec.describe LightTime, type: :model do
       expect(build(:light_time)).to be_valid
     end
 
+    it "全ての値が正しい場合であれば有効であること" do
+      light_time = build(:light_time)
+      expect(light_time).to be_valid
+    end
+
     it "action のみでも有効であること" do
       light_time = build(:light_time, characteristic: nil, desired_self: nil)
       expect(light_time).to be_valid
@@ -24,8 +29,8 @@ RSpec.describe LightTime, type: :model do
       expect(light_time.errors[:action]).to be_present
     end
 
-    it "user が nil の場合は無効であること" do
-      light_time =build(:light_time, user: nil)
+    it "user が紐付いていない場合は無効であること" do
+      light_time = build(:light_time, user: nil)
       expect(light_time).to be_invalid
       expect(light_time.errors[:user]).to be_present
     end
