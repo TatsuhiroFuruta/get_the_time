@@ -1,13 +1,22 @@
 require 'rails_helper'
 
 RSpec.describe DarkTime, type: :model do
-  describe "validations" do
-    it "behaviorがあれば有効" do
+  describe "バリデーション" do
+    it "factory は有効であること" do
+      expect(build(:dark_time)).to be_valid
+    end
+
+    it "全ての値が正しい場合であれば有効" do
       dark_time = build(:dark_time)
       expect(dark_time).to be_valid
     end
 
-    it "behaviorがないと無効" do
+    it "behaviorのみで有効" do
+      dark_time = build(:dark_time, characteristic: nil, unwanted_future: nil)
+      expect(dark_time).to be_valid
+    end
+
+    it "behaviorがnilだと無効" do
       dark_time = build(:dark_time, behavior: nil)
       expect(dark_time).to be_invalid
       expect(dark_time.errors[:behavior]).to be_present
@@ -21,10 +30,16 @@ RSpec.describe DarkTime, type: :model do
       expect(second).to be_invalid
       expect(second.errors[:user_id]).to be_present
     end
+
+    it "userが紐付いていないと無効" do
+      dark_time = build(:dark_time, user: nil)
+      expect(dark_time).to be_invalid
+      expect(dark_time.errors[:user]).to be_present
+    end
   end
 
-  describe "associations" do
-    it "userに属している" do
+  describe "アソシエーション" do
+    it "Userに属していること" do
       association = described_class.reflect_on_association(:user)
       expect(association.macro).to eq(:belongs_to)
     end

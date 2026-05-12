@@ -55,11 +55,12 @@ export default class extends Controller {
 
   switch() {
     const id = this.light_times[this.index]
+    const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
 
     fetch(`/light_times/${id}/switch`, {
       method: "PATCH",
       headers: {
-        "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
+        "X-CSRF-Token": csrfToken || "",
         "Accept": "text/vnd.turbo-stream.html"
       },
       credentials: "same-origin"
