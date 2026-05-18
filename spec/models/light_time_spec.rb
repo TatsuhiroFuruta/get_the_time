@@ -2,9 +2,17 @@ require 'rails_helper'
 
 RSpec.describe LightTime, type: :model do
   describe "アソシエーション" do
-    it "Userに属していること" do
+    it "User に属していること" do
       association = described_class.reflect_on_association(:user)
       expect(association.macro).to eq :belongs_to
+    end
+
+    it 'activity_records を dependent: :destroy で複数持つこと' do
+      association = described_class.reflect_on_association(:activity_records)
+      aggregate_failures do
+        expect(association.macro).to eq :has_many
+        expect(association.options[:dependent]).to eq :destroy
+      end
     end
   end
 
@@ -87,6 +95,12 @@ RSpec.describe LightTime, type: :model do
         expect(next_light_time.reload.is_current).to be false
         expect(third_light_time.reload.is_current).to be false
       end
+    end
+  end
+
+  describe '.ransackable_attributes' do
+    it 'action カラムのみ検索可能' do
+      expect(described_class.ransackable_attributes).to eq ["action"]
     end
   end
 end

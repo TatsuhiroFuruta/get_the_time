@@ -6,6 +6,21 @@ RSpec.describe ActivityRecord, type: :model do
   let(:light_time) { create(:light_time, :current, user: user) }
 
   # =========================================================
+  # アソシエーション
+  # =========================================================
+  describe 'アソシエーション' do
+    it 'User に属していること' do
+      association = described_class.reflect_on_association(:user)
+      expect(association.macro).to eq :belongs_to
+    end
+
+    it 'LightTime に属していること' do
+      association = described_class.reflect_on_association(:light_time)
+      expect(association.macro).to eq :belongs_to
+    end
+  end
+
+  # =========================================================
   # バリデーション
   # =========================================================
   describe 'バリデーション' do
@@ -190,6 +205,16 @@ RSpec.describe ActivityRecord, type: :model do
         create(:activity_record, :short_session, user: user, light_time: light_time)
         expect(purification_time.reload.remaining_time).to eq 0
       end
+    end
+  end
+
+  describe 'ransack の検索可能カラム' do
+    it '検索可能なカラムが comment のみであること' do
+      expect(described_class.ransackable_attributes).to eq ['comment']
+    end
+
+    it '検索可能な関連付けが light_time のみであること' do
+      expect(described_class.ransackable_associations).to eq ['light_time']
     end
   end
 end
