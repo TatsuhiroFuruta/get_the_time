@@ -1,0 +1,220 @@
+require 'rails_helper'
+
+RSpec.describe ActivityRecord, type: :model do
+  let(:user)       { create(:user) }
+  # is_current: false がデフォルトのため :current トレイトを明示
+  let(:light_time) { create(:light_time, :current, user: user) }
+
+  # =========================================================
+  # アソシエーション
+  # =========================================================
+  describe 'アソシエーション' do
+    it 'User に属していること' do
+      association = described_class.reflect_on_association(:user)
+      expect(association.macro).to eq :belongs_to
+    end
+
+    it 'LightTime に属していること' do
+      association = described_class.reflect_on_association(:light_time)
+      expect(association.macro).to eq :belongs_to
+    end
+  end
+
+  # =========================================================
+  # バリデーション
+  # =========================================================
+  describe 'バリデーション' do
+    context '正常な値のとき' do
+      subject { build(:activity_record, user: user, light_time: light_time) }
+
+      it { is_expected.to be_valid }
+    end
+
+    describe 'idle_duration' do
+      subject(:record) { build(:activity_record, user: user, light_time: light_time) }
+
+      it '0 は有効' do
+        record.idle_duration = 0
+        expect(record).to be_valid
+      end
+
+      it '負の値は無効' do
+        record.idle_duration = -1
+        expect(record).to be_invalid
+        expect(record.errors[:idle_duration]).to be_present
+      end
+
+      it 'total_duration を超えると無効' do
+        record.idle_duration = record.total_duration + 1
+        expect(record).to be_invalid
+        expect(record.errors[:idle_duration]).to include('は合計時間以下にしてください')
+      end
+
+      it 'total_duration と同値は有効' do
+        record.idle_duration = record.total_duration
+        expect(record).to be_valid
+      end
+    end
+
+    describe '5段階評価カラム' do
+      subject(:record) { build(:activity_record, user: user, light_time: light_time) }
+
+      %i[satisfaction progress quality focus fatigue].each do |attr|
+        context attr.to_s do
+          (1..5).each do |v|
+            it "#{v} は有効" do
+              record.send(:"#{attr}=", v)
+              expect(record).to be_valid
+            end
+          end
+
+          [0, 6].each do |v|
+            it "#{v} は無効" do
+              record.send(:"#{attr}=", v)
+              expect(record).to be_invalid
+              expect(record.errors[attr]).to be_present
+            end
+          end
+        end
+      end
+    end
+  end
+
+  # =========================================================
+  # .calculate_purification_time
+  # =========================================================
+  describe '.calculate_purification_time' do
+    subject { described_class.calculate_purification_time(total_duration) }
+
+    context 'nil のとき' do
+      let(:total_duration) { nil }
+      it { is_expected.to eq 0 }
+    end
+
+    context '0 分のとき' do
+      let(:total_duration) { 0 }
+      it { is_expected.to eq 0 }
+    end
+
+    context '29 分（30 未満）のとき' do
+      let(:total_duration) { 29 }
+      it { is_expected.to eq 0 }
+    end
+
+    context '30 分のとき' do
+      let(:total_duration) { 30 }
+      it { is_expected.to eq 10 }
+    end
+
+    context '59 分のとき' do
+      let(:total_duration) { 59 }
+      it { is_expected.to eq 10 }
+    end
+
+    context '60 分のとき' do
+      let(:total_duration) { 60 }
+      it { is_expected.to eq 20 }
+    end
+
+    context '120 分のとき' do
+      let(:total_duration) { 120 }
+      it { is_expected.to eq 40 }
+    end
+  end
+
+  # =========================================================
+  # .total_light_time_today
+  # =========================================================
+  describe '.total_light_time_today' do
+    subject { described_class.total_light_time_today(user) }
+
+    context '今日の記録がないとき' do
+      it { is_expected.to eq 0 }
+    end
+
+    context '今日の記録が複数あるとき' do
+      before do
+        create(:activity_record, user: user, light_time: light_time, total_duration: 30)
+        create(:activity_record, user: user, light_time: light_time, total_duration: 45)
+      end
+
+      it '合計値を返すこと' do
+        is_expected.to eq 75
+      end
+    end
+
+    context '昨日の記録しかないとき' do
+      before { create(:activity_record, :yesterday, user: user, light_time: light_time) }
+
+      it { is_expected.to eq 0 }
+    end
+
+    context '別ユーザーの記録は集計に含まないこと' do
+      let(:other_user)  { create(:user) }
+      let(:other_light) { create(:light_time, :current, user: other_user) }
+
+      before do
+        create(:activity_record, user: other_user, light_time: other_light, total_duration: 999)
+      end
+
+      it { is_expected.to eq 0 }
+    end
+  end
+
+  # =========================================================
+  # before_save: calculate_desired_self_percentage
+  # =========================================================
+  describe 'desired_self_percentage の計算' do
+    it '正しい割合が保存されること' do
+      record = create(:activity_record, user: user, light_time: light_time,
+                      total_duration: 100, idle_duration: 20)
+      # (100 - 20) / 100.0 = 0.8
+      expect(record.desired_self_percentage).to be_within(0.001).of(0.8)
+    end
+
+    it 'idle_duration が 0 のとき 1.0 になること' do
+      record = create(:activity_record, user: user, light_time: light_time,
+                      total_duration: 60, idle_duration: 0)
+      expect(record.desired_self_percentage).to be_within(0.001).of(1.0)
+    end
+
+    it 'total_duration が 0 のときは nil のままであること' do
+      record = build(:activity_record, user: user, light_time: light_time,
+                     total_duration: 0, idle_duration: 0)
+      record.save(validate: false)
+      expect(record.desired_self_percentage).to be_nil
+    end
+  end
+
+  # =========================================================
+  # after_create: grant_purification_time
+  # =========================================================
+  describe 'grant_purification_time コールバック' do
+    let!(:purification_time) { create(:purification_time, user: user, remaining_time: 0) }
+
+    context ':long_session（90 分）のとき' do
+      it 'remaining_time に 1800 秒（30 分）加算されること' do
+        # (90 / 30).floor * 10 = 30 分付与 → 30 * 60 = 1800 秒
+        create(:activity_record, :long_session, user: user, light_time: light_time)
+        expect(purification_time.reload.remaining_time).to eq 1800
+      end
+    end
+
+    context ':short_session（20 分）のとき' do
+      it 'remaining_time が変化しないこと' do
+        create(:activity_record, :short_session, user: user, light_time: light_time)
+        expect(purification_time.reload.remaining_time).to eq 0
+      end
+    end
+  end
+
+  describe 'ransack の検索可能カラム' do
+    it '検索可能なカラムが comment のみであること' do
+      expect(described_class.ransackable_attributes).to eq ['comment']
+    end
+
+    it '検索可能な関連付けが light_time のみであること' do
+      expect(described_class.ransackable_associations).to eq ['light_time']
+    end
+  end
+end
