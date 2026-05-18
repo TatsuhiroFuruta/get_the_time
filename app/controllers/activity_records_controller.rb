@@ -66,7 +66,8 @@ class ActivityRecordsController < ApplicationController
   end
 
   def set_light_and_dark_times
-    @light_time = current_user.light_times.find_by(is_current: true)
+    light_time_id = params.dig(:activity_record_form, :light_time_id)
+    @light_time = current_user.light_times.find_by(id: light_time_id)
     @dark_time = current_user.dark_time
   end
 
@@ -74,7 +75,7 @@ class ActivityRecordsController < ApplicationController
     params.require(:activity_record_form).permit(
     :started_at, :ended_at, :task, :total_duration,
     :idle_duration, :satisfaction, :progress,
-    :quality, :focus, :fatigue, :comment,
+    :quality, :focus, :fatigue, :light_time_id, :comment,
     :light_time_characteristic, :dark_time_characteristic
     )
   end

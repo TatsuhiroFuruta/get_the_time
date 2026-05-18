@@ -18,6 +18,7 @@ class ActivityRecordForm
   attribute :quality, :integer
   attribute :focus, :integer
   attribute :fatigue, :integer
+  attribute :light_time_id, :integer
 
   # ===== バリデーション =====
   validates :idle_duration, numericality: { greater_than_or_equal_to: 0 }
@@ -30,7 +31,8 @@ class ActivityRecordForm
     return false unless valid?
 
     ActiveRecord::Base.transaction do
-      light_time = user.light_times.find_by(is_current: true)
+      # find_by(is_current: true) をやめて、IDで直接取得
+      light_time = user.light_times.find_by(id: light_time_id)
 
       # ActivityRecord 作成
       user.activity_records.create!(
@@ -49,7 +51,7 @@ class ActivityRecordForm
       )
 
       # LightTime 更新
-      user.light_times.find_by(is_current: true)&.update!(
+      user.light_times.find_by(id: light_time_id).update!(
         characteristic: light_time_characteristic
       )
 

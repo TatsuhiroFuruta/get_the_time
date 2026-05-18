@@ -6,7 +6,8 @@ export default class extends Controller {
   static values = {
     workDuration: { type: Number, default: 1500 },
     breakDuration: { type: Number, default: 300 },
-    task: {type: String, default: null}
+    task: {type: String, default: null},
+    lightTimeId: { type: Number, default: null }
   }
 
   connect() {
@@ -300,7 +301,8 @@ export default class extends Controller {
       'activity_record_form[task]': this.task,
       'activity_record_form[started_at]': this.firstStartedAt.toISOString(),
       'activity_record_form[ended_at]': lastEndedAt.toISOString(),
-      'activity_record_form[total_duration]': durationInMinutes
+      'activity_record_form[total_duration]': durationInMinutes,
+      'activity_record_form[light_time_id]': this.lightTimeIdValue
     })
     return params
   }
