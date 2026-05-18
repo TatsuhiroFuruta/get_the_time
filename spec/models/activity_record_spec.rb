@@ -31,48 +31,48 @@ RSpec.describe ActivityRecord, type: :model do
     end
 
     describe 'idle_duration' do
-      subject(:record) { build(:activity_record, user: user, light_time: light_time) }
+      subject(:activity_record) { build(:activity_record, user: user, light_time: light_time) }
 
       it '0 は有効' do
-        record.idle_duration = 0
-        expect(record).to be_valid
+        activity_record.idle_duration = 0
+        expect(activity_record).to be_valid
       end
 
       it '負の値は無効' do
-        record.idle_duration = -1
-        expect(record).to be_invalid
-        expect(record.errors[:idle_duration]).to be_present
+        activity_record.idle_duration = -1
+        expect(activity_record).to be_invalid
+        expect(activity_record.errors[:idle_duration]).to be_present
       end
 
       it 'total_duration を超えると無効' do
-        record.idle_duration = record.total_duration + 1
-        expect(record).to be_invalid
-        expect(record.errors[:idle_duration]).to include('は合計時間以下にしてください')
+        activity_record.idle_duration = activity_record.total_duration + 1
+        expect(activity_record).to be_invalid
+        expect(activity_record.errors[:idle_duration]).to include('は合計時間以下にしてください')
       end
 
       it 'total_duration と同値は有効' do
-        record.idle_duration = record.total_duration
-        expect(record).to be_valid
+        activity_record.idle_duration = activity_record.total_duration
+        expect(activity_record).to be_valid
       end
     end
 
     describe '5段階評価カラム' do
-      subject(:record) { build(:activity_record, user: user, light_time: light_time) }
+      subject(:activity_record) { build(:activity_record, user: user, light_time: light_time) }
 
       %i[satisfaction progress quality focus fatigue].each do |attr|
         context attr.to_s do
           (1..5).each do |v|
             it "#{v} は有効" do
-              record.send(:"#{attr}=", v)
-              expect(record).to be_valid
+              activity_record.send(:"#{attr}=", v)
+              expect(activity_record).to be_valid
             end
           end
 
           [0, 6].each do |v|
             it "#{v} は無効" do
-              record.send(:"#{attr}=", v)
-              expect(record).to be_invalid
-              expect(record.errors[attr]).to be_present
+              activity_record.send(:"#{attr}=", v)
+              expect(activity_record).to be_invalid
+              expect(activity_record.errors[attr]).to be_present
             end
           end
         end
@@ -166,23 +166,23 @@ RSpec.describe ActivityRecord, type: :model do
   # =========================================================
   describe 'desired_self_percentage の計算' do
     it '正しい割合が保存されること' do
-      record = create(:activity_record, user: user, light_time: light_time,
+      activity_record = create(:activity_record, user: user, light_time: light_time,
                       total_duration: 100, idle_duration: 20)
       # (100 - 20) / 100.0 = 0.8
-      expect(record.desired_self_percentage).to be_within(0.001).of(0.8)
+      expect(activity_record.desired_self_percentage).to be_within(0.001).of(0.8)
     end
 
     it 'idle_duration が 0 のとき 1.0 になること' do
-      record = create(:activity_record, user: user, light_time: light_time,
+      activity_record = create(:activity_record, user: user, light_time: light_time,
                       total_duration: 60, idle_duration: 0)
-      expect(record.desired_self_percentage).to be_within(0.001).of(1.0)
+      expect(activity_record.desired_self_percentage).to be_within(0.001).of(1.0)
     end
 
     it 'total_duration が 0 のときは nil のままであること' do
-      record = build(:activity_record, user: user, light_time: light_time,
+      activity_record = build(:activity_record, user: user, light_time: light_time,
                      total_duration: 0, idle_duration: 0)
-      record.save(validate: false)
-      expect(record.desired_self_percentage).to be_nil
+      activity_record.save(validate: false)
+      expect(activity_record.desired_self_percentage).to be_nil
     end
   end
 
