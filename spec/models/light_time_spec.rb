@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe LightTime, type: :model do
   describe "アソシエーション" do
@@ -7,7 +7,7 @@ RSpec.describe LightTime, type: :model do
       expect(association.macro).to eq :belongs_to
     end
 
-    it 'activity_records を dependent: :destroy で複数持つこと' do
+    it "activity_records を dependent: :destroy で複数持つこと" do
       association = described_class.reflect_on_association(:activity_records)
       aggregate_failures do
         expect(association.macro).to eq :has_many
@@ -88,7 +88,7 @@ RSpec.describe LightTime, type: :model do
       it "update! 失敗時は rollback されること" do
         allow(next_light_time).to receive(:update!).and_raise(ActiveRecord::RecordInvalid)
 
-        expect {described_class.switch_current!(user, next_light_time)
+        expect { described_class.switch_current!(user, next_light_time)
         }.to raise_error(ActiveRecord::RecordInvalid)
 
         expect(current_light_time.reload.is_current).to be true
@@ -98,9 +98,9 @@ RSpec.describe LightTime, type: :model do
     end
   end
 
-  describe '.ransackable_attributes' do
-    it 'action カラムのみ検索可能' do
-      expect(described_class.ransackable_attributes).to eq ["action"]
+  describe ".ransackable_attributes" do
+    it "action カラムのみ検索可能" do
+      expect(described_class.ransackable_attributes).to eq [ "action" ]
     end
   end
 end

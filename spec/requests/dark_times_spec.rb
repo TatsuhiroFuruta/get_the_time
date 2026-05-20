@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "DarkTimes", type: :request do
   let(:user) { create(:user) }
@@ -9,11 +9,11 @@ RSpec.describe "DarkTimes", type: :request do
 
   describe "POST /dark_time" do
     let(:success_message) do
-      I18n.t('defaults.flash_message.created', item: DarkTime.model_name.human)
+      I18n.t("defaults.flash_message.created", item: DarkTime.model_name.human)
     end
 
     let(:failure_message) do
-      I18n.t('defaults.flash_message.not_created', item: DarkTime.model_name.human)
+      I18n.t("defaults.flash_message.not_created", item: DarkTime.model_name.human)
     end
 
     context "正常系" do
@@ -60,7 +60,7 @@ RSpec.describe "DarkTimes", type: :request do
 
         expect(response).to redirect_to(edit_dark_time_path)
         expect(flash[:alert]).to eq(
-          I18n.t('defaults.flash_message.already_exists', item: DarkTime.model_name.human)
+          I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
         )
       end
     end
@@ -70,11 +70,11 @@ RSpec.describe "DarkTimes", type: :request do
     let!(:dark_time) { create(:dark_time, user: user) }
 
     let(:success_message) do
-      I18n.t('defaults.flash_message.updated', item: DarkTime.model_name.human)
+      I18n.t("defaults.flash_message.updated", item: DarkTime.model_name.human)
     end
 
     let(:failure_message) do
-      I18n.t('defaults.flash_message.not_updated', item: DarkTime.model_name.human)
+      I18n.t("defaults.flash_message.not_updated", item: DarkTime.model_name.human)
     end
 
     it "更新できる" do
@@ -123,7 +123,7 @@ RSpec.describe "DarkTimes", type: :request do
         get new_dark_time_path
         expect(response).to redirect_to(edit_dark_time_path)
         expect(flash[:alert]).to eq(
-          I18n.t('defaults.flash_message.already_exists', item: DarkTime.model_name.human)
+          I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
         )
       end
     end
@@ -144,7 +144,7 @@ RSpec.describe "DarkTimes", type: :request do
         get edit_dark_time_path
         expect(response).to redirect_to(new_dark_time_path)
         expect(flash[:alert]).to eq(
-          I18n.t('defaults.flash_message.not_found', item: DarkTime.model_name.human)
+          I18n.t("defaults.flash_message.not_found", item: DarkTime.model_name.human)
         )
       end
     end

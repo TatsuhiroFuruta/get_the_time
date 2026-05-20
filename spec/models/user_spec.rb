@@ -1,12 +1,11 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe User, type: :model do
-
   # =========================================================
   # アソシエーション
   # =========================================================
-  describe 'アソシエーション' do
-    it 'dark_time を dependent: :destroy で1つ持つこと' do
+  describe "アソシエーション" do
+    it "dark_time を dependent: :destroy で1つ持つこと" do
       association = described_class.reflect_on_association(:dark_time)
       aggregate_failures do
         expect(association.macro).to eq :has_one
@@ -14,7 +13,7 @@ RSpec.describe User, type: :model do
       end
     end
 
-    it 'light_times を dependent: :destroy で複数持つこと' do
+    it "light_times を dependent: :destroy で複数持つこと" do
       association = described_class.reflect_on_association(:light_times)
       aggregate_failures do
         expect(association.macro).to eq :has_many
@@ -22,7 +21,7 @@ RSpec.describe User, type: :model do
       end
     end
 
-    it 'activity_records を dependent: :destroy で複数持つこと' do
+    it "activity_records を dependent: :destroy で複数持つこと" do
       association = described_class.reflect_on_association(:activity_records)
       aggregate_failures do
         expect(association.macro).to eq :has_many
@@ -30,7 +29,7 @@ RSpec.describe User, type: :model do
       end
     end
 
-    it 'purification_time を dependent: :destroy で1つ持つこと' do
+    it "purification_time を dependent: :destroy で1つ持つこと" do
       association = described_class.reflect_on_association(:purification_time)
       aggregate_failures do
         expect(association.macro).to eq :has_one

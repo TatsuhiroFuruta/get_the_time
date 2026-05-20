@@ -6,13 +6,13 @@ module ApplicationHelper
   def format_seconds_to_mmss(elapsed_seconds)
     minutes = elapsed_seconds / 60
     seconds = elapsed_seconds % 60
-    "#{minutes} 分 #{seconds.to_s.rjust(2, '0')} 秒"
+    "#{minutes} 分 #{seconds.to_s.rjust(2, "0")} 秒"
   end
 
   def format_minutes_to_hm(elapsed_minutes)
     hours = elapsed_minutes / 60
     minutes = elapsed_minutes % 60
-    "#{hours} 時間 #{minutes.to_s.rjust(2, '0')} 分"
+    "#{hours} 時間 #{minutes.to_s.rjust(2, "0")} 分"
   end
 
   def display_percentage(value)

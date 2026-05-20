@@ -12,6 +12,6 @@ class LightTime < ApplicationRecord
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    ["action"]  # 検索可能なカラム
+    [ "action" ]  # 検索可能なカラム
   end
 end

@@ -6,7 +6,7 @@ module ActivityRecordsHelper
       # 上の数字（1〜5）
       concat(
         content_tag(:div, class: "grid grid-cols-7 text-center mb-1") do
-          ([""] + (1..5).to_a + [""]).map do |i|
+          ([ "" ] + (1..5).to_a + [ "" ]).map do |i|
             content_tag(:div, i, class: "text-sm text")
           end.join.html_safe
         end
