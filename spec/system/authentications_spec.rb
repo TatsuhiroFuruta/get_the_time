@@ -88,5 +88,4 @@ RSpec.describe "Authentications", type: :system do
       )
     end
   end
-
 end

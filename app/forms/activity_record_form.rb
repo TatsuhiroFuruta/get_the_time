@@ -59,7 +59,6 @@ class ActivityRecordForm
       user.dark_time&.update!(
         characteristic: dark_time_characteristic
       )
-
     end
 
     true

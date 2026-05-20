@@ -68,7 +68,7 @@ RSpec.describe ActivityRecord, type: :model do
             end
           end
 
-          [0, 6].each do |v|
+          [ 0, 6 ].each do |v|
             it "#{v} は無効" do
               activity_record.send(:"#{attr}=", v)
               expect(activity_record).to be_invalid
@@ -234,11 +234,11 @@ RSpec.describe ActivityRecord, type: :model do
   # =========================================================
   describe 'ransack の検索可能カラム' do
     it '検索可能なカラムが comment のみであること' do
-      expect(described_class.ransackable_attributes).to eq ['comment']
+      expect(described_class.ransackable_attributes).to eq [ 'comment' ]
     end
 
     it '検索可能な関連付けが light_time のみであること' do
-      expect(described_class.ransackable_associations).to eq ['light_time']
+      expect(described_class.ransackable_associations).to eq [ 'light_time' ]
     end
   end
 end

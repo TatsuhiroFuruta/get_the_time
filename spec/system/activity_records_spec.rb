@@ -421,7 +421,7 @@ RSpec.describe 'ActivityRecords システムテスト', type: :system do
       before do
         # 9件作成（per_page: 8 を超える件数）
         9.times do |i|
-          create(:activity_record, user: user, light_time: light_time,comment: "コメント#{i + 1}")
+          create(:activity_record, user: user, light_time: light_time, comment: "コメント#{i + 1}")
         end
         visit activity_records_path
       end

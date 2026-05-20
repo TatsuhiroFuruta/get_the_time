@@ -19,9 +19,9 @@ class LightTimesController < ApplicationController
     @light_time = current_user.light_times.build(light_time_params)
     if @light_time.save
       LightTime.switch_current!(current_user, @light_time)
-      redirect_to mypage_path, notice: t('defaults.flash_message.created', item: LightTime.model_name.human)
+      redirect_to mypage_path, notice: t("defaults.flash_message.created", item: LightTime.model_name.human)
     else
-      flash.now[:alert] = t('defaults.flash_message.not_created', item: LightTime.model_name.human)
+      flash.now[:alert] = t("defaults.flash_message.not_created", item: LightTime.model_name.human)
       render :new, status: :unprocessable_entity
     end
   end
@@ -32,9 +32,9 @@ class LightTimesController < ApplicationController
 
   def update
     if @light_time.update(light_time_params)
-      redirect_to light_time_path(@light_time), notice: t('defaults.flash_message.updated', item: LightTime.model_name.human)
+      redirect_to light_time_path(@light_time), notice: t("defaults.flash_message.updated", item: LightTime.model_name.human)
     else
-      flash.now[:alert] = t('defaults.flash_message.not_updated', item: LightTime.model_name.human)
+      flash.now[:alert] = t("defaults.flash_message.not_updated", item: LightTime.model_name.human)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -48,7 +48,7 @@ class LightTimesController < ApplicationController
       LightTime.switch_current!(current_user, next_light_time) if next_light_time
     end
 
-    redirect_to mypage_path, notice: t('defaults.flash_message.deleted', item: LightTime.model_name.human), status: :see_other
+    redirect_to mypage_path, notice: t("defaults.flash_message.deleted", item: LightTime.model_name.human), status: :see_other
   end
 
   private
