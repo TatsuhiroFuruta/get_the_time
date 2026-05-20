@@ -7,11 +7,26 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
 
+inherit_mode:
+  merge:
+    - Exclude
+    - Include
+
+AllCops:
+  Exclude:
+    - "db/schema.rb"
+    - "db/*_schema.rb"     # cache_schema.rb, cable_schema.rb など
+    - "db/migrate/*"        # マイグレーションファイルも除外推奨
+
 # 文字列リテラルはダブルクォートで統一
 Style/StringLiterals:
   Enabled: true
   EnforcedStyle: double_quotes
+  Include:
+    - spec/**/*
 
 Style/StringLiteralsInInterpolation:
   Enabled: true
   EnforcedStyle: double_quotes
+  Include:
+    - spec/**/*
