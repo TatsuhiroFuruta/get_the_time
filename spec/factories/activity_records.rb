@@ -13,8 +13,8 @@ FactoryBot.define do
     quality        { 3 }
     focus          { 3 }
     fatigue        { 3 }
-    task           { '学習する' }
-    comment        { '集中できた' }
+    task           { "学習する" }
+    comment        { "集中できた" }
 
     # 評価が最高のレコード
     trait :high_rating do

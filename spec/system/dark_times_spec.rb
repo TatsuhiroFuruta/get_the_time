@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "DarkTimes", type: :system do
   let(:user) { create(:user) }
@@ -26,7 +26,7 @@ RSpec.describe "DarkTimes", type: :system do
 
         # フラッシュメッセージが表示される
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.created', item: DarkTime.model_name.human)
+          I18n.t("defaults.flash_message.created", item: DarkTime.model_name.human)
         )
 
         # 作成したDarkTimeが表示される
@@ -54,7 +54,7 @@ RSpec.describe "DarkTimes", type: :system do
         # エラーメッセージが表示される
         expect(page).to have_content("闇の時間での行動を入力してください")
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.not_created', item: DarkTime.model_name.human)
+          I18n.t("defaults.flash_message.not_created", item: DarkTime.model_name.human)
         )
 
         # 作成画面に留まる
@@ -75,7 +75,7 @@ RSpec.describe "DarkTimes", type: :system do
 
         expect(page).to have_current_path(dark_time_path)
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.updated', item: DarkTime.model_name.human)
+          I18n.t("defaults.flash_message.updated", item: DarkTime.model_name.human)
         )
         expect(page).to have_content("改善後の行動")
       end
@@ -98,7 +98,7 @@ RSpec.describe "DarkTimes", type: :system do
 
         expect(page).to have_content("闇の時間での行動を入力してください")
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.not_updated', item: DarkTime.model_name.human)
+          I18n.t("defaults.flash_message.not_updated", item: DarkTime.model_name.human)
         )
         expect(page).to have_current_path(edit_dark_time_path)
       end
@@ -143,7 +143,7 @@ RSpec.describe "DarkTimes", type: :system do
 
       expect(page).to have_current_path(edit_dark_time_path)
       expect(page).to have_content(
-        I18n.t('defaults.flash_message.already_exists', item: DarkTime.model_name.human)
+        I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
       )
     end
   end

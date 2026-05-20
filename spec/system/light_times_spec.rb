@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "LightTimes", type: :system do
   let(:user) { create(:user) }
@@ -7,110 +7,110 @@ RSpec.describe "LightTimes", type: :system do
     sign_in user
   end
 
-  describe 'LightTime のCRUD' do
-    describe '新規作成' do
-      it '新規作成できること' do
+  describe "LightTime のCRUD" do
+    describe "新規作成" do
+      it "新規作成できること" do
         visit new_light_time_path
 
-        fill_in '光の時間での行動', with: '朝のヨガ'
-        fill_in 'なりたい自分', with: '穏やかな自分'
-        fill_in '光の時間の特徴', with: 'リラックス効果'
+        fill_in "光の時間での行動", with: "朝のヨガ"
+        fill_in "なりたい自分", with: "穏やかな自分"
+        fill_in "光の時間の特徴", with: "リラックス効果"
 
-        click_button '登録する'
+        click_button "登録する"
 
         expect(page).to have_current_path(mypage_path)
 
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.created', item: LightTime.model_name.human)
+          I18n.t("defaults.flash_message.created", item: LightTime.model_name.human)
         )
 
-        expect(page).to have_content('朝のヨガ')
-        expect(page).to have_content('穏やかな自分')
+        expect(page).to have_content("朝のヨガ")
+        expect(page).to have_content("穏やかな自分")
       end
 
-      it '必須項目未入力では作成できないこと' do
+      it "必須項目未入力では作成できないこと" do
         visit new_light_time_path
 
-        fill_in '光の時間での行動', with: ''
+        fill_in "光の時間での行動", with: ""
 
-        click_button '登録する'
+        click_button "登録する"
 
         expect(page).to have_content("光の時間での行動を入力してください")
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.not_created', item: LightTime.model_name.human)
+          I18n.t("defaults.flash_message.not_created", item: LightTime.model_name.human)
         )
 
         expect(page).to have_current_path(new_light_time_path)
       end
 
-      it 'キャンセルでマイページへ戻ること' do
+      it "キャンセルでマイページへ戻ること" do
         visit new_light_time_path
 
-        click_link 'キャンセル'
+        click_link "キャンセル"
 
         expect(page).to have_current_path(mypage_path)
       end
     end
 
-    describe '詳細表示' do
-      let!(:light_time) { create(:light_time, user: user, action: '朝のヨガ', desired_self: '穏やかな自分', characteristic: 'リラックス効果') }
+    describe "詳細表示" do
+      let!(:light_time) { create(:light_time, user: user, action: "朝のヨガ", desired_self: "穏やかな自分", characteristic: "リラックス効果") }
 
-      it '詳細が表示されること' do
+      it "詳細が表示されること" do
         visit light_time_path(light_time)
 
-        expect(page).to have_content('朝のヨガ')
-        expect(page).to have_content('穏やかな自分')
-        expect(page).to have_content('リラックス効果')
+        expect(page).to have_content("朝のヨガ")
+        expect(page).to have_content("穏やかな自分")
+        expect(page).to have_content("リラックス効果")
       end
 
-      it 'マイページへ戻れること' do
+      it "マイページへ戻れること" do
         visit light_time_path(light_time)
 
-        click_link '← マイページに戻る'
+        click_link "← マイページに戻る"
 
         expect(page).to have_current_path(mypage_path)
       end
     end
 
-    describe '編集' do
-      let!(:light_time) { create(:light_time, user: user, action: '朝のヨガ') }
+    describe "編集" do
+      let!(:light_time) { create(:light_time, user: user, action: "朝のヨガ") }
 
-      it '編集できること' do
+      it "編集できること" do
         visit edit_light_time_path(light_time)
 
-        fill_in '光の時間での行動', with: '夜の読書'
-        click_button '更新する'
+        fill_in "光の時間での行動", with: "夜の読書"
+        click_button "更新する"
 
         expect(page).to have_current_path(
           light_time_path(light_time)
         )
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.updated', item: LightTime.model_name.human)
+          I18n.t("defaults.flash_message.updated", item: LightTime.model_name.human)
         )
 
-        expect(page).to have_content('夜の読書')
+        expect(page).to have_content("夜の読書")
       end
 
-      it '必須項目未入力では更新できないこと' do
+      it "必須項目未入力では更新できないこと" do
         visit edit_light_time_path(light_time)
 
-        fill_in '光の時間での行動', with: ''
+        fill_in "光の時間での行動", with: ""
 
-        click_button '更新する'
+        click_button "更新する"
 
         expect(page).to have_content("光の時間での行動を入力してください")
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.not_updated', item: LightTime.model_name.human)
+          I18n.t("defaults.flash_message.not_updated", item: LightTime.model_name.human)
         )
         expect(page).to have_current_path(
           edit_light_time_path(light_time)
         )
       end
 
-      it 'キャンセルで詳細画面へ戻ること' do
+      it "キャンセルで詳細画面へ戻ること" do
         visit edit_light_time_path(light_time)
 
-        click_link 'キャンセル'
+        click_link "キャンセル"
 
         expect(page).to have_current_path(
           light_time_path(light_time)
@@ -118,127 +118,127 @@ RSpec.describe "LightTimes", type: :system do
       end
     end
 
-    describe '削除' do
+    describe "削除" do
       let!(:light_time) { create(:light_time, :current, user: user) }
 
-      it '削除できること' do
+      it "削除できること" do
         visit light_time_path(light_time)
 
         accept_confirm do
-          click_link '削除'
+          click_link "削除"
         end
 
         expect(page).to have_current_path(mypage_path)
 
         expect(page).to have_content(
-          I18n.t('defaults.flash_message.deleted', item: LightTime.model_name.human)
+          I18n.t("defaults.flash_message.deleted", item: LightTime.model_name.human)
         )
       end
 
-      context 'current を削除した場合' do
-        let!(:current_light_time) { create(:light_time, :current, user: user, action: '朝のヨガ', created_at: 2.days.ago) }
-        let!(:next_light_time) { create(:light_time, user: user, action: '夜の読書', created_at: 1.day.ago) }
+      context "current を削除した場合" do
+        let!(:current_light_time) { create(:light_time, :current, user: user, action: "朝のヨガ", created_at: 2.days.ago) }
+        let!(:next_light_time) { create(:light_time, user: user, action: "夜の読書", created_at: 1.day.ago) }
 
-        it 'current を削除すると次が表示されること' do
+        it "current を削除すると次が表示されること" do
           visit light_time_path(current_light_time)
 
           accept_confirm do
-            click_link '削除'
+            click_link "削除"
           end
 
           expect(page).to have_current_path(mypage_path)
-          expect(page).to have_content('夜の読書')
+          expect(page).to have_content("夜の読書")
         end
       end
     end
   end
 
-  describe 'LightTime 切り替え機能', js: true do
-    let!(:light_time1) { create(:light_time, :current, user: user, action: '朝のヨガ', created_at: 2.days.ago) }
-    let!(:light_time2) { create(:light_time, user: user, action: '夜の読書', created_at: 1.day.ago) }
+  describe "LightTime 切り替え機能", js: true do
+    let!(:light_time1) { create(:light_time, :current, user: user, action: "朝のヨガ", created_at: 2.days.ago) }
+    let!(:light_time2) { create(:light_time, user: user, action: "夜の読書", created_at: 1.day.ago) }
 
-    context 'ボタン操作' do
-      it '次の LightTime に切り替えられること' do
+    context "ボタン操作" do
+      it "次の LightTime に切り替えられること" do
         visit mypage_path
 
-        expect(page).to have_content('朝のヨガ')
+        expect(page).to have_content("朝のヨガ")
 
-        find('button', text: '>').click
+        find("button", text: ">").click
 
-        expect(page).to have_content('夜の読書')
+        expect(page).to have_content("夜の読書")
 
         expect(light_time2.reload.is_current).to be true
       end
     end
 
-    context 'キーボード操作（デスクトップ）' do
+    context "キーボード操作（デスクトップ）" do
       before do
         page.driver.browser.manage.window.resize_to(1200, 800)
       end
 
-      it '下キーで次へ切り替えできること' do
+      it "下キーで次へ切り替えできること" do
         visit mypage_path
 
-        expect(page).to have_content('朝のヨガ')
+        expect(page).to have_content("朝のヨガ")
 
-        find('body').send_keys(:arrow_down)
+        find("body").send_keys(:arrow_down)
 
-        expect(page).to have_content('夜の読書')
+        expect(page).to have_content("夜の読書")
       end
     end
 
-    context 'キーボード操作（モバイル）' do
+    context "キーボード操作（モバイル）" do
       before do
         page.driver.browser.manage.window.resize_to(375, 667)
       end
 
-      it '右キーで次へ切り替えできること' do
+      it "右キーで次へ切り替えできること" do
         visit mypage_path
 
-        expect(page).to have_content('朝のヨガ')
+        expect(page).to have_content("朝のヨガ")
 
-        find('body').send_keys(:arrow_right)
+        find("body").send_keys(:arrow_right)
 
-        expect(page).to have_content('夜の読書')
+        expect(page).to have_content("夜の読書")
       end
     end
   end
 
-  describe 'mypage 表示' do
-    context 'LightTime が存在しない場合' do
-      it '新規登録導線が表示されること' do
+  describe "mypage 表示" do
+    context "LightTime が存在しない場合" do
+      it "新規登録導線が表示されること" do
         visit mypage_path
 
-        expect(page).to have_content('登録されていません')
+        expect(page).to have_content("登録されていません")
 
-        expect(page).to have_link('新規登録', href: new_light_time_path)
+        expect(page).to have_link("新規登録", href: new_light_time_path)
       end
     end
 
-    context 'LightTime が1件の場合' do
+    context "LightTime が1件の場合" do
       before do
         create(:light_time, :current, user: user)
       end
 
-      it '切り替えボタンが表示されないこと' do
+      it "切り替えボタンが表示されないこと" do
         visit mypage_path
 
-        expect(page).not_to have_button('<')
-        expect(page).not_to have_button('>')
+        expect(page).not_to have_button("<")
+        expect(page).not_to have_button(">")
       end
     end
 
-    context 'LightTime が複数ある場合' do
+    context "LightTime が複数ある場合" do
       before do
         create(:light_time, :current, user: user)
         create(:light_time, user: user)
       end
 
-      it '切り替えボタンが表示されること' do
+      it "切り替えボタンが表示されること" do
         visit mypage_path
 
-        expect(page).to have_button('<')
-        expect(page).to have_button('>')
+        expect(page).to have_button("<")
+        expect(page).to have_button(">")
       end
     end
   end

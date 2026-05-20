@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe LightTime, type: :model do
   describe "アソシエーション" do
@@ -7,7 +7,7 @@ RSpec.describe LightTime, type: :model do
       expect(association.macro).to eq :belongs_to
     end
 
-    it 'activity_records を dependent: :destroy で複数持つこと' do
+    it "activity_records を dependent: :destroy で複数持つこと" do
       association = described_class.reflect_on_association(:activity_records)
       aggregate_failures do
         expect(association.macro).to eq :has_many
@@ -98,8 +98,8 @@ RSpec.describe LightTime, type: :model do
     end
   end
 
-  describe '.ransackable_attributes' do
-    it 'action カラムのみ検索可能' do
+  describe ".ransackable_attributes" do
+    it "action カラムのみ検索可能" do
       expect(described_class.ransackable_attributes).to eq [ "action" ]
     end
   end

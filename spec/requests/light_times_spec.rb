@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "LightTimes", type: :request do
   let(:user) { create(:user) }
@@ -47,11 +47,11 @@ RSpec.describe "LightTimes", type: :request do
 
   describe "POST /light_times" do
     let(:success_message) do
-      I18n.t('defaults.flash_message.created', item: LightTime.model_name.human)
+      I18n.t("defaults.flash_message.created", item: LightTime.model_name.human)
     end
 
     let(:failure_message) do
-      I18n.t('defaults.flash_message.not_created', item: LightTime.model_name.human)
+      I18n.t("defaults.flash_message.not_created", item: LightTime.model_name.human)
     end
 
     context "正常系" do
@@ -112,11 +112,11 @@ RSpec.describe "LightTimes", type: :request do
     let!(:light_time) { create(:light_time, user: user) }
 
     let(:success_message) do
-      I18n.t('defaults.flash_message.updated', item: LightTime.model_name.human)
+      I18n.t("defaults.flash_message.updated", item: LightTime.model_name.human)
     end
 
     let(:failure_message) do
-      I18n.t('defaults.flash_message.not_updated', item: LightTime.model_name.human)
+      I18n.t("defaults.flash_message.not_updated", item: LightTime.model_name.human)
     end
 
     context "正常系" do
@@ -161,7 +161,7 @@ RSpec.describe "LightTimes", type: :request do
     let!(:next_light_time) { create(:light_time, user: user) }
 
     let(:success_message) do
-      I18n.t('defaults.flash_message.deleted', item: LightTime.model_name.human)
+      I18n.t("defaults.flash_message.deleted", item: LightTime.model_name.human)
     end
 
     it "削除できる" do
@@ -196,9 +196,9 @@ RSpec.describe "LightTimes", type: :request do
 
     context "正常系" do
       it "current が切り替わる" do
-        patch switch_light_time_path(light_time2), headers: { 'ACCEPT' => 'text/vnd.turbo-stream.html' }
+        patch switch_light_time_path(light_time2), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:ok)
-        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
         expect(light_time1.reload.is_current).to be false
         expect(light_time2.reload.is_current).to be true
       end
@@ -207,7 +207,7 @@ RSpec.describe "LightTimes", type: :request do
     context "異常系" do
       it "他人のデータにはアクセスできない" do
         other_light_time = create(:light_time, user: other_user)
-        patch switch_light_time_path(other_light_time), headers: { 'ACCEPT' => 'text/vnd.turbo-stream.html' }
+        patch switch_light_time_path(other_light_time), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:not_found)
       end
     end
