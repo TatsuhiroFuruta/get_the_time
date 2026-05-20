@@ -53,6 +53,17 @@ RSpec.describe 'ActivityRecords', type: :request do
       get pomodoro_timer_activity_records_path
       expect(response).to have_http_status(:ok)
     end
+
+    context 'task パラメータがあるとき' do
+      it 'レスポンスボディに task の内容が含まれること' do
+        get pomodoro_timer_activity_records_path(task: 'テストタスク')
+
+        aggregate_failures do
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to include('テストタスク')
+        end
+      end
+    end
   end
 
   # =========================================================
