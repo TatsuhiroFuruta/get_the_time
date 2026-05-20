@@ -44,4 +44,21 @@ RSpec.describe "Users", type: :request do
       end
     end
   end
+
+  describe "GET /users/sign_up" do
+    context "ログイン済み" do
+      it "rootにリダイレクトされる" do
+        sign_in user
+
+        get new_user_registration_path
+
+        expect(response).to redirect_to(root_path)
+
+        follow_redirect!
+        expect(response.body).to include(
+          I18n.t("devise.failure.already_authenticated")
+        )
+      end
+    end
+  end
 end
