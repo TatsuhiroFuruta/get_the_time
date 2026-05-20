@@ -10,6 +10,33 @@ RSpec.describe 'ActivityRecords システムテスト', type: :system do
     sign_in user
   end
 
+  describe 'マイページからポモドーロタイマー画面への遷移' do
+    it '「やること」を入力してスタートすると入力内容が引き継がれること' do
+      visit mypage_path
+      fill_in 'やることを入力', with: 'マイページからのタスク'
+      click_on 'スタート'
+
+      aggregate_failures do
+        expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+        expect(page).to have_content('マイページからのタスク')
+      end
+    end
+
+    it '「やること」未入力でスタートしてもポモドーロタイマー画面に遷移できること' do
+      visit mypage_path
+      # やることを入力せずにスタート
+      click_on 'スタート'
+
+      aggregate_failures do
+        expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+        # タイマー画面の主要要素が表示される
+        expect(page).to have_content('25:00')
+        expect(page).to have_content('朝のランニング')
+        expect(page).to have_content('健康的な自分')
+      end
+    end
+  end
+
   # =========================================================
   # ポモドーロタイマー画面
   # =========================================================

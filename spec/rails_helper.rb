@@ -80,6 +80,8 @@ RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :system
   # FactoryBotの設定
   config.include FactoryBot::Syntax::Methods
+  # freeze_time を利用
+  config.include ActiveSupport::Testing::TimeHelpers
 
   # System Spec の設定
   config.before(:each, type: :system) do

@@ -84,10 +84,11 @@ export default class extends Controller {
   }
 
   request(url, redirect = false) {
+    const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
     fetch(url, {
       method: "PATCH",
       headers: {
-        "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content
+        "X-CSRF-Token": csrfToken || ""
       }
     }).then(() => {
       if (redirect) {
