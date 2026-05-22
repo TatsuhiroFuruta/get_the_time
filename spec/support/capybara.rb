@@ -29,9 +29,15 @@ end
 RSpec.configure do |config|
   config.before(:each, type: :system) do
     if ENV["SELENIUM_DRIVER_URL"].present?
+      # Docker環境: リモートChromeコンテナを使用
       driven_by :remote_chrome
+      Capybara.server_host = IPSocket.getaddress(Socket.gethostname)
+      Capybara.server_port = 4444
+      Capybara.app_host = "http://#{Capybara.server_host}:#{Capybara.server_port}"
     else
+      # CI/ローカル直接実行: ホストのHeadless Chromeを使用
       driven_by :headless_chrome
     end
+    Capybara.ignore_hidden_elements = false
   end
 end
