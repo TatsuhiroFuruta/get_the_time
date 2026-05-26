@@ -232,7 +232,7 @@ RSpec.describe ActivityRecord, type: :model do
 
     it "total_duration が 0 のときは nil のままであること" do
       activity_record = build(:activity_record, user: user, light_time: light_time,
-                     total_duration: 0, idle_duration: 0)
+                      total_duration: 0, idle_duration: 0)
       activity_record.save(validate: false)
       expect(activity_record.desired_self_percentage).to be_nil
     end
