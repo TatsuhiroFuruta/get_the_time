@@ -34,7 +34,7 @@ FactoryBot.define do
       fatigue      { 5 }
     end
 
-    # 浄化タイマーが付与される長時間セッション（90分 → 30分付与）
+    # 浄化タイマーが付与される長時間セッション（90分 → 3ブロック分ランダム付与）
     trait :long_session do
       total_duration { 90 }
       idle_duration  { 0 }

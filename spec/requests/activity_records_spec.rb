@@ -148,6 +148,8 @@ RSpec.describe "ActivityRecords", type: :request do
       end
 
       context "total_duration >= 30 のとき" do
+        before { allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10) }
+
         it "flash[:purification_time] に付与メッセージがセットされること" do
           post activity_records_path, params: valid_params
           expect(flash[:purification_time]).to eq "浄化タイマーを20分獲得！"

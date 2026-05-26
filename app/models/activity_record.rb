@@ -22,15 +22,33 @@ class ActivityRecord < ApplicationRecord
       .to_i
   end
 
-  # 浄化タイマーの時間計算メソッド
+  # 付与分数の重み付きテーブル（合計 100）
+  PURIFICATION_TIME_TABLE = [
+    { minutes: 8,  weight: 60 },
+    { minutes: 10, weight: 30 },
+    { minutes: 13, weight: 9  },
+    { minutes: 15, weight: 1  },
+  ].freeze
+
+  # 1ブロック分の付与分数をランダム抽選
+  def self.sample_purification_minutes
+    threshold = rand(100)
+    cumulative = 0
+    PURIFICATION_TIME_TABLE.each do |entry|
+      cumulative += entry[:weight]
+      return entry[:minutes] if threshold < cumulative
+    end
+    PURIFICATION_TIME_TABLE.last[:minutes]
+  end
+
+  # 浄化タイマーの時間計算メソッド（30分ブロックごとにランダム付与）
   def self.calculate_purification_time(total_duration)
-    # return 0 if total_duration.blank? || total_duration < 10
     return 0 if total_duration.blank? || total_duration < 1
 
-    # 確認用
-    # (total_duration / 2).floor * 1
-    # 本番用
-    (total_duration / 30).floor * 10
+    blocks = (total_duration / 30).floor
+    return 0 if blocks == 0
+
+    blocks.times.sum { sample_purification_minutes }
   end
 
   # 検索可能カラムの登録
