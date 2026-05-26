@@ -87,13 +87,13 @@ RSpec.describe ActivityRecord, type: :model do
     subject { described_class.sample_purification_minutes }
 
     [
-      [0,  8],
-      [59, 8],
-      [60, 10],
-      [89, 10],
-      [90, 13],
-      [98, 13],
-      [99, 15],
+      [ 0,  8 ],
+      [ 59, 8 ],
+      [ 60, 10 ],
+      [ 89, 10 ],
+      [ 90, 13 ],
+      [ 98, 13 ],
+      [ 99, 15 ]
     ].each do |rand_val, expected|
       context "rand が #{rand_val} を返すとき" do
         before { allow(described_class).to receive(:rand).with(100).and_return(rand_val) }
@@ -105,7 +105,7 @@ RSpec.describe ActivityRecord, type: :model do
     end
 
     it "スタブなしでも有効な付与分数を返すこと" do
-      is_expected.to be_in([8, 10, 13, 15])
+      is_expected.to be_in([ 8, 10, 13, 15 ])
     end
   end
 
@@ -169,7 +169,7 @@ RSpec.describe ActivityRecord, type: :model do
       let(:total_duration) { 30 }
 
       it "有効な付与分数を返すこと" do
-        is_expected.to be_in([8, 10, 13, 15])
+        is_expected.to be_in([ 8, 10, 13, 15 ])
       end
     end
   end

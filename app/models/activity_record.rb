@@ -27,7 +27,7 @@ class ActivityRecord < ApplicationRecord
     { minutes: 8,  weight: 60 },
     { minutes: 10, weight: 30 },
     { minutes: 13, weight: 9  },
-    { minutes: 15, weight: 1  },
+    { minutes: 15, weight: 1  }
   ].freeze
 
   # 1ブロック分の付与分数をランダム抽選
