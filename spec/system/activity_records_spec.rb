@@ -287,6 +287,8 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
 
       it "浄化タイマー獲得モーダルが表示され、OKをクリックすると閉じること" do
+        allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10)
+
         %w[satisfaction progress quality focus fatigue].each do |attr|
           find("input[name='activity_record_form[#{attr}]'][value='3']").choose
         end
@@ -294,7 +296,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         click_on "記録する"
 
         # モーダルが表示されている
-        # total_duration: 60 → (60/30).floor * 10 = 20分付与
+        # total_duration: 60 → 2ブロック × 10分（スタブ固定）= 20分付与
         expect(page).to have_content("浄化タイマーを20分獲得！")
 
         # OKボタンをクリックするとモーダルが閉じる

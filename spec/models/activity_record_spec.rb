@@ -81,10 +81,41 @@ RSpec.describe ActivityRecord, type: :model do
   end
 
   # =========================================================
+  # .sample_purification_minutes
+  # =========================================================
+  describe ".sample_purification_minutes" do
+    subject { described_class.sample_purification_minutes }
+
+    [
+      [ 0,  8 ],
+      [ 59, 8 ],
+      [ 60, 10 ],
+      [ 89, 10 ],
+      [ 90, 13 ],
+      [ 98, 13 ],
+      [ 99, 15 ]
+    ].each do |rand_val, expected|
+      context "rand が #{rand_val} を返すとき" do
+        before { allow(described_class).to receive(:rand).with(100).and_return(rand_val) }
+
+        it "#{expected} 分を返すこと" do
+          is_expected.to eq expected
+        end
+      end
+    end
+
+    it "スタブなしでも有効な付与分数を返すこと" do
+      is_expected.to be_in([ 8, 10, 13, 15 ])
+    end
+  end
+
+  # =========================================================
   # .calculate_purification_time
   # =========================================================
   describe ".calculate_purification_time" do
     subject { described_class.calculate_purification_time(total_duration) }
+
+    before { allow(described_class).to receive(:sample_purification_minutes).and_return(10) }
 
     context "nil のとき" do
       let(:total_duration) { nil }
@@ -103,6 +134,12 @@ RSpec.describe ActivityRecord, type: :model do
 
     context "30 分のとき" do
       let(:total_duration) { 30 }
+
+      it "sample_purification_minutes を 1 回呼ぶこと" do
+        subject
+        expect(described_class).to have_received(:sample_purification_minutes).once
+      end
+
       it { is_expected.to eq 10 }
     end
 
@@ -113,12 +150,27 @@ RSpec.describe ActivityRecord, type: :model do
 
     context "60 分のとき" do
       let(:total_duration) { 60 }
+
+      it "sample_purification_minutes を 2 回呼ぶこと" do
+        subject
+        expect(described_class).to have_received(:sample_purification_minutes).twice
+      end
+
       it { is_expected.to eq 20 }
     end
 
     context "120 分のとき" do
       let(:total_duration) { 120 }
       it { is_expected.to eq 40 }
+    end
+
+    context "スタブなしで 30 分のとき" do
+      before { allow(described_class).to receive(:sample_purification_minutes).and_call_original }
+      let(:total_duration) { 30 }
+
+      it "有効な付与分数を返すこと" do
+        is_expected.to be_in([ 8, 10, 13, 15 ])
+      end
     end
   end
 
@@ -180,7 +232,7 @@ RSpec.describe ActivityRecord, type: :model do
 
     it "total_duration が 0 のときは nil のままであること" do
       activity_record = build(:activity_record, user: user, light_time: light_time,
-                     total_duration: 0, idle_duration: 0)
+                      total_duration: 0, idle_duration: 0)
       activity_record.save(validate: false)
       expect(activity_record.desired_self_percentage).to be_nil
     end
@@ -190,11 +242,13 @@ RSpec.describe ActivityRecord, type: :model do
   # after_create: grant_purification_time
   # =========================================================
   describe "grant_purification_time コールバック" do
+    before { allow(described_class).to receive(:sample_purification_minutes).and_return(10) }
+
     context "PurificationTime が既に存在するとき" do
       let!(:purification_time) { create(:purification_time, user: user, remaining_time: 0) }
 
       context ":long_session (90 分) のとき" do
-        it "remaining_time に 1800 秒 (30 分) 加算されること" do
+        it "remaining_time に 1800 秒 (3 ブロック × 10 分) 加算されること" do
           create(:activity_record, :long_session, user: user, light_time: light_time)
           expect(purification_time.reload.remaining_time).to eq 1800
         end
