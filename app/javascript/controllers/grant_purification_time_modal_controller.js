@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Connects to data-controller="modal"
+// Connects to data-controller="grant-purification-time-modal"
 export default class extends Controller {
   static targets = ["overlay"]
 

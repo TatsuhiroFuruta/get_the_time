@@ -1,4 +1,4 @@
-<div class="text-center text-zinc-800">
+<div data-controller="pomodoro-setting-modal" class="text-center text-zinc-800">
 
   <p class="text-white/90 text-xl mb-4">
     今日の光の時間
@@ -16,9 +16,17 @@
 
     <%= f.text_field :task, placeholder: "やることを入力", class: "rounded px-3 py-2 w-56 mb-6 bg-gray-200 border-2 focus:outline-none focus:ring-4 focus:ring-blue-400" %>
 
-    <div>
-      <%= f.submit "スタート", class: "bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 transition duration-200" %>
+    <div class="flex flex-col items-center gap-3">
+      <%= f.submit "スタート", class: "bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 transition duration-200 cursor-pointer" %>
+
+      <button type="button"
+              data-action="click->pomodoro-setting-modal#open"
+              class="text-sm md:text-base text-white/90 md:text-zinc-800 underline hover:text-amber-300 transition duration-200 cursor-pointer">
+        ⚙ ポモドーロ時間を設定
+      </button>
     </div>
   <% end %>
+
+  <%= render "mypages/pomodoro_setting_modal", pomodoro_setting: @pomodoro_setting %>
 
 </div>

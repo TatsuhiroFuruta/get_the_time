@@ -57,6 +57,7 @@ class ActivityRecordsController < ApplicationController
     @activity_record = current_user.activity_records.build(task: params.permit(:task)[:task])
     @light_time = current_user.light_times.find_by(is_current: true)
     @dark_time = current_user.dark_time
+    @pomodoro_setting = current_user.pomodoro_setting
   end
 
   private

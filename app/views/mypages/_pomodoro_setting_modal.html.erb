@@ -1,0 +1,56 @@
+<div data-pomodoro-setting-modal-target="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+
+  <!-- オーバーレイ -->
+  <div
+    data-pomodoro-setting-modal-target="overlay"
+    data-action="click->pomodoro-setting-modal#closeOnOverlay"
+    class="absolute inset-0 bg-black opacity-50">
+  </div>
+
+  <!-- モーダル本体 -->
+  <div class="relative z-10 w-80 bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% p-6 rounded-2xl shadow-2xl text-zinc-800">
+    <p class="text-base font-semibold mb-4 text-center">
+      ポモドーロ時間の設定
+    </p>
+
+    <%= form_with model: pomodoro_setting, url: pomodoro_setting_path, method: :patch, local: true, class: "flex flex-col gap-3" do |f| %>
+      <div class="flex items-center justify-between gap-2">
+        <%= f.label :work_duration, "活動時間", class: "text-sm" %>
+        <div class="flex items-center gap-1">
+          <%= f.number_field :work_duration,
+                in: PomodoroSetting::WORK_DURATION_RANGE,
+                step: 1,
+                required: true,
+                class: "w-20 rounded px-2 py-1 bg-white border focus:outline-none focus:ring-2 focus:ring-amber-500 text-right text-sm" %>
+          <span class="text-sm">分</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2">
+        <%= f.label :break_duration, "休憩時間", class: "text-sm" %>
+        <div class="flex items-center gap-1">
+          <%= f.number_field :break_duration,
+                in: PomodoroSetting::BREAK_DURATION_RANGE,
+                step: 1,
+                required: true,
+                class: "w-20 rounded px-2 py-1 bg-white border focus:outline-none focus:ring-2 focus:ring-amber-500 text-right text-sm" %>
+          <span class="text-sm">分</span>
+        </div>
+      </div>
+
+      <p class="text-xs text-zinc-700 leading-snug">
+        活動時間: <%= PomodoroSetting::WORK_DURATION_RANGE.min %>~<%= PomodoroSetting::WORK_DURATION_RANGE.max %>分<br>
+        休憩時間: <%= PomodoroSetting::BREAK_DURATION_RANGE.min %>~<%= PomodoroSetting::BREAK_DURATION_RANGE.max %>分(活動時間未満)
+      </p>
+
+      <div class="flex gap-2 mt-2">
+        <button type="button"
+                data-action="click->pomodoro-setting-modal#close"
+                class="flex-1 text-sm bg-stone-300 text-zinc-800 text-center rounded-full py-2 hover:bg-stone-400 transition duration-200 cursor-pointer">
+          閉じる
+        </button>
+        <%= f.submit "保存する", class: "flex-1 text-sm bg-amber-500 text-zinc-800 text-center rounded-full py-2 hover:bg-amber-600 transition duration-200 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

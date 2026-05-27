@@ -5,6 +5,7 @@ ja:
       light_time: 光の時間の活動内容
       activity_record: 光の時間の活動記録
       purification_time: 浄化タイマー
+      pomodoro_setting: ポモドーロ時間設定
     attributes:
       dark_time:
         behavior: 闇の時間での行動
@@ -33,6 +34,9 @@ ja:
         total_time : 設定された合計時間
         started_at : 開始時刻
         paused_at : 一時停止時刻
+      pomodoro_setting:
+        work_duration: 活動時間
+        break_duration: 休憩時間
   enums:
     purification_time:
       status:

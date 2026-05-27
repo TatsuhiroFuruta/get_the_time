@@ -13,11 +13,14 @@ application.register("hello", HelloController)
 import LightTimeSwitchController from "./light_time_switch_controller"
 application.register("light-time-switch", LightTimeSwitchController)
 
-import ModalController from "./modal_controller"
-application.register("modal", ModalController)
+import GrantPurificationTimeModalController from "./grant_purification_time_modal_controller"
+application.register("grant-purification-time-modal", GrantPurificationTimeModalController)
 
 import PomodoroController from "./pomodoro_controller"
 application.register("pomodoro", PomodoroController)
+
+import PomodoroSettingModalController from "./pomodoro_setting_modal_controller"
+application.register("pomodoro-setting-modal", PomodoroSettingModalController)
 
 import PurificationTimerController from "./purification_timer_controller"
 application.register("purification-timer", PurificationTimerController)

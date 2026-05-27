@@ -36,6 +36,28 @@ RSpec.describe User, type: :model do
         expect(association.options[:dependent]).to eq :destroy
       end
     end
+
+    it "pomodoro_setting を dependent: :destroy で1つ持つこと" do
+      association = described_class.reflect_on_association(:pomodoro_setting)
+      aggregate_failures do
+        expect(association.macro).to eq :has_one
+        expect(association.options[:dependent]).to eq :destroy
+      end
+    end
+  end
+
+  # =========================================================
+  # コールバック
+  # =========================================================
+  describe "after_create :create_pomodoro_setting" do
+    it "User 作成時にデフォルト値の PomodoroSetting が生成されること" do
+      user = create(:user)
+      aggregate_failures do
+        expect(user.pomodoro_setting).to be_present
+        expect(user.pomodoro_setting.work_duration).to eq 25
+        expect(user.pomodoro_setting.break_duration).to eq 5
+      end
+    end
   end
 
   describe "nameのバリデーション" do
