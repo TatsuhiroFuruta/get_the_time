@@ -31,8 +31,10 @@
   <% else %>
     <div class="flex items-center justify-center min-h-[60vh]">
       <p class="text-lg">
-        <% if params[:q].present? %>
+        <% if params.dig(:q, :comment_or_light_time_action_cont).present? %>
           検索結果が見つかりませんでした
+        <% elsif params.dig(:q, :favorited_eq).to_s == "true" %>
+          お気に入りの活動記録がありません。★をクリックして追加できます
         <% else %>
           光の時間の活動記録が登録されていません
         <% end %>

@@ -1,4 +1,18 @@
+<% favorited_active = q.favorited_eq.to_s == "true" %>
+<% keyword = q.comment_or_light_time_action_cont %>
+
+<!-- お気に入り絞り込みタブ -->
+<div class="flex gap-2 mb-3">
+  <%= link_to "すべて",
+              url_for(q: { comment_or_light_time_action_cont: keyword }),
+              class: "px-4 py-2 rounded-t-lg font-bold transition duration-200 #{favorited_active ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-blue-500 text-white/90'}" %>
+  <%= link_to "★ お気に入り",
+              url_for(q: { comment_or_light_time_action_cont: keyword, favorited_eq: true }),
+              class: "px-4 py-2 rounded-t-lg font-bold transition duration-200 #{favorited_active ? 'bg-blue-500 text-white/90' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}" %>
+</div>
+
 <%= search_form_for q, url: url do |f| %>
+  <%= f.hidden_field :favorited_eq, value: favorited_active ? "true" : "" %>
   <div class="flex gap-3 mb-10">
     <%= f.search_field :comment_or_light_time_action_cont, placeholder: "コメント or 活動内容で検索", class: "flex-1 px-4 py-2 bg-gray-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     <%= f.submit '検索', class: "px-6 py-2 bg-blue-500 text-white/90 font-bold rounded-lg hover:bg-blue-600 transition duration-200" %>

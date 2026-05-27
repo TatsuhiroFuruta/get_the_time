@@ -53,7 +53,7 @@ class ActivityRecord < ApplicationRecord
 
   # 検索可能カラムの登録
   def self.ransackable_attributes(auth_object = nil)
-    [ "comment" ]  # 検索可能なカラム
+    [ "comment", "favorited" ]  # 検索可能なカラム
   end
 
   # 検索可能な関連付けをホワイトリスト化

@@ -287,8 +287,8 @@ RSpec.describe ActivityRecord, type: :model do
   # ransack の検索可能カラム
   # =========================================================
   describe "ransack の検索可能カラム" do
-    it "検索可能なカラムが comment のみであること" do
-      expect(described_class.ransackable_attributes).to eq [ "comment" ]
+    it "検索可能なカラムが comment と favorited であること" do
+      expect(described_class.ransackable_attributes).to eq [ "comment", "favorited" ]
     end
 
     it "検索可能な関連付けが light_time のみであること" do

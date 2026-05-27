@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_27_141309) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_27_141310) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_27_141309) do
     t.decimal "desired_self_percentage", precision: 5, scale: 2
     t.datetime "ended_at"
     t.integer "fatigue"
+    t.boolean "favorited", default: false, null: false
     t.integer "focus"
     t.integer "idle_duration"
     t.bigint "light_time_id", null: false
