@@ -1,6 +1,6 @@
 class ActivityRecordsController < ApplicationController
   before_action :set_light_and_dark_times, only: %i[new create]
-  before_action :set_activity_record, only: %i[show edit update destroy]
+  before_action :set_activity_record, only: %i[show edit update destroy favorite]
 
   def index
     @q = current_user.activity_records.ransack(params[:q])
@@ -50,6 +50,15 @@ class ActivityRecordsController < ApplicationController
   def destroy
     @activity_record.destroy!
     redirect_to activity_records_path, notice: t("defaults.flash_message.deleted", item: ActivityRecord.model_name.human), status: :see_other
+  end
+
+  def favorite
+    @activity_record.update!(favorited: !@activity_record.favorited)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to activity_records_path }
+    end
   end
 
   def pomodoro_timer

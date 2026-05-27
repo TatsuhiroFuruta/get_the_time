@@ -308,6 +308,62 @@ RSpec.describe "ActivityRecords", type: :request do
   end
 
   # =========================================================
+  # PATCH /activity_records/:id/favorite
+  # =========================================================
+  describe "PATCH /activity_records/:id/favorite" do
+    let!(:activity_record) do
+      create(:activity_record, user: user, light_time: light_time, favorited: false)
+    end
+
+    context "favorited が false のとき" do
+      it "true にトグルされること" do
+        expect {
+          patch favorite_activity_record_path(activity_record)
+        }.to change { activity_record.reload.favorited }.from(false).to(true)
+      end
+
+      it "turbo_stream リクエストで 200 を返すこと" do
+        patch favorite_activity_record_path(activity_record),
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        aggregate_failures do
+          expect(response).to have_http_status(:ok)
+          expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        end
+      end
+
+      it "html リクエストで一覧ページへリダイレクトすること" do
+        patch favorite_activity_record_path(activity_record)
+        expect(response).to redirect_to(activity_records_path)
+      end
+    end
+
+    context "favorited が true のとき" do
+      before { activity_record.update!(favorited: true) }
+
+      it "false にトグルされること" do
+        expect {
+          patch favorite_activity_record_path(activity_record)
+        }.to change { activity_record.reload.favorited }.from(true).to(false)
+      end
+    end
+
+    context "他ユーザーのレコードに対して操作すると" do
+      let!(:other_activity_record) do
+        create(:activity_record, user: other_user, light_time: other_light_time, favorited: false)
+      end
+
+      it "更新できず 404 を返すこと" do
+        aggregate_failures do
+          expect {
+            patch favorite_activity_record_path(other_activity_record)
+          }.not_to change { other_activity_record.reload.favorited }
+          expect(response).to have_http_status(:not_found)
+        end
+      end
+    end
+  end
+
+  # =========================================================
   # DELETE /activity_records/:id (destroy)
   # =========================================================
   describe "DELETE /activity_records/:id" do

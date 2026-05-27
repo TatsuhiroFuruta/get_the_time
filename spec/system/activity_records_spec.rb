@@ -392,6 +392,37 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
     end
 
+    context "お気に入りトグル" do
+      let!(:activity_record) do
+        create(:activity_record, user: user, light_time: light_time, comment: "お気に入り対象")
+      end
+
+      it "☆ をクリックすると ★ に切り替わり、レコードが favorited になること" do
+        visit activity_records_path
+
+        within("##{ActionView::RecordIdentifier.dom_id(activity_record)}") do
+          expect(page).to have_button("お気に入りに追加")
+          click_on "お気に入りに追加"
+          expect(page).to have_button("お気に入りを解除")
+        end
+
+        expect(activity_record.reload.favorited).to be true
+      end
+
+      it "★ をクリックすると ☆ に戻り、favorited が false になること" do
+        activity_record.update!(favorited: true)
+        visit activity_records_path
+
+        within("##{ActionView::RecordIdentifier.dom_id(activity_record)}") do
+          expect(page).to have_button("お気に入りを解除")
+          click_on "お気に入りを解除"
+          expect(page).to have_button("お気に入りに追加")
+        end
+
+        expect(activity_record.reload.favorited).to be false
+      end
+    end
+
     context "検索フォームを使ったとき" do
       before do
         create(:activity_record, user: user, light_time: light_time, comment: "検索ヒット")
@@ -411,6 +442,50 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         fill_in "コメント or 活動内容で検索", with: "存在しないキーワード"
         click_on "検索"
         expect(page).to have_content("検索結果が見つかりませんでした")
+      end
+    end
+
+    context "お気に入りで絞り込みするとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, comment: "お気に入り対象", favorited: true)
+        create(:activity_record, user: user, light_time: light_time, comment: "通常レコード", favorited: false)
+      end
+
+      it "「★ お気に入り」タブをクリックするとお気に入りのみ表示されること" do
+        visit activity_records_path
+        click_on "★ お気に入り"
+
+        aggregate_failures do
+          expect(page).to have_content("お気に入り対象")
+          expect(page).not_to have_content("通常レコード")
+        end
+      end
+
+      it "「すべて」タブをクリックすると全件表示されること" do
+        visit activity_records_path(q: { favorited_eq: true })
+
+        # まずお気に入りのみ表示されていることを確認
+        expect(page).to have_content("お気に入り対象")
+        expect(page).not_to have_content("通常レコード")
+
+        click_on "すべて"
+
+        aggregate_failures do
+          expect(page).to have_content("お気に入り対象")
+          expect(page).to have_content("通常レコード")
+        end
+      end
+    end
+
+    context "お気に入りタブでお気に入りが1件もないとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, favorited: false)
+      end
+
+      it "お気に入り未登録のメッセージが表示されること" do
+        visit activity_records_path
+        click_on "★ お気に入り"
+        expect(page).to have_content("お気に入りの活動記録がありません。★をクリックして追加できます")
       end
     end
   end

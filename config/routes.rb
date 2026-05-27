@@ -38,6 +38,9 @@ Rails.application.routes.draw do
     collection do
       get :pomodoro_timer    # タイマーページ
     end
+    member do
+      patch :favorite        # お気に入りトグル
+    end
   end
 
   # 浄化タイマー
