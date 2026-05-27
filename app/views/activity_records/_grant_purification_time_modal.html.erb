@@ -1,10 +1,10 @@
 <% if flash[:purification_time] %>
-  <div data-controller="modal" class="fixed inset-0 z-70 flex items-center justify-center transition-opacity duration-300">
+  <div data-controller="grant-purification-time-modal" class="fixed inset-0 z-70 flex items-center justify-center transition-opacity duration-300">
 
     <!-- オーバーレイ -->
     <div
-      data-modal-target="overlay"
-      data-action="click->modal#closeOnOverlay"
+      data-grant-purification-time-modal-target="overlay"
+      data-action="click->grant-purification-time-modal#closeOnOverlay"
       class="absolute inset-0 bg-black opacity-50">
     </div>
 
@@ -16,7 +16,7 @@
 
       <%= image_tag "timer.png", class: "w-32 my-4" %>
 
-      <button data-action="click->modal#close" class="bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 transition duration-200 px-6 py-2 rounded-full">
+      <button data-action="click->grant-purification-time-modal#close" class="bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 transition duration-200 px-6 py-2 rounded-full">
         OK
       </button>
     </div>

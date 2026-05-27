@@ -12,4 +12,7 @@ class User < ApplicationRecord
   has_many :light_times, dependent: :destroy
   has_many :activity_records, dependent: :destroy
   has_one :purification_time, dependent: :destroy
+  has_one :pomodoro_setting, dependent: :destroy
+
+  after_create :create_pomodoro_setting
 end

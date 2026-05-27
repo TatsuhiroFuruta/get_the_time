@@ -4,5 +4,6 @@ class MypagesController < ApplicationController
     @light_time = current_user.light_times.find_by(is_current: true) || current_user.light_times.first
     @purification_time = current_user.purification_time
     @today_light_time = ActivityRecord.total_light_time_today(current_user)
+    @pomodoro_setting = current_user.pomodoro_setting
   end
 end

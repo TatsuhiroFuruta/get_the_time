@@ -303,7 +303,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         click_on "OK"
 
         # closeアクションで display:none になるまで待つ（setTimeoutで300ms）
-        expect(page).to have_selector('[data-controller="modal"]', visible: :hidden, wait: 5)
+        expect(page).to have_selector('[data-controller="grant-purification-time-modal"]', visible: :hidden, wait: 5)
       end
     end
 
