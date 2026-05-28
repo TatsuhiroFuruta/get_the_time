@@ -284,6 +284,225 @@ RSpec.describe ActivityRecord, type: :model do
   end
 
   # =========================================================
+  # .evaluation_averages
+  # =========================================================
+  describe ".evaluation_averages" do
+    subject(:averages) { described_class.evaluation_averages(user, days: 30) }
+
+    context "記録が一件もないとき" do
+      it "4項目すべてのキーが nil で返ること" do
+        expect(averages).to eq(satisfaction: nil, progress: nil, quality: nil, focus: nil)
+      end
+
+      it "疲労感のキーは含まれないこと" do
+        expect(averages).not_to have_key(:fatigue)
+      end
+    end
+
+    context "直近30日以内の記録が複数あるとき" do
+      before do
+        create(:activity_record, :high_rating, user: user, light_time: light_time)
+        create(:activity_record, :low_rating,  user: user, light_time: light_time)
+      end
+
+      it "4項目それぞれの平均値が返ること" do
+        # high(5) と low(1) の平均はすべて 3.0
+        expect(averages).to eq(satisfaction: 3.0, progress: 3.0, quality: 3.0, focus: 3.0)
+      end
+    end
+
+    context "30日より古い記録は集計に含めないこと" do
+      before do
+        create(:activity_record, :high_rating, user: user, light_time: light_time)
+        old_record = build(:activity_record, :low_rating, user: user, light_time: light_time)
+        old_record.save!
+        old_record.update_column(:created_at, 31.days.ago)
+      end
+
+      it "期間内（high_rating）のみが平均値に反映されること" do
+        expect(averages).to eq(satisfaction: 5.0, progress: 5.0, quality: 5.0, focus: 5.0)
+      end
+    end
+
+    context "別ユーザーの記録は集計に含めないこと" do
+      let(:other_user)  { create(:user) }
+      let(:other_light) { create(:light_time, :current, user: other_user) }
+
+      before do
+        create(:activity_record, :high_rating, user: other_user, light_time: other_light)
+      end
+
+      it "対象ユーザーの記録がなければ nil になること" do
+        expect(averages).to eq(satisfaction: nil, progress: nil, quality: nil, focus: nil)
+      end
+    end
+  end
+
+  # =========================================================
+  # .fatigue_average
+  # =========================================================
+  describe ".fatigue_average" do
+    subject { described_class.fatigue_average(user, days: 30) }
+
+    context "記録が一件もないとき" do
+      it { is_expected.to be_nil }
+    end
+
+    context "直近30日以内の記録が複数あるとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, fatigue: 2)
+        create(:activity_record, user: user, light_time: light_time, fatigue: 4)
+      end
+
+      it "平均値を返すこと" do
+        is_expected.to eq 3.0
+      end
+    end
+
+    context "30日より古い記録は集計に含めないこと" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, fatigue: 2)
+        old_record = build(:activity_record, user: user, light_time: light_time, fatigue: 5)
+        old_record.save!
+        old_record.update_column(:created_at, 31.days.ago)
+      end
+
+      it "期間内の値のみが平均に反映されること" do
+        is_expected.to eq 2.0
+      end
+    end
+  end
+
+  # =========================================================
+  # .desired_self_percentage_average
+  # =========================================================
+  describe ".desired_self_percentage_average" do
+    subject { described_class.desired_self_percentage_average(user, days: 30) }
+
+    context "記録が一件もないとき" do
+      it { is_expected.to be_nil }
+    end
+
+    context "直近30日以内の記録が複数あるとき" do
+      before do
+        # (100 - 20) / 100.0 = 0.8
+        create(:activity_record, user: user, light_time: light_time,
+                                 total_duration: 100, idle_duration: 20)
+        # (100 - 40) / 100.0 = 0.6
+        create(:activity_record, user: user, light_time: light_time,
+                                 total_duration: 100, idle_duration: 40)
+      end
+
+      it "全レコードの平均値を返すこと" do
+        is_expected.to be_within(0.001).of(0.7)
+      end
+    end
+
+    context "30日より古い記録は集計に含めないこと" do
+      before do
+        create(:activity_record, user: user, light_time: light_time,
+                                 total_duration: 100, idle_duration: 20)
+        old_record = build(:activity_record, user: user, light_time: light_time,
+                                             total_duration: 100, idle_duration: 80)
+        old_record.save!
+        old_record.update_column(:created_at, 31.days.ago)
+      end
+
+      it "期間内の値のみが平均に反映されること" do
+        is_expected.to be_within(0.001).of(0.8)
+      end
+    end
+  end
+
+  # =========================================================
+  # .daily_series
+  # =========================================================
+  describe ".daily_series" do
+    subject(:series) { described_class.daily_series(user, days: 30) }
+
+    context "記録が一件もないとき" do
+      it { is_expected.to eq [] }
+    end
+
+    context "同日に複数レコードがあるとき" do
+      around { |example| travel_to(Time.zone.local(2026, 5, 28, 12, 0, 0)) { example.run } }
+
+      before do
+        create(:activity_record, user: user, light_time: light_time,
+                                 total_duration: 60, idle_duration: 0)
+        create(:activity_record, user: user, light_time: light_time,
+                                 total_duration: 120, idle_duration: 60)
+      end
+
+      it "同日の合計時間が分単位で合算されること" do
+        # SUM(60 + 120) / 60 = 3 分
+        expect(series.size).to eq 1
+        expect(series.first[:light_time_minutes]).to eq 3
+      end
+
+      it "同日の本来の自分が平均化されること" do
+        # AVG(1.0, 0.5) = 0.75
+        expect(series.first[:desired_self_percentage]).to be_within(0.001).of(0.75)
+      end
+
+      it "日付が JST の今日になること" do
+        expect(series.first[:date]).to eq Date.new(2026, 5, 28)
+      end
+    end
+
+    context "JST で日跨ぎする UTC レコード（JST 0:30 など）があるとき" do
+      around { |example| travel_to(Time.zone.local(2026, 5, 28, 12, 0, 0)) { example.run } }
+
+      before do
+        # JST 2026-05-28 0:30 = UTC 2026-05-27 15:30
+        record = create(:activity_record, user: user, light_time: light_time,
+                                          total_duration: 60, idle_duration: 0)
+        record.update_column(:created_at, Time.zone.local(2026, 5, 28, 0, 30, 0))
+      end
+
+      it "JST の日付（5/28）でグルーピングされること" do
+        expect(series.first[:date]).to eq Date.new(2026, 5, 28)
+      end
+    end
+
+    context "複数日にレコードがあるとき" do
+      around { |example| travel_to(Time.zone.local(2026, 5, 28, 12, 0, 0)) { example.run } }
+
+      before do
+        r1 = create(:activity_record, user: user, light_time: light_time, total_duration: 60)
+        r1.update_column(:created_at, Time.zone.local(2026, 5, 26, 10, 0, 0))
+        r2 = create(:activity_record, user: user, light_time: light_time, total_duration: 120)
+        r2.update_column(:created_at, Time.zone.local(2026, 5, 27, 10, 0, 0))
+      end
+
+      it "日付昇順で返ること" do
+        expect(series.map { |row| row[:date] }).to eq [ Date.new(2026, 5, 26), Date.new(2026, 5, 27) ]
+      end
+    end
+
+    context "30日より古い記録は集計に含めないこと" do
+      before do
+        old_record = build(:activity_record, user: user, light_time: light_time, total_duration: 60)
+        old_record.save!
+        old_record.update_column(:created_at, 31.days.ago)
+      end
+
+      it { is_expected.to eq [] }
+    end
+
+    context "別ユーザーの記録は集計に含めないこと" do
+      let(:other_user)  { create(:user) }
+      let(:other_light) { create(:light_time, :current, user: other_user) }
+
+      before do
+        create(:activity_record, user: other_user, light_time: other_light, total_duration: 60)
+      end
+
+      it { is_expected.to eq [] }
+    end
+  end
+
+  # =========================================================
   # ransack の検索可能カラム
   # =========================================================
   describe "ransack の検索可能カラム" do
