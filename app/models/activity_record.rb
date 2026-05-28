@@ -11,8 +11,15 @@ class ActivityRecord < ApplicationRecord
 
   validates :satisfaction, :progress, :quality, :focus, :fatigue, inclusion: { in: 1..5 }
 
+  # レーダーチャート対象の5段階評価カラム（疲労感は逆指標のため別集計）
+  RADAR_FIELDS = %i[satisfaction progress quality focus].freeze
+
   scope :today, -> {
     where(created_at: Time.current.all_day)
+  }
+
+  scope :within_last_days, ->(days) {
+    where(created_at: days.days.ago.beginning_of_day..)
   }
 
   def self.total_light_time_today(user)
@@ -20,6 +27,45 @@ class ActivityRecord < ApplicationRecord
       .today
       .sum(:total_duration)
       .to_i
+  end
+
+  # レーダーチャート用: 直近N日の5段階評価4項目の平均
+  def self.evaluation_averages(user, days: 30)
+    records = user.activity_records.within_last_days(days)
+    RADAR_FIELDS.index_with { |field| records.average(field)&.to_f }
+  end
+
+  # 直近N日の疲労感の平均（逆指標のためレーダーから分離）
+  def self.fatigue_average(user, days: 30)
+    user.activity_records.within_last_days(days).average(:fatigue)&.to_f
+  end
+
+  # 直近N日の本来の自分の平均（全レコード平均）
+  def self.desired_self_percentage_average(user, days: 30)
+    user.activity_records.within_last_days(days).average(:desired_self_percentage)&.to_f
+  end
+
+  # 時系列グラフ用: 直近N日の日次集計（JST基準）
+  # light_time_minutes は SUM(total_duration) を分単位に丸めた Integer
+  # 該当レコードがない日は配列に含まれない
+  def self.daily_series(user, days: 30)
+    bucket = Arel.sql("DATE((created_at AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Tokyo')")
+    user.activity_records
+        .within_last_days(days)
+        .group(bucket)
+        .order(bucket)
+        .pluck(
+          bucket,
+          Arel.sql("SUM(total_duration)"),
+          Arel.sql("AVG(desired_self_percentage)")
+        )
+        .map do |date, total_duration_sum, desired_self_avg|
+          {
+            date: date,
+            light_time_minutes: (total_duration_sum.to_i / 60),
+            desired_self_percentage: desired_self_avg&.to_f
+          }
+        end
   end
 
   # 付与分数の重み付きテーブル（合計 100）

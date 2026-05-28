@@ -67,7 +67,8 @@ RSpec.describe "Authentications", type: :system do
     fill_in "パスワード", with: "password123"
     click_button "ログイン"
 
-    # ログアウト操作
+    # ログイン後のリダイレクト完了を待ってからログアウト操作
+    expect(page).to have_link("ログアウト")
     click_link "ログアウト"
 
     aggregate_failures do
