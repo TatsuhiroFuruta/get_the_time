@@ -435,9 +435,9 @@ RSpec.describe ActivityRecord, type: :model do
       end
 
       it "同日の合計時間が分単位で合算されること" do
-        # SUM(60 + 120) / 60 = 3 分
+        # SUM(60 + 120) = 180 分
         expect(series.size).to eq 1
-        expect(series.first[:light_time_minutes]).to eq 3
+        expect(series.first[:light_time_minutes]).to eq 180
       end
 
       it "同日の本来の自分が平均化されること" do
