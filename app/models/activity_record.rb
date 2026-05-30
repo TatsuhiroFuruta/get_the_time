@@ -46,7 +46,7 @@ class ActivityRecord < ApplicationRecord
   end
 
   # 時系列グラフ用: 直近N日の日次集計（JST基準）
-  # light_time_minutes は SUM(total_duration) を分単位に丸めた Integer
+  # light_time_minutes は SUM(total_duration) の合計分数（total_duration は分単位で保存されている）
   # 該当レコードがない日は配列に含まれない
   def self.daily_series(user, days: 30)
     bucket = Arel.sql("DATE((created_at AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Tokyo')")
@@ -62,7 +62,7 @@ class ActivityRecord < ApplicationRecord
         .map do |date, total_duration_sum, desired_self_avg|
           {
             date: date,
-            light_time_minutes: (total_duration_sum.to_i / 60),
+            light_time_minutes: total_duration_sum.to_i,
             desired_self_percentage: desired_self_avg&.to_f
           }
         end
