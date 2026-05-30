@@ -25,6 +25,8 @@ Rails.application.routes.draw do
   root "static_pages#home" # ホーム画面をルートパスに設定
 
   resource :mypage, only: %i[show]
+  # マイステータス（時系列グラフ）
+  resource :mystatus, only: %i[show]
   # 闇の時間の活動内容
   resource :dark_time, only: %i[new create show edit update]
   # 光の時間の活動内容

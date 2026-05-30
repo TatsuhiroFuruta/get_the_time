@@ -24,3 +24,6 @@ application.register("pomodoro-setting-modal", PomodoroSettingModalController)
 
 import PurificationTimerController from "./purification_timer_controller"
 application.register("purification-timer", PurificationTimerController)
+
+import MystatusChartController from "./mystatus_chart_controller"
+application.register("mystatus-chart", MystatusChartController)
