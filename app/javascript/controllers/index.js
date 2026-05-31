@@ -27,3 +27,6 @@ application.register("purification-timer", PurificationTimerController)
 
 import MystatusChartController from "./mystatus_chart_controller"
 application.register("mystatus-chart", MystatusChartController)
+
+import MystatusRadarChartController from "./mystatus_radar_chart_controller"
+application.register("mystatus-radar-chart", MystatusRadarChartController)
