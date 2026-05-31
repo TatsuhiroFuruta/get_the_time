@@ -1,11 +1,20 @@
 class MystatusesController < ApplicationController
-  DAYS = 30
+  DAYS = 14
 
   def show
     @daily_series = build_daily_series(current_user, days: DAYS)
+    @evaluation_averages = ActivityRecord.evaluation_averages(current_user, days: DAYS)
+    @fatigue_average = ActivityRecord.fatigue_average(current_user, days: DAYS)
+    @desired_self_percentage_average = build_desired_self_percentage_average(current_user, days: DAYS)
   end
 
   private
+
+  # 直近 DAYS 日の本来の自分の平均を 0〜100 のパーセント表記で返す（記録なしは nil）
+  def build_desired_self_percentage_average(user, days:)
+    avg = ActivityRecord.desired_self_percentage_average(user, days: days)
+    avg ? (avg * 100).round(1) : nil
+  end
 
   # daily_series を直近 DAYS 日の枠に展開し、欠損日は light_time_minutes=0, desired_self_percentage=nil で埋める
   # desired_self_percentage は 0〜100 のパーセント表記に変換
