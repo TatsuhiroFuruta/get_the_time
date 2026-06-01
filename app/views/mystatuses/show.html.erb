@@ -94,6 +94,11 @@
         <% else %>
           <p class="text-center text-zinc-600 py-8">まだ評価データがありません</p>
         <% end %>
+
+        <!-- 振り返り方ページへの導線（評価データの有無にかかわらず表示） -->
+        <div class="mt-6 text-center">
+          <%= link_to "振り返り方を見る", reflection_guide_path, class: "inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 text-zinc-800 font-semibold shadow transition duration-200" %>
+        </div>
       </div>
     </div>
 

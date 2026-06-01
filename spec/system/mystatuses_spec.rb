@@ -30,6 +30,13 @@ RSpec.describe "Mystatuses システムテスト", type: :system do
 
       expect(page).to have_current_path(mypage_path)
     end
+
+    it "振り返り方を見るリンクから振り返り方ページへ遷移できること" do
+      visit mystatus_path
+      click_link "振り返り方を見る"
+
+      expect(page).to have_current_path(reflection_guide_path)
+    end
   end
 
   describe "マイページのハンバーガーメニューからの遷移" do
