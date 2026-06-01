@@ -3,4 +3,6 @@ class StaticPagesController < ApplicationController
   def home; end
 
   def how_to_use; end
+
+  def reflection_guide; end
 end

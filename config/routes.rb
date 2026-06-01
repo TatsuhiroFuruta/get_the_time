@@ -57,4 +57,7 @@ Rails.application.routes.draw do
 
   # 使い方ページ
   get "/how_to_use", to: "static_pages#how_to_use", as: "how_to_use"
+
+  # 振り返り方ページ
+  get "/reflection_guide", to: "static_pages#reflection_guide", as: "reflection_guide"
 end
