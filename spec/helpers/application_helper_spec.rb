@@ -35,20 +35,20 @@ RSpec.describe ApplicationHelper, type: :helper do
   end
 
   describe "#display_percentage" do
-    it "nil のとき「未設定」を返すこと" do
-      expect(helper.display_percentage(nil)).to eq "未設定"
+    it "nil のとき nil を返すこと(表示文言はビュー側に委譲)" do
+      expect(helper.display_percentage(nil)).to be_nil
     end
 
-    it "0.8 を「80 %」に変換すること" do
-      expect(helper.display_percentage(0.8)).to eq "80 %"
+    it "0.8 を「80.0 %」に変換すること(小数1桁)" do
+      expect(helper.display_percentage(0.8)).to eq "80.0 %"
     end
 
-    it "0.125 を「13 %」に変換すること(四捨五入)" do
-      expect(helper.display_percentage(0.125)).to eq "13 %"
+    it "0.125 を「12.5 %」に変換すること(小数1桁に四捨五入)" do
+      expect(helper.display_percentage(0.125)).to eq "12.5 %"
     end
 
-    it "1.0 を「100 %」に変換すること" do
-      expect(helper.display_percentage(1.0)).to eq "100 %"
+    it "1.0 を「100.0 %」に変換すること" do
+      expect(helper.display_percentage(1.0)).to eq "100.0 %"
     end
   end
 
