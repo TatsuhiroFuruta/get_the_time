@@ -62,7 +62,7 @@ RSpec.describe "Mystatuses", type: :request do
 
       it "本来の自分の14日平均がパーセント表記で大きく表示されること" do
         travel_to Time.zone.local(2026, 5, 30, 12, 0, 0) do
-          # (90 - 10) / 90 → decimal(5,2) で 0.89 → *100 で 89.0%
+          # (90 - 10) / 90 → decimal(5,2) で 0.89 → display_percentage で「89.0 %」
           create(:activity_record, user: user, light_time: light_time,
                                    total_duration: 90, idle_duration: 10)
 
@@ -71,7 +71,7 @@ RSpec.describe "Mystatuses", type: :request do
 
         aggregate_failures do
           expect(response.body).to include("本来の自分（直近14日平均）")
-          expect(response.body).to include("89.0%")
+          expect(response.body).to include("89.0 %")
         end
       end
 

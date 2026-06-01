@@ -21,7 +21,7 @@
     <div class="w-full max-w-3xl bg-stone-300/80 rounded-2xl shadow-xl px-6 py-12 mb-24 text-center">
       <p class="text-zinc-800 text-sm md:text-base font-semibold">本来の自分（直近14日平均）</p>
       <p class="text-5xl md:text-6xl font-bold text-amber-600 leading-tight wrap-break-word">
-        <%= @desired_self_percentage_average ? "#{@desired_self_percentage_average}%" : "—" %>
+        <%= display_percentage(@desired_self_percentage_average) || "—" %>
       </p>
     </div>
 

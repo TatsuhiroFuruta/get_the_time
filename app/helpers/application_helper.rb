@@ -16,9 +16,9 @@ module ApplicationHelper
   end
 
   def display_percentage(value)
-    return "未設定" if value.blank?
+    return nil if value.blank?
 
-    "#{(value * 100).round} %"
+    "#{(value * 100).round(1)} %"
   end
 
   def nav_link_class(path)
