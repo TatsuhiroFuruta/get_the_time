@@ -1,0 +1,17 @@
+<%#
+  X（Twitter）シェアボタン。
+  文面（％入り）と共有先 URL を載せて X の投稿画面を開く。
+  画像は共有先 URL の OGP カードとして表示される（既存の ogp.png を使用）。
+
+  locals:
+    text:     投稿本文（必須）
+    url:      共有する URL（任意。既定はトップページ）
+    hashtags: 付与するハッシュタグ配列（任意）
+%>
+<% message = x_share_message(text, hashtags: local_assigns[:hashtags], url: local_assigns.fetch(:url, root_url)) %>
+<%= link_to x_intent_url(message),
+      target: "_blank",
+      rel: "noopener",
+      class: "inline-flex items-center gap-2 bg-black text-white/90 px-5 py-2 rounded-full hover:bg-zinc-800 transition duration-200 font-semibold shadow" do %>
+  <span class="font-bold">𝕏</span> でシェア
+<% end %>

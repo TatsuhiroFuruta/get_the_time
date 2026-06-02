@@ -201,6 +201,22 @@ RSpec.describe "ActivityRecords", type: :request do
       get activity_record_path(other_activity_record)
       expect(response).to have_http_status(:not_found)
     end
+
+    it "本来の自分が計測済みのとき X 投稿画面へのリンクと文面が描画されること" do
+      record = create(:activity_record, user: user, light_time: light_time,
+                                        started_at: Time.zone.local(2026, 6, 2, 14, 30),
+                                        total_duration: 60, idle_duration: 30)
+
+      get activity_record_path(record)
+
+      expected_body = "2026年6月2日14時30分開始の活動における今日の本来の自分は 50.0 % です"
+      aggregate_failures do
+        expect(response.body).to include("でシェア")
+        expect(response.body).to include("twitter.com/intent/tweet")
+        expect(response.body).to include(CGI.escape(expected_body))
+        expect(response.body).to include(CGI.escape("#GetTheTime #今日の本来の自分"))
+      end
+    end
   end
 
   # =========================================================

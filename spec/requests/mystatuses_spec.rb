@@ -75,6 +75,26 @@ RSpec.describe "Mystatuses", type: :request do
         end
       end
 
+      it "平均が存在するとき X 投稿画面へのリンクと文面が描画されること" do
+        travel_to Time.zone.local(2026, 5, 30, 12, 0, 0) do
+          create(:activity_record, user: user, light_time: light_time,
+                                   total_duration: 90, idle_duration: 10)
+
+          get mystatus_path
+        end
+
+        aggregate_failures do
+          expect(response.body).to include("twitter.com/intent/tweet")
+          expect(response.body).to include(CGI.escape("2026年5月30日の本来の自分は 89.0 % です"))
+          expect(response.body).to include(CGI.escape("#GetTheTime #本来の自分"))
+        end
+      end
+
+      it "記録がなく平均が無いときは X シェアボタンを描画しないこと" do
+        get mystatus_path
+        expect(response.body).not_to include("twitter.com/intent/tweet")
+      end
+
       it "評価レーダーの data 属性に4項目の平均値が含まれること" do
         travel_to Time.zone.local(2026, 5, 30, 12, 0, 0) do
           create(:activity_record, user: user, light_time: light_time,
