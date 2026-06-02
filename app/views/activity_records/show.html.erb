@@ -43,6 +43,15 @@
       今日の本来の自分: <span class="bg-amber-500 px-3 py-1 rounded"><%= display_percentage(@activity_record.desired_self_percentage) || "未計測" %></span>
     </p>
 
+    <!-- X でシェア -->
+    <% if @activity_record.desired_self_percentage.present? %>
+      <div class="mb-6">
+        <%= render "shared/x_share_button",
+              text: x_share_activity_text(@activity_record.desired_self_percentage, started_at: @activity_record.started_at),
+              hashtags: XShareHelper::ACTIVITY_HASHTAGS %>
+      </div>
+    <% end %>
+
     <!-- 満足度、進行度、作業の質、集中度、疲労感 -->
     <div class="space-y-2 mb-6">
       <% [

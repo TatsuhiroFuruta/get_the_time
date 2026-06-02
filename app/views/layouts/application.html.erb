@@ -9,6 +9,15 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# OGP / Twitter Card（SNS シェア用。既定はサービス紹介カード） %>
+    <meta property="og:site_name" content="Get The Time">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<%= content_for(:og_title).presence || "Get The Time" %>">
+    <meta property="og:description" content="<%= content_for(:og_description).presence || "自由時間を「光の時間」と「闇の時間」に分け、本来の自分を計測するサービス" %>">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:image" content="<%= image_url("ogp.png") %>">
+    <meta name="twitter:card" content="summary_large_image">
+
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>

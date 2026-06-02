@@ -23,6 +23,14 @@
       <p class="text-5xl md:text-6xl font-bold text-amber-600 leading-tight wrap-break-word">
         <%= display_percentage(@desired_self_percentage_average) || "—" %>
       </p>
+
+      <% if @desired_self_percentage_average.present? %>
+        <div class="mt-8">
+          <%= render "shared/x_share_button",
+                text: x_share_overall_text(@desired_self_percentage_average),
+                hashtags: XShareHelper::OVERALL_HASHTAGS %>
+        </div>
+      <% end %>
     </div>
 
     <!-- グラフ（すべて縦積み。上から 本来の自分 → 光の時間 → 評価レーダー） -->

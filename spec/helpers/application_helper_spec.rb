@@ -43,8 +43,11 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(helper.display_percentage(0.8)).to eq "80.0 %"
     end
 
-    it "0.125 を「12.5 %」に変換すること(小数1桁に四捨五入)" do
-      expect(helper.display_percentage(0.125)).to eq "12.5 %"
+    it "小数第2位を四捨五入して第1位までにすること" do
+      aggregate_failures do
+        expect(helper.display_percentage(0.3333)).to eq "33.3 %" # 切り下げ
+        expect(helper.display_percentage(0.6666)).to eq "66.7 %" # 切り上げ
+      end
     end
 
     it "1.0 を「100.0 %」に変換すること" do
