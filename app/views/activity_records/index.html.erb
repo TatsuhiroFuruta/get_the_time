@@ -16,9 +16,9 @@
   </div>
 
   <% if @activity_records.present? %>
-    <div class="w-80 md:w-full max-w-2xl mx-auto">
+    <div class="w-80 md:w-full max-w-5xl mx-auto">
       <!-- 一覧 -->
-      <div class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch" data-test="activity-records-list">
         <%= render @activity_records %>
       </div>
     </div>
