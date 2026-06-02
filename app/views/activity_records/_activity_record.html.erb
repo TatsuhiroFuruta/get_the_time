@@ -1,38 +1,66 @@
-<%= turbo_frame_tag dom_id(activity_record), class: "block" do %>
-  <div class="bg-amber-500 hover:bg-amber-60 rounded-lg px-4 py-3 shadow transition duration-200 flex items-start gap-3">
+<% level = desired_self_level(activity_record.desired_self_percentage) %>
+<% image = desired_self_image_path(level) %>
+<%= turbo_frame_tag dom_id(activity_record), class: "block h-full" do %>
+  <div class="bg-amber-500 rounded-lg shadow hover:shadow-lg transition duration-200 h-full">
 
-    <!-- お気に入りトグル -->
-    <%= button_to favorite_activity_record_path(activity_record),
-                  method: :patch,
-                  form: { data: { turbo_frame: dom_id(activity_record) } },
-                  class: "shrink-0 text-2xl leading-none focus:outline-none",
-                  title: activity_record.favorited? ? "お気に入りを解除" : "お気に入りに追加",
-                  aria: { label: activity_record.favorited? ? "お気に入りを解除" : "お気に入りに追加" } do %>
-      <% if activity_record.favorited? %>
-        <span class="text-yellow-300">★</span>
-      <% else %>
-        <span class="text-gray-300">☆</span>
-      <% end %>
+    <!-- タイトル：今日の本来の自分 -->
+    <h2 class="text-lg font-bold text-center px-4 pt-4">
+      今日の本来の自分
+    </h2>
+
+    <!-- 背景画像（または色グラデーション）の上に本来の自分の数値 -->
+    <%= link_to activity_record_path(activity_record),
+                class: "block px-4 pt-3",
+                data: { turbo_frame: "_top" } do %>
+      <div class="relative rounded-lg overflow-hidden h-32 flex items-center justify-center <%= image ? "bg-cover bg-center" : desired_self_fallback_class(level) %>"<%= " style=\"background-image:url('#{image}')\"".html_safe if image %>>
+        <span class="text-3xl font-bold text-red-600 drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)]">
+          <%= display_percentage(activity_record.desired_self_percentage) || "未計測" %>
+        </span>
+      </div>
     <% end %>
 
+    <!-- 日時（左）とお気に入り（右）を同じ行に揃える -->
+    <div class="flex items-center justify-between px-4 py-2">
+      <p class="text-sm">
+        <%= format_datetime(activity_record.started_at) %>
+      </p>
+
+      <!-- お気に入りトグル -->
+      <%= button_to favorite_activity_record_path(activity_record),
+                    method: :patch,
+                    form: { data: { turbo_frame: dom_id(activity_record) }, class: "shrink-0 leading-none" },
+                    class: "text-2xl leading-none focus:outline-none",
+                    title: activity_record.favorited? ? "お気に入りを解除" : "お気に入りに追加",
+                    aria: { label: activity_record.favorited? ? "お気に入りを解除" : "お気に入りに追加" } do %>
+        <% if activity_record.favorited? %>
+          <span class="text-yellow-300">★</span>
+        <% else %>
+          <span class="text-gray-300">☆</span>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- 残りの情報（クリックで詳細へ） -->
     <%= link_to activity_record_path(activity_record),
-                class: "flex-1 flex flex-wrap gap-6 text-lg",
+                class: "block px-4 pb-4",
                 data: { turbo_frame: "_top" } do %>
 
-      <!-- 日時 -->
-      <span>
-        <%= format_datetime(activity_record.started_at) %>
-      </span>
+      <!-- 計測時間 -->
+      <p class="text-xl font-bold text-center mb-3">
+        <%= activity_record.total_duration %> 分
+      </p>
 
-      <!-- 光の時間の活動内容 -->
-      <span>
-        <%= activity_record.light_time&.action %>
-      </span>
+      <!-- 光の時間での行動 -->
+      <p class="text-sm font-semibold">光の時間での行動：</p>
+      <p class="text-center mb-2"><%= truncate_card_text(activity_record.light_time&.action) %></p>
+
+      <!-- やること -->
+      <p class="text-sm font-semibold">やること：</p>
+      <p class="text-center mb-2"><%= truncate_card_text(activity_record.task) %></p>
 
       <!-- コメント -->
-      <span class="text-gray-800">
-        <%= activity_record.comment.presence || "コメント記入なし" %>
-      </span>
+      <p class="text-sm font-semibold">コメント：</p>
+      <p class="text-center"><%= truncate_card_text(activity_record.comment) %></p>
 
     <% end %>
 

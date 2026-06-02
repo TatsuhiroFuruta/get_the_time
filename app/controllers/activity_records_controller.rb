@@ -4,7 +4,7 @@ class ActivityRecordsController < ApplicationController
 
   def index
     @q = current_user.activity_records.ransack(params[:q])
-    @activity_records = @q.result(distinct: true).includes(:light_time).order(created_at: :desc).page(params[:page]).per(8)
+    @activity_records = @q.result(distinct: true).includes(:light_time).order(created_at: :desc).page(params[:page]).per(9)
   end
 
   def new

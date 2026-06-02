@@ -491,22 +491,64 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
   end
 
   # =========================================================
+  # 一覧画面（カードデザイン）
+  # =========================================================
+  describe "一覧画面（カードデザイン）" do
+    it "今日の本来の自分・計測時間・やることが表示されること" do
+      create(:activity_record, user: user, light_time: light_time,
+             total_duration: 60, idle_duration: 0, task: "学習する", comment: "集中できた")
+      visit activity_records_path
+
+      aggregate_failures do
+        expect(page).to have_content("今日の本来の自分")
+        expect(page).to have_content("100.0 %")  # (60 - 0) / 60 = 100%
+        expect(page).to have_content("60 分")
+        expect(page).to have_content("光の時間での行動：")
+        expect(page).to have_content("やること：")
+        expect(page).to have_content("コメント：")
+        expect(page).to have_content("学習する")
+      end
+    end
+
+    it "10文字を超える内容は先頭10文字+「...」で省略表示されること" do
+      record = create(:activity_record, user: user, light_time: light_time,
+                      task: "今日もよく頑張ったよヨヨヨ")  # 13文字
+      visit activity_records_path
+
+      within("##{ActionView::RecordIdentifier.dom_id(record)}") do
+        expect(page).to have_content("今日もよく頑張ったよ...")
+        expect(page).not_to have_content("今日もよく頑張ったよヨヨヨ")
+      end
+    end
+
+    it "やること・コメントが未記入のときは「...」が表示されること" do
+      record = create(:activity_record, user: user, light_time: light_time,
+                      task: "", comment: "")
+      visit activity_records_path
+
+      within("##{ActionView::RecordIdentifier.dom_id(record)}") do
+        expect(page).to have_content("...")
+      end
+    end
+  end
+
+  # =========================================================
   # 一覧画面（ページネーション）
   # =========================================================
   describe "一覧画面（ページネーション）" do
-    context "活動記録が9件以上あるとき" do
+    context "活動記録が10件以上あるとき" do
       before do
-        # 9件作成（per_page: 8 を超える件数）
-        9.times do |i|
+        # 10件作成（per_page: 9 を超える件数）
+        10.times do |i|
           create(:activity_record, user: user, light_time: light_time, comment: "コメント#{i + 1}")
         end
         visit activity_records_path
       end
 
-      it "1ページ目には8件まで表示されること" do
-        # 9件のうち8件のみ表示
-        within("div.space-y-4") do
-          expect(page).to have_selector(".bg-amber-500", count: 8)
+      it "1ページ目には9件まで表示されること" do
+        # 10件のうち9件のみ表示
+        within('[data-test="activity-records-list"]') do
+          expect(page).to have_selector(".bg-amber-500", count: 9)
         end
       end
 
@@ -519,16 +561,16 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
         aggregate_failures do
           expect(page).to have_current_path(activity_records_path, ignore_query: true)
-          # 9件目（=最も古いレコード）が表示される
+          # 10件目（=最も古いレコード）が表示される
           # created_at: desc 順なので、最初に作ったレコード = 「コメント1」が2ページ目に来る
           expect(page).to have_content("コメント1")
         end
       end
     end
 
-    context "活動記録が8件以下のとき" do
+    context "活動記録が9件以下のとき" do
       before do
-        create(:activity_record, user: user, light_time: light_time)
+        9.times { create(:activity_record, user: user, light_time: light_time) }
         visit activity_records_path
       end
 
