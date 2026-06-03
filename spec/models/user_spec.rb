@@ -44,6 +44,14 @@ RSpec.describe User, type: :model do
         expect(association.options[:dependent]).to eq :destroy
       end
     end
+
+    it "regret_records を dependent: :destroy で複数持つこと" do
+      association = described_class.reflect_on_association(:regret_records)
+      aggregate_failures do
+        expect(association.macro).to eq :has_many
+        expect(association.options[:dependent]).to eq :destroy
+      end
+    end
   end
 
   # =========================================================

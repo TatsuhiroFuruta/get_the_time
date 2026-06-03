@@ -1,0 +1,103 @@
+require "rails_helper"
+
+RSpec.describe "RegretRecords", type: :system do
+  let(:user) { create(:user) }
+  # ハンバーガーメニューはマイページに dark_time と light_time の両方がある時のみ表示される
+  let!(:light_time) { create(:light_time, :current, user: user) }
+  let!(:dark_time)  { create(:dark_time, user: user) }
+
+  before do
+    sign_in user
+  end
+
+  describe "新規作成" do
+    it "新規作成でき、一覧に登録した内容が表示されること" do
+      visit new_regret_record_path
+
+      fill_in "タイトル（任意）", with: "ダラダラした日"
+      fill_in "後悔した内容", with: "やるべきことに手をつけられなかった"
+
+      click_button "登録する"
+
+      aggregate_failures do
+        expect(page).to have_current_path(regret_records_path)
+        expect(page).to have_content(
+          I18n.t("defaults.flash_message.created", item: RegretRecord.model_name.human)
+        )
+        expect(page).to have_content("ダラダラした日")
+        expect(page).to have_content("やるべきことに手をつけられなかった")
+      end
+    end
+
+    it "後悔した内容が未入力では作成できないこと" do
+      visit new_regret_record_path
+
+      fill_in "後悔した内容", with: ""
+
+      click_button "登録する"
+
+      aggregate_failures do
+        expect(page).to have_content(
+          I18n.t("defaults.flash_message.not_created", item: RegretRecord.model_name.human)
+        )
+        expect(page).to have_current_path(new_regret_record_path)
+      end
+    end
+
+    it "キャンセルで一覧へ戻ること" do
+      visit new_regret_record_path
+
+      click_link "キャンセル"
+
+      expect(page).to have_current_path(regret_records_path)
+    end
+  end
+
+  describe "マイページからの導線" do
+    it "「後悔したと思ったら」をクリックすると新規作成フォームが表示されること" do
+      visit mypage_path
+
+      # PC用・モバイル用で同じ文言のリンクが2つあるため、実際に表示されている方をクリックする
+      # (ignore_hidden_elements = false のため visible: true で可視要素に限定する)
+      click_link "後悔したと思ったら", match: :first, visible: true
+
+      aggregate_failures do
+        expect(page).to have_current_path(new_regret_record_path)
+        expect(page).to have_content("後悔した1日の記録")
+      end
+    end
+  end
+
+  describe "ハンバーガーメニューからの導線" do
+    it "「後悔した1日の記録一覧」をクリックすると一覧画面が表示されること" do
+      visit mypage_path
+
+      find('[data-hamburger-target="button"]').click
+
+      within('[data-hamburger-target="menu"]') do
+        click_on "後悔した1日の記録一覧"
+      end
+
+      aggregate_failures do
+        expect(page).to have_current_path(regret_records_path)
+        expect(page).to have_content("後悔した1日の記録一覧")
+      end
+    end
+  end
+
+  describe "一覧画面からの導線" do
+    it "「後悔した1日を投稿」をクリックすると新規作成フォームが表示されること" do
+      visit regret_records_path
+
+      click_link "後悔した1日を投稿"
+
+      expect(page).to have_current_path(new_regret_record_path)
+    end
+
+    it "記録がない場合は案内文が表示されること" do
+      visit regret_records_path
+
+      expect(page).to have_content("後悔した1日の記録がまだありません")
+    end
+  end
+end

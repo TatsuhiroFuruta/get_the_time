@@ -1,0 +1,29 @@
+<%= form_with model: regret_record, class: "space-y-8" do |f| %>
+  <%= render "shared/error_messages", object: regret_record %>
+
+  <!-- タイトル -->
+  <div>
+    <%= f.label :title, "タイトル（任意）", class: "block text-lg mb-2" %>
+    <%= f.text_field :title, class: "w-full rounded-lg bg-gray-200 text-zinc-800 border-2 border-gray-700 px-4 py-2 focus:outline-none focus:ring-4 focus:ring-blue-400" %>
+  </div>
+
+  <!-- 後悔した内容 -->
+  <div>
+    <%= f.label :content, "後悔した内容", class: "block text-lg mb-2" %>
+
+    <p class="text-sm leading-relaxed mb-3">
+      「後悔した1日を過ごしてしまったなあ」と思ったときに、その気持ちや出来事を書き残す場所です。
+      何に時間を使い、どう感じたのかを振り返り、「なぜそうなったのか」と原因まで掘り下げてみましょう。
+      アプリを使っていないときの気づきや反省も含め、無理のない範囲で自由に書いて構いません。
+    </p>
+
+    <%= f.text_area :content, rows: 6, class: "w-full rounded-lg bg-gray-200 text-zinc-800 border-2 border-gray-700 px-4 py-2 focus:outline-none focus:ring-4 focus:ring-blue-400" %>
+  </div>
+
+  <!-- ボタン -->
+  <div class="flex justify-center gap-6 pt-6">
+    <%= f.submit "登録する", class: "bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-full text-white/90 transition duration-200 shadow-md" %>
+    <%= link_to "キャンセル", regret_records_path, class: "px-6 py-2 rounded-full bg-red-500 text-white/90 hover:bg-red-600 transition duration-200 shadow-md" %>
+  </div>
+
+<% end %>
