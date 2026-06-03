@@ -52,3 +52,6 @@
 # 依存ライブラリの実体とキャッシュ
 /vendor/bundle
 /vendor/cache
+
+# Claude Code のローカル状態（メモリ等）
+/.claude/
