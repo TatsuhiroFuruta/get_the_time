@@ -47,7 +47,7 @@
     <% if @activity_record.desired_self_percentage.present? %>
       <div class="mb-6">
         <%= render "shared/x_share_button",
-              text: x_share_activity_text(@activity_record.desired_self_percentage, started_at: @activity_record.started_at),
+              text: x_share_activity_text(@activity_record.desired_self_percentage, started_at: @activity_record.started_at, total_duration: @activity_record.total_duration),
               hashtags: XShareHelper::ACTIVITY_HASHTAGS %>
       </div>
     <% end %>

@@ -209,7 +209,7 @@ RSpec.describe "ActivityRecords", type: :request do
 
       get activity_record_path(record)
 
-      expected_body = "2026年6月2日14時30分開始の活動における今日の本来の自分は 50.0 % です"
+      expected_body = "2026年6月2日14時30分開始の約60分間の活動における今日の本来の自分は 50.0 % です"
       aggregate_failures do
         expect(response.body).to include("でシェア")
         expect(response.body).to include("twitter.com/intent/tweet")

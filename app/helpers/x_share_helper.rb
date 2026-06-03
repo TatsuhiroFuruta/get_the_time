@@ -15,9 +15,10 @@ module XShareHelper
   end
 
   # 「今日の本来の自分」シェア文面（活動記録向け）
-  #   例: 「2026年6月2日14時30分開始の活動における今日の本来の自分は 89.0 % です」
-  def x_share_activity_text(percentage, started_at:)
-    "#{format_date_ja(started_at)}#{format_time_ja(started_at)}開始の活動における今日の本来の自分は #{display_percentage(percentage)} です"
+  #   例: 「2026年6月2日14時30分開始の約60分間の活動における今日の本来の自分は 89.0 % です」
+  #   total_duration は秒切り捨ての分なので「約」を付ける
+  def x_share_activity_text(percentage, started_at:, total_duration:)
+    "#{format_date_ja(started_at)}#{format_time_ja(started_at)}開始の約#{total_duration}分間の活動における今日の本来の自分は #{display_percentage(percentage)} です"
   end
 
   # 投稿本文を「本文 → ハッシュタグ → URL」の順に改行で組み立てる。
