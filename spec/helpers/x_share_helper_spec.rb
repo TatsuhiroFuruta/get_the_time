@@ -30,10 +30,10 @@ RSpec.describe XShareHelper, type: :helper do
   end
 
   describe "#x_share_activity_text" do
-    it "「〜年〜月〜日〜時〜分開始の活動における今日の本来の自分は ◯◯ % です」の文面を返すこと" do
+    it "「〜年〜月〜日〜時〜分開始の約〜分間の活動における今日の本来の自分は ◯◯ % です」の文面を返すこと" do
       started_at = Time.zone.local(2026, 6, 2, 14, 30)
-      expect(helper.x_share_activity_text(0.5, started_at: started_at))
-        .to eq "2026年6月2日14時30分開始の活動における今日の本来の自分は 50.0 % です"
+      expect(helper.x_share_activity_text(0.5, started_at: started_at, total_duration: 60))
+        .to eq "2026年6月2日14時30分開始の約60分間の活動における今日の本来の自分は 50.0 % です"
     end
   end
 
