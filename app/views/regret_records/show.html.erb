@@ -33,9 +33,10 @@
       </div>
     </div>
 
-    <!-- 編集ボタン -->
-    <div class="flex justify-center pt-6">
+    <!-- 編集・削除ボタン -->
+    <div class="flex justify-center gap-10 text-center pt-6">
       <%= link_to "編集", edit_regret_record_path(@regret_record), class: "bg-green-700 hover:bg-green-800 px-6 py-3 rounded-full text-white/90 font-semibold transition duration-200" %>
+      <%= link_to "削除", regret_record_path(@regret_record), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "bg-red-500 hover:bg-red-600 px-6 py-3 rounded-full text-white/90 font-semibold transition duration-200" %>
     </div>
 
   </div>
