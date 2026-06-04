@@ -2,7 +2,7 @@ class RegretRecordsController < ApplicationController
   before_action :set_regret_record, only: %i[show]
 
   def index
-    @regret_records = current_user.regret_records.order(created_at: :desc).page(params[:page])
+    @regret_records = current_user.regret_records.order(created_at: :desc).page(params[:page]).per(9)
   end
 
   def show; end
