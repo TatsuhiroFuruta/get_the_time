@@ -40,6 +40,7 @@ RSpec.describe "RegretRecords", type: :system do
         expect(page).to have_content(
           I18n.t("defaults.flash_message.not_created", item: RegretRecord.model_name.human)
         )
+        expect(page).to have_content("後悔した内容を入力してください")
         expect(page).to have_current_path(new_regret_record_path)
       end
     end
@@ -79,6 +80,56 @@ RSpec.describe "RegretRecords", type: :system do
       click_link "← 一覧に戻る"
 
       expect(page).to have_current_path(regret_records_path)
+    end
+  end
+
+  describe "編集" do
+    let!(:regret_record) do
+      create(:regret_record, user: user, title: "編集前タイトル", content: "編集前の内容")
+    end
+
+    it "詳細画面の「編集する」から更新でき、詳細画面に反映されること" do
+      visit regret_record_path(regret_record)
+
+      click_link "編集"
+      expect(page).to have_current_path(edit_regret_record_path(regret_record))
+
+      fill_in "タイトル（任意）", with: "編集後タイトル"
+      fill_in "後悔した内容", with: "編集後の内容"
+      click_button "更新する"
+
+      aggregate_failures do
+        expect(page).to have_current_path(regret_record_path(regret_record))
+        expect(page).to have_content(
+          I18n.t("defaults.flash_message.updated", item: RegretRecord.model_name.human)
+        )
+        expect(page).to have_content("編集後タイトル")
+        expect(page).to have_content("編集後の内容")
+      end
+    end
+
+    it "後悔した内容が未入力では更新できないこと" do
+      visit edit_regret_record_path(regret_record)
+
+      fill_in "後悔した内容", with: ""
+
+      click_button "更新する"
+
+      aggregate_failures do
+        expect(page).to have_content(
+          I18n.t("defaults.flash_message.not_updated", item: RegretRecord.model_name.human)
+        )
+        expect(page).to have_content("後悔した内容を入力してください")
+        expect(page).to have_current_path(edit_regret_record_path(regret_record))
+      end
+    end
+
+    it "「キャンセル」をクリックすると詳細画面へ戻ること" do
+      visit edit_regret_record_path(regret_record)
+
+      click_link "キャンセル"
+
+      expect(page).to have_current_path(regret_record_path(regret_record))
     end
   end
 

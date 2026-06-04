@@ -55,6 +55,71 @@ RSpec.describe "RegretRecords", type: :request do
     end
   end
 
+  describe "GET /regret_records/:id/edit" do
+    it "自分の記録の編集画面が表示される" do
+      regret_record = create(:regret_record, user: user, content: "編集前の内容")
+
+      get edit_regret_record_path(regret_record)
+
+      aggregate_failures do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("編集前の内容")
+      end
+    end
+
+    it "他人の記録の編集画面にアクセスすると 404 を返す" do
+      other_regret_record = create(:regret_record, user: other_user)
+
+      get edit_regret_record_path(other_regret_record)
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "PATCH /regret_records/:id" do
+    let(:success_message) do
+      I18n.t("defaults.flash_message.updated", item: RegretRecord.model_name.human)
+    end
+
+    context "正常系" do
+      it "更新でき、詳細画面にリダイレクトされる" do
+        regret_record = create(:regret_record, user: user, content: "編集前の内容")
+
+        patch regret_record_path(regret_record), params: { regret_record: { content: "編集後の内容" } }
+
+        aggregate_failures do
+          expect(response).to redirect_to(regret_record_path(regret_record))
+          expect(flash[:notice]).to eq(success_message)
+          expect(regret_record.reload.content).to eq("編集後の内容")
+        end
+      end
+    end
+
+    context "異常系" do
+      it "内容が空では更新できない" do
+        regret_record = create(:regret_record, user: user, content: "編集前の内容")
+
+        patch regret_record_path(regret_record), params: { regret_record: { content: "" } }
+
+        aggregate_failures do
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(regret_record.reload.content).to eq("編集前の内容")
+        end
+      end
+    end
+
+    it "他人の記録を更新しようとすると 404 を返す" do
+      other_regret_record = create(:regret_record, user: other_user, content: "他人の内容")
+
+      patch regret_record_path(other_regret_record), params: { regret_record: { content: "改ざん" } }
+
+      aggregate_failures do
+        expect(response).to have_http_status(:not_found)
+        expect(other_regret_record.reload.content).to eq("他人の内容")
+      end
+    end
+  end
+
   describe "POST /regret_records" do
     let(:success_message) do
       I18n.t("defaults.flash_message.created", item: RegretRecord.model_name.human)

@@ -4,10 +4,10 @@
 
     <!-- タイトル -->
     <h2 class="text-center text-2xl md:text-3xl font-semibold mb-10">
-      後悔した1日の記録
+      後悔した1日の記録を編集
     </h2>
 
-    <%= render "form", regret_record: @regret_record, button_text: "登録する", button_class: "bg-blue-500 hover:bg-blue-600", cancel_path: regret_records_path %>
+    <%= render "form", regret_record: @regret_record, button_text: "更新する", button_class: "bg-green-700 hover:bg-green-800", cancel_path: regret_record_path(@regret_record) %>
 
   </div>
 </div>
