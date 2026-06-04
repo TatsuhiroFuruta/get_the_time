@@ -133,6 +133,28 @@ RSpec.describe "RegretRecords", type: :system do
     end
   end
 
+  describe "削除" do
+    let!(:regret_record) do
+      create(:regret_record, user: user, title: "削除する記録", content: "削除される内容")
+    end
+
+    it "詳細画面の「削除」をクリックすると一覧へ遷移し、記録が削除されていること" do
+      visit regret_record_path(regret_record)
+
+      accept_confirm do
+        click_link "削除"
+      end
+
+      aggregate_failures do
+        expect(page).to have_current_path(regret_records_path)
+        expect(page).to have_content(
+          I18n.t("defaults.flash_message.deleted", item: RegretRecord.model_name.human)
+        )
+        expect(page).not_to have_content("削除する記録")
+      end
+    end
+  end
+
   describe "マイページからの導線" do
     it "「後悔したと思ったら」をクリックすると新規作成フォームが表示されること" do
       visit mypage_path

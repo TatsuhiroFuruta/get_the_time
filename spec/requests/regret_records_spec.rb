@@ -173,4 +173,34 @@ RSpec.describe "RegretRecords", type: :request do
       end
     end
   end
+
+  describe "DELETE /regret_records/:id" do
+    let(:success_message) do
+      I18n.t("defaults.flash_message.deleted", item: RegretRecord.model_name.human)
+    end
+
+    it "自分の記録を削除でき、一覧にリダイレクトされる" do
+      regret_record = create(:regret_record, user: user)
+
+      expect {
+        delete regret_record_path(regret_record)
+      }.to change(user.regret_records, :count).by(-1)
+
+      aggregate_failures do
+        expect(response).to redirect_to(regret_records_path)
+        expect(flash[:notice]).to eq(success_message)
+      end
+    end
+
+    it "他人の記録を削除しようとすると 404 を返し、削除されない" do
+      other_regret_record = create(:regret_record, user: other_user)
+
+      aggregate_failures do
+        expect {
+          delete regret_record_path(other_regret_record)
+        }.not_to change(RegretRecord, :count)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
 end

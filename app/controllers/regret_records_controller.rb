@@ -1,5 +1,5 @@
 class RegretRecordsController < ApplicationController
-  before_action :set_regret_record, only: %i[show edit update]
+  before_action :set_regret_record, only: %i[show edit update destroy]
 
   def index
     @regret_records = current_user.regret_records.order(created_at: :desc).page(params[:page]).per(9)
@@ -30,6 +30,11 @@ class RegretRecordsController < ApplicationController
       flash.now[:alert] = t("defaults.flash_message.not_created", item: RegretRecord.model_name.human)
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @regret_record.destroy!
+    redirect_to regret_records_path, notice: t("defaults.flash_message.deleted", item: RegretRecord.model_name.human), status: :see_other
   end
 
   private
