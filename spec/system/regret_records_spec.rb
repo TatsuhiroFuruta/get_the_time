@@ -114,6 +114,47 @@ RSpec.describe "RegretRecords", type: :system do
     end
   end
 
+  describe "ページネーション" do
+    context "記録が10件以上あるとき" do
+      before do
+        # 10件作成（per_page: 9 を超える件数）
+        10.times { |i| create(:regret_record, user: user, content: "後悔#{i + 1}") }
+        visit regret_records_path
+      end
+
+      it "1ページ目には9件まで表示されること" do
+        within('[data-test="regret-records-list"]') do
+          expect(page).to have_selector("a", count: 9)
+        end
+      end
+
+      it "ページネーションリンクが表示されること" do
+        expect(page).to have_selector('[data-test="pagination"]')
+      end
+
+      it "2ページ目をクリックすると残りのレコードが表示されること" do
+        click_on "2"
+
+        aggregate_failures do
+          expect(page).to have_current_path(regret_records_path, ignore_query: true)
+          # created_at: desc 順なので、最初に作った「後悔1」が2ページ目に来る
+          expect(page).to have_content("後悔1")
+        end
+      end
+    end
+
+    context "記録が9件以下のとき" do
+      before do
+        9.times { create(:regret_record, user: user) }
+        visit regret_records_path
+      end
+
+      it "ページネーションリンクが表示されないこと" do
+        expect(page).not_to have_selector('[data-test="pagination"]')
+      end
+    end
+  end
+
   describe "一覧画面からの導線" do
     it "「後悔した1日を投稿」をクリックすると新規作成フォームが表示されること" do
       visit regret_records_path
