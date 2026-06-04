@@ -1,0 +1,37 @@
+<div class="min-h-screen bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% text-white/90">
+
+  <!-- 戻るボタン -->
+  <%= link_to "← 一覧に戻る", regret_records_path, class: "mt-6 ml-6 mb-10 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
+
+  <div class="w-full max-w-2xl px-10 mx-auto pb-20">
+
+    <h1 class="text-2xl font-bold text-center mb-10">
+      後悔した1日の記録詳細
+    </h1>
+
+    <!-- 日時 -->
+    <div class="mb-8">
+      <p class="mb-2 text-sm">記録した日時</p>
+      <div class="bg-violet-800 rounded-lg px-6 py-4">
+        <%= format_datetime(@regret_record.created_at) %>
+      </div>
+    </div>
+
+    <!-- タイトル -->
+    <div class="mb-8">
+      <p class="mb-2 text-sm">タイトル</p>
+      <div class="bg-violet-800 rounded-lg px-6 py-4 wrap-break-word">
+        <%= @regret_record.title.presence || "（未入力）" %>
+      </div>
+    </div>
+
+    <!-- 後悔した内容 -->
+    <div class="mb-8">
+      <p class="mb-2 text-sm">後悔した内容</p>
+      <div class="bg-violet-800 rounded-lg px-6 py-4 whitespace-pre-wrap wrap-break-word">
+        <%= @regret_record.content %>
+      </div>
+    </div>
+
+  </div>
+</div>

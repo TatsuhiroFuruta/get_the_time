@@ -1,7 +1,11 @@
 class RegretRecordsController < ApplicationController
+  before_action :set_regret_record, only: %i[show]
+
   def index
     @regret_records = current_user.regret_records.order(created_at: :desc).page(params[:page])
   end
+
+  def show; end
 
   def new
     @regret_record = current_user.regret_records.build
@@ -18,6 +22,10 @@ class RegretRecordsController < ApplicationController
   end
 
   private
+
+  def set_regret_record
+    @regret_record = current_user.regret_records.find(params[:id])
+  end
 
   def regret_record_params
     params.require(:regret_record).permit(:title, :content)
