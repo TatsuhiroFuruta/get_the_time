@@ -22,8 +22,8 @@
 
   <!-- ボタン -->
   <div class="flex justify-center gap-6 pt-6">
-    <%= f.submit "登録する", class: "bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-full text-white/90 transition duration-200 shadow-md" %>
-    <%= link_to "キャンセル", regret_records_path, class: "px-6 py-2 rounded-full bg-red-500 text-white/90 hover:bg-red-600 transition duration-200 shadow-md" %>
+    <%= f.submit button_text, class: "#{button_class} px-6 py-2 rounded-full text-white/90 transition duration-200 shadow-md" %>
+    <%= link_to "キャンセル", cancel_path, class: "px-6 py-2 rounded-full bg-red-500 text-white/90 hover:bg-red-600 transition duration-200 shadow-md" %>
   </div>
 
 <% end %>
