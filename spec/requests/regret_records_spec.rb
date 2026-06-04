@@ -34,6 +34,27 @@ RSpec.describe "RegretRecords", type: :request do
     end
   end
 
+  describe "GET /regret_records/:id" do
+    it "自分の記録の詳細が表示される" do
+      regret_record = create(:regret_record, user: user, content: "自分の後悔")
+
+      get regret_record_path(regret_record)
+
+      aggregate_failures do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("自分の後悔")
+      end
+    end
+
+    it "他人の記録にアクセスすると 404 を返す" do
+      other_regret_record = create(:regret_record, user: other_user)
+
+      get regret_record_path(other_regret_record)
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "POST /regret_records" do
     let(:success_message) do
       I18n.t("defaults.flash_message.created", item: RegretRecord.model_name.human)

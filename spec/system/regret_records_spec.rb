@@ -53,6 +53,35 @@ RSpec.describe "RegretRecords", type: :system do
     end
   end
 
+  describe "詳細画面" do
+    let!(:regret_record) do
+      create(:regret_record, user: user, title: "ダラダラした日", content: "やるべきことに手をつけられなかった")
+    end
+
+    it "一覧の記録をクリックすると詳細画面が表示されること" do
+      visit regret_records_path
+
+      within('[data-test="regret-records-list"]') do
+        click_link "ダラダラした日"
+      end
+
+      aggregate_failures do
+        expect(page).to have_current_path(regret_record_path(regret_record))
+        expect(page).to have_content("後悔した1日の記録詳細")
+        expect(page).to have_content("ダラダラした日")
+        expect(page).to have_content("やるべきことに手をつけられなかった")
+      end
+    end
+
+    it "「一覧に戻る」をクリックすると一覧へ戻ること" do
+      visit regret_record_path(regret_record)
+
+      click_link "← 一覧に戻る"
+
+      expect(page).to have_current_path(regret_records_path)
+    end
+  end
+
   describe "マイページからの導線" do
     it "「後悔したと思ったら」をクリックすると新規作成フォームが表示されること" do
       visit mypage_path

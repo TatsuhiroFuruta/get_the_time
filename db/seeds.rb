@@ -48,3 +48,29 @@ dark_time = user.dark_time || user.create_dark_time!(
     light_time: light_time
   )
 end
+
+# RegretRecordを作成（一覧の体裁確認用にバリエーションを持たせる）
+if user.regret_records.empty?
+  # ランダムな通常データ
+  20.times do
+    user.regret_records.create!(
+      title: [ Faker::Lorem.sentence(word_count: rand(2..6)), nil ].sample,
+      content: Faker::Lorem.paragraph(sentence_count: rand(1..8)),
+      created_at: Faker::Time.backward(days: 30)
+    )
+  end
+
+  # レイアウトが崩れやすいエッジケース
+  user.regret_records.create!(
+    title: "とても長いタイトルを入力したときにカードの高さが崩れないか確認するためのダミータイトルです" * 2,
+    content: "短い内容"
+  )
+  user.regret_records.create!(
+    title: nil,
+    content: "タイトル無し・本文のみのパターン。" + Faker::Lorem.paragraph(sentence_count: 10)
+  )
+  user.regret_records.create!(
+    title: "スペースなし長文字列",
+    content: "https://example.com/" + ("a" * 120)
+  )
+end
