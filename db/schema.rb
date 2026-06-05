@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_03_063444) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_05_061430) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -81,6 +81,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_03_063444) do
   create_table "regret_records", force: :cascade do |t|
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.boolean "favorited", default: false, null: false
     t.text "title"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false

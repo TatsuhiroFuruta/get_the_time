@@ -155,6 +155,83 @@ RSpec.describe "RegretRecords", type: :system do
     end
   end
 
+  describe "お気に入り" do
+    context "お気に入りトグル" do
+      let!(:regret_record) do
+        create(:regret_record, user: user, title: "お気に入り対象", content: "本質的な後悔")
+      end
+
+      it "☆ をクリックすると ★ に切り替わり、レコードが favorited になること" do
+        visit regret_records_path
+
+        within('[data-test="regret-records-list"]') do
+          expect(page).to have_button("お気に入りに追加")
+          click_on "お気に入りに追加"
+          expect(page).to have_button("お気に入りを解除")
+        end
+
+        expect(regret_record.reload.favorited).to be true
+      end
+
+      it "★ をクリックすると ☆ に戻り、favorited が false になること" do
+        regret_record.update!(favorited: true)
+        visit regret_records_path
+
+        within('[data-test="regret-records-list"]') do
+          expect(page).to have_button("お気に入りを解除")
+          click_on "お気に入りを解除"
+          expect(page).to have_button("お気に入りに追加")
+        end
+
+        expect(regret_record.reload.favorited).to be false
+      end
+    end
+
+    context "お気に入りで絞り込みするとき" do
+      before do
+        create(:regret_record, user: user, title: "お気に入り対象", favorited: true)
+        create(:regret_record, user: user, title: "通常レコード", favorited: false)
+      end
+
+      it "「★ お気に入り」タブをクリックするとお気に入りのみ表示されること" do
+        visit regret_records_path
+        click_on "★ お気に入り"
+
+        aggregate_failures do
+          expect(page).to have_content("お気に入り対象")
+          expect(page).not_to have_content("通常レコード")
+        end
+      end
+
+      it "「すべて」タブをクリックすると全件表示されること" do
+        visit regret_records_path(q: { favorited_eq: true })
+
+        # まずお気に入りのみ表示されていることを確認
+        expect(page).to have_content("お気に入り対象")
+        expect(page).not_to have_content("通常レコード")
+
+        click_on "すべて"
+
+        aggregate_failures do
+          expect(page).to have_content("お気に入り対象")
+          expect(page).to have_content("通常レコード")
+        end
+      end
+    end
+
+    context "お気に入りタブでお気に入りが1件もないとき" do
+      before do
+        create(:regret_record, user: user, favorited: false)
+      end
+
+      it "お気に入り未登録のメッセージが表示されること" do
+        visit regret_records_path
+        click_on "★ お気に入り"
+        expect(page).to have_content("お気に入りの記録がありません。★をクリックして追加できます")
+      end
+    end
+  end
+
   describe "マイページからの導線" do
     it "「後悔したと思ったら」をクリックすると新規作成フォームが表示されること" do
       visit mypage_path

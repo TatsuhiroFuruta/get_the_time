@@ -56,7 +56,11 @@ Rails.application.routes.draw do
   resource :pomodoro_setting, only: %i[update]
 
   # 後悔した1日の記録
-  resources :regret_records
+  resources :regret_records do
+    member do
+      patch :favorite        # お気に入りトグル
+    end
+  end
 
   # 使い方ページ
   get "/how_to_use", to: "static_pages#how_to_use", as: "how_to_use"

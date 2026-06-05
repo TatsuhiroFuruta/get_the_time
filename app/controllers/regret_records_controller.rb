@@ -1,8 +1,9 @@
 class RegretRecordsController < ApplicationController
-  before_action :set_regret_record, only: %i[show edit update destroy]
+  before_action :set_regret_record, only: %i[show edit update destroy favorite]
 
   def index
-    @regret_records = current_user.regret_records.order(created_at: :desc).page(params[:page]).per(9)
+    @q = current_user.regret_records.ransack(params[:q])
+    @regret_records = @q.result.order(created_at: :desc).page(params[:page]).per(9)
   end
 
   def show; end
@@ -35,6 +36,15 @@ class RegretRecordsController < ApplicationController
   def destroy
     @regret_record.destroy!
     redirect_to regret_records_path, notice: t("defaults.flash_message.deleted", item: RegretRecord.model_name.human), status: :see_other
+  end
+
+  def favorite
+    @regret_record.update!(favorited: !@regret_record.favorited)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to regret_records_path }
+    end
   end
 
   private
