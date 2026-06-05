@@ -35,4 +35,14 @@ RSpec.describe RegretRecord, type: :model do
       expect(regret_record.errors[:user]).to be_present
     end
   end
+
+  describe "ransack の検索可能カラム" do
+    it "検索可能なカラムが favorited のみであること" do
+      expect(described_class.ransackable_attributes).to eq [ "favorited" ]
+    end
+
+    it "検索可能な関連付けが無いこと" do
+      expect(described_class.ransackable_associations).to eq []
+    end
+  end
 end

@@ -203,4 +203,53 @@ RSpec.describe "RegretRecords", type: :request do
       end
     end
   end
+
+  describe "PATCH /regret_records/:id/favorite" do
+    let!(:regret_record) { create(:regret_record, user: user, favorited: false) }
+
+    context "favorited が false のとき" do
+      it "true にトグルされること" do
+        expect {
+          patch favorite_regret_record_path(regret_record)
+        }.to change { regret_record.reload.favorited }.from(false).to(true)
+      end
+
+      it "turbo_stream リクエストで 200 を返すこと" do
+        patch favorite_regret_record_path(regret_record),
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        aggregate_failures do
+          expect(response).to have_http_status(:ok)
+          expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        end
+      end
+
+      it "html リクエストで一覧ページへリダイレクトすること" do
+        patch favorite_regret_record_path(regret_record)
+        expect(response).to redirect_to(regret_records_path)
+      end
+    end
+
+    context "favorited が true のとき" do
+      before { regret_record.update!(favorited: true) }
+
+      it "false にトグルされること" do
+        expect {
+          patch favorite_regret_record_path(regret_record)
+        }.to change { regret_record.reload.favorited }.from(true).to(false)
+      end
+    end
+
+    context "他ユーザーのレコードに対して操作すると" do
+      let!(:other_regret_record) { create(:regret_record, user: other_user, favorited: false) }
+
+      it "更新できず 404 を返すこと" do
+        aggregate_failures do
+          expect {
+            patch favorite_regret_record_path(other_regret_record)
+          }.not_to change { other_regret_record.reload.favorited }
+          expect(response).to have_http_status(:not_found)
+        end
+      end
+    end
+  end
 end

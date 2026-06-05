@@ -1,0 +1,11 @@
+<% favorited_active = q.favorited_eq.to_s == "true" %>
+
+<!-- お気に入り絞り込みタブ -->
+<div class="flex justify-center gap-2 mb-8">
+  <%= link_to "すべて",
+              regret_records_path,
+              class: "px-5 py-2 rounded-full font-bold transition duration-200 #{favorited_active ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-blue-500 text-white/90'}" %>
+  <%= link_to "★ お気に入り",
+              regret_records_path(q: { favorited_eq: true }),
+              class: "px-5 py-2 rounded-full font-bold transition duration-200 #{favorited_active ? 'bg-blue-500 text-white/90' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}" %>
+</div>
