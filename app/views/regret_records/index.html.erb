@@ -15,6 +15,9 @@
   <!-- お気に入り絞り込み -->
   <%= render "favorite_filter", q: @q %>
 
+  <!-- AIによる後悔の傾向まとめ -->
+  <%= render "regret_summaries/regret_summary" %>
+
   <% if @regret_records.present? %>
     <div class="w-80 md:w-full max-w-5xl mx-auto">
       <!-- 一覧 -->

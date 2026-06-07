@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_one :purification_time, dependent: :destroy
   has_one :pomodoro_setting, dependent: :destroy
   has_many :regret_records, dependent: :destroy
+  has_one :regret_summary, dependent: :destroy
 
   after_create :create_pomodoro_setting
 end

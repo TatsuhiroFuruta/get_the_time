@@ -11,3 +11,12 @@ ja:
   activity_records:
     flash_message:
       require_timer_access: ポモドーロタイマーからアクセスしてください
+  regret_summaries:
+    flash_message:
+      generated: 後悔の傾向を要約しました
+      no_favorites: お気に入りの記録がありません。★をつけてから要約してください
+      generation_failed: 要約の生成に失敗しました。時間をおいて再度お試しください
+      rate_limited: 短時間に要約を実行しすぎです。しばらくしてから再度お試しください
+      appended: 闇の時間の特徴に追記しました
+      summary_not_found: 先に要約を作成してください
+      dark_time_not_found: 先に闇の時間を登録してください
