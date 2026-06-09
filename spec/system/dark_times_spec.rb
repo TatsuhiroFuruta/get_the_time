@@ -123,6 +123,17 @@ RSpec.describe "DarkTimes", type: :system do
 
       expect(page).to have_current_path(mypage_path)
     end
+
+    it "避けたい未来・特徴の改行が保持されて表示される" do
+      dark_time.update!(unwanted_future: "未来1\n未来2", characteristic: "特徴1\n特徴2")
+
+      visit dark_time_path
+
+      aggregate_failures do
+        expect(page).to have_css("div.whitespace-pre-wrap", text: "未来1")
+        expect(page).to have_css("div.whitespace-pre-wrap", text: "特徴1")
+      end
+    end
   end
 
   describe "DarkTimeが未作成の場合" do

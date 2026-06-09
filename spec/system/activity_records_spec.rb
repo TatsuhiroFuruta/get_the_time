@@ -610,6 +610,14 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
     it "「削除」リンクが表示されること" do
       expect(page).to have_link("削除")
     end
+
+    it "コメントの改行が保持されて表示されること" do
+      activity_record.update!(comment: "コメント1\nコメント2")
+
+      visit activity_record_path(activity_record)
+
+      expect(page).to have_css("div.whitespace-pre-wrap", text: "コメント1")
+    end
   end
 
   # =========================================================
