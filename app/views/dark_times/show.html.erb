@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100%">
+<div class="min-h-screen pb-16 bg-linear-to-b from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100%">
 
   <!-- 戻るボタン -->
   <%= link_to "← マイページに戻る", mypage_path, class: "mt-6 ml-6 mb-20 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
@@ -20,17 +20,13 @@
     <!-- 避けたい未来 -->
     <div class="mb-8">
       <p class="mb-2 text-sm">避けたい未来</p>
-      <div class="bg-violet-800 rounded-lg px-6 py-4">
-        <%= @dark_time.unwanted_future.presence || "これから考える" %>
-      </div>
+      <div class="bg-violet-800 rounded-lg px-6 py-4 whitespace-pre-wrap wrap-break-word"><%= @dark_time.unwanted_future.presence || "これから考える" %></div>
     </div>
 
     <!-- 闇の時間の特徴 -->
     <div class="mb-16">
       <p class="mb-2 text-sm">闇の時間の特徴</p>
-      <div class="bg-violet-800 rounded-lg px-6 py-4">
-        <%= @dark_time.characteristic.presence || "これから見つけていく" %>
-      </div>
+      <div class="bg-violet-800 rounded-lg px-6 py-4 whitespace-pre-wrap wrap-break-word"><%= @dark_time.characteristic.presence || "これから見つけていく" %></div>
     </div>
 
     <!-- 編集ボタン -->

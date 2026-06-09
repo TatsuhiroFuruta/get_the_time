@@ -70,6 +70,17 @@ RSpec.describe "LightTimes", type: :system do
 
         expect(page).to have_current_path(mypage_path)
       end
+
+      it "なりたい自分・特徴の改行が保持されて表示されること" do
+        light_time.update!(desired_self: "自分1\n自分2", characteristic: "特徴1\n特徴2")
+
+        visit light_time_path(light_time)
+
+        aggregate_failures do
+          expect(page).to have_css("div.whitespace-pre-wrap", text: "自分1")
+          expect(page).to have_css("div.whitespace-pre-wrap", text: "特徴1")
+        end
+      end
     end
 
     describe "編集" do

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
+<div class="min-h-screen pb-16 bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
 
 <!-- 戻るボタン -->
     <%= link_to "← 活動記録一覧", activity_records_path, class: "mt-6 ml-6 mb-20 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
@@ -82,9 +82,7 @@
     <!-- コメント -->
     <div class="mb-12">
       <p class="mb-2">コメント</p>
-      <div class="bg-amber-500 rounded-lg px-6 py-4">
-        <%= @activity_record.comment.presence || "なし" %>
-      </div>
+      <div class="bg-amber-500 rounded-lg px-6 py-4 whitespace-pre-wrap wrap-break-word text-left"><%= @activity_record.comment.presence || "なし" %></div>
     </div>
 
     <!-- 編集ボタン -->
