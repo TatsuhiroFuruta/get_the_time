@@ -27,6 +27,7 @@
                       method: :patch,
                       form: { data: { turbo_frame: "_top" }, class: "inline-block" },
                       class: "px-5 py-2 rounded-full bg-blue-500 hover:bg-blue-600 font-semibold transition duration-200" %>
+        <p class="text-xs text-white/60 mt-2">お気に入りのうち最新<%= RegretSummarizer::MAX_RECORDS %>件をもとに要約します。</p>
       <% else %>
         <p class="text-xs text-white/60">★お気に入りに登録すると要約できます</p>
       <% end %>

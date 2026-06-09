@@ -24,6 +24,9 @@ RSpec.describe "RegretSummaries", type: :system do
       it "要約を生成して表示し、闇の時間の特徴へ追記できること" do
         visit regret_records_path
 
+        # 要約対象の件数上限が案内されている
+        expect(page).to have_content("最新#{RegretSummarizer::MAX_RECORDS}件")
+
         click_on "要約する"
 
         # 要約パネルに生成結果と追記ボタンが表示される
