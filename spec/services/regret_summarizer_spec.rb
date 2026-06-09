@@ -50,6 +50,17 @@ RSpec.describe RegretSummarizer do
       expect(numbered_lines.size).to eq(RegretSummarizer::MAX_RECORDS)
     end
 
+    it "ちょうど MAX_RECORDS 件のときは全件含めること" do
+      RegretSummarizer::MAX_RECORDS.times do |i|
+        create(:regret_record, user: user, favorited: true, content: "後悔#{i}")
+      end
+
+      RegretSummarizer.new(user).call
+
+      numbered_lines = captured_user_prompt.scan(/^\d+\. /)
+      expect(numbered_lines.size).to eq(RegretSummarizer::MAX_RECORDS)
+    end
+
     it "1件あたり MAX_CHARS_PER_RECORD を超える内容は切り詰めること" do
       long_content = "あ" * 400
       create(:regret_record, user: user, favorited: true, content: long_content)
@@ -57,6 +68,15 @@ RSpec.describe RegretSummarizer do
       RegretSummarizer.new(user).call
 
       expect(captured_user_prompt).not_to include(long_content)
+    end
+
+    it "ちょうど MAX_CHARS_PER_RECORD 文字の内容は切り詰めないこと" do
+      exact_content = "あ" * RegretSummarizer::MAX_CHARS_PER_RECORD
+      create(:regret_record, user: user, favorited: true, content: exact_content)
+
+      RegretSummarizer.new(user).call
+
+      expect(captured_user_prompt).to include(exact_content)
     end
 
     it "お気に入りが0件のときは NoFavoritesError を投げること" do
