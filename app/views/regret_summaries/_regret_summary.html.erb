@@ -1,0 +1,36 @@
+<% regret_summary = current_user.regret_summary %>
+<% has_favorites = current_user.regret_records.exists?(favorited: true) %>
+
+<%= turbo_frame_tag "regret_summary", class: "block w-80 md:w-full max-w-5xl mx-auto mb-8" do %>
+  <div class="bg-violet-800 text-white/90 rounded-lg shadow px-6 py-5">
+    <h2 class="text-lg font-bold mb-3">AIによる後悔の傾向まとめ</h2>
+
+    <% if regret_summary.present? %>
+      <p class="text-sm whitespace-pre-wrap wrap-break-word mb-3"><%= regret_summary.content %></p>
+      <p class="text-xs text-white/60 mb-4">生成日時: <%= format_datetime(regret_summary.generated_at) %></p>
+
+      <%= button_to "闇の時間の特徴へ追記する",
+                    append_to_dark_time_regret_summary_path,
+                    method: :patch,
+                    form: { data: { turbo_frame: "_top" }, class: "inline-block" },
+                    class: "px-5 py-2 rounded-full bg-green-700 hover:bg-green-800 font-semibold transition duration-200" %>
+    <% else %>
+      <p class="text-sm text-white/80 mb-4">
+        お気に入り（★）に登録した記録をもとに、闇の時間に陥りやすい傾向をAIが要約します。
+      </p>
+    <% end %>
+
+    <div class="mt-4">
+      <% if has_favorites %>
+        <%= button_to regret_summary.present? ? "再要約する" : "要約する",
+                      generate_regret_summary_path,
+                      method: :patch,
+                      form: { data: { turbo_frame: "_top" }, class: "inline-block" },
+                      class: "px-5 py-2 rounded-full bg-blue-500 hover:bg-blue-600 font-semibold transition duration-200" %>
+        <p class="text-xs text-white/60 mt-2">お気に入りのうち最新<%= RegretSummarizer::MAX_RECORDS %>件をもとに要約します。</p>
+      <% else %>
+        <p class="text-xs text-white/60">★お気に入りに登録すると要約できます</p>
+      <% end %>
+    </div>
+  </div>
+<% end %>
