@@ -17,6 +17,13 @@ RSpec.describe RegretSummarizer do
     args[:parameters][:messages].last[:content]
   end
 
+  # チャットに渡された system プロンプト本文を取り出すヘルパ
+  def captured_system_prompt
+    args = nil
+    expect(client).to have_received(:chat) { |a| args = a }
+    args[:parameters][:messages].first[:content]
+  end
+
   describe "#call" do
     it "OpenAI の応答テキストを返すこと" do
       create(:regret_record, user: user, favorited: true)
@@ -77,6 +84,17 @@ RSpec.describe RegretSummarizer do
       RegretSummarizer.new(user).call
 
       expect(captured_user_prompt).to include(exact_content)
+    end
+
+    it "システムプロンプトに診断・断定を避ける指示を含めること" do
+      create(:regret_record, user: user, favorited: true)
+
+      RegretSummarizer.new(user).call
+
+      aggregate_failures do
+        expect(captured_system_prompt).to include("診断")
+        expect(captured_system_prompt).to include("断定を避け")
+      end
     end
 
     it "お気に入りが0件のときは NoFavoritesError を投げること" do
