@@ -14,5 +14,7 @@ class ApplicationController < ActionController::Base
   def configure_permitted_parameters
     # 名前を新規登録する場合に必要
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :name ])
+    # 名前をアカウント編集で更新する場合に必要
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name ])
   end
 end

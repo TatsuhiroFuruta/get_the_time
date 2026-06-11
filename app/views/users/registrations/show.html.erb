@@ -1,0 +1,34 @@
+<div class="bg-[url('bg_light_and_darkness_narrow.png')] md:bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center min-h-screen pb-16">
+
+  <!-- 戻るボタン -->
+  <%= link_to "← マイページに戻る", mypage_path, class: "mt-6 ml-6 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
+
+  <div class="flex items-center justify-center px-6 mt-10">
+    <div class="w-full max-w-md bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-2xl shadow-2xl p-8 text-zinc-800">
+
+      <h2 class="text-center text-2xl font-bold mb-8">アカウント情報</h2>
+
+      <!-- 名前 -->
+      <div class="mb-6">
+        <p class="text-sm font-medium mb-1">名前</p>
+        <div class="bg-gray-200 rounded-md border border-gray-400 px-3 py-2 wrap-break-word">
+          <%= @user.name %>
+        </div>
+      </div>
+
+      <!-- メールアドレス -->
+      <div class="mb-8">
+        <p class="text-sm font-medium mb-1">メールアドレス</p>
+        <div class="bg-gray-200 rounded-md border border-gray-400 px-3 py-2 wrap-break-word">
+          <%= @user.email %>
+        </div>
+      </div>
+
+      <!-- 編集ボタン -->
+      <div class="text-center">
+        <%= link_to "編集する", edit_user_registration_path, class: "inline-block bg-green-700 hover:bg-green-800 px-6 py-2 rounded-full text-white/90 font-semibold transition duration-200 shadow-md" %>
+      </div>
+
+    </div>
+  </div>
+</div>

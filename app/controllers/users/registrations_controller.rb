@@ -3,6 +3,15 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]
+  # Devise の authenticate_user! は devise_controller 内では force: true 無しだと素通りするため、
+  # show を認証必須にするには force: true を明示的に渡す必要がある
+  before_action -> { authenticate_user!(force: true) }, only: [ :show ]
+
+  # GET /users/account
+  # アカウント情報画面
+  def show
+    @user = current_user
+  end
 
   # GET /resource/sign_up
   # def new
@@ -53,6 +62,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # サインアップ後に遷移するパスの指定
   def after_sign_up_path_for(resource)
     root_path
+  end
+
+  # アカウント更新後に遷移するパスの指定（アカウント情報画面へ）
+  def after_update_path_for(resource)
+    user_account_path
   end
 
   # The path used after sign up for inactive accounts.

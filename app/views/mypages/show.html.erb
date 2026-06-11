@@ -1,9 +1,7 @@
 <div class="pb-20 md:pb-0 min-h-screen bg-[url('bg_light_and_darkness_narrow.png')] md:bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center overflow-hidden">
 
   <!-- 🔹 ハンバーガーメニュー -->
-  <% if both_times_present?(@dark_time, @light_time) %>
-    <%= render "shared/hamburger_menu" %>
-  <% end %>
+  <%= render "shared/hamburger_menu" %>
 
   <!-- 🔹 右上ユーザーメニュー -->
   <div class="flex justify-end px-6 pt-6">
