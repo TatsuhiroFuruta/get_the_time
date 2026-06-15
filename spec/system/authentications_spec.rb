@@ -68,6 +68,7 @@ RSpec.describe "Authentications", type: :system do
     click_button "ログイン"
 
     # ログイン後のリダイレクト完了を待ってからログアウト操作
+    expect(page).to have_content(I18n.t("devise.sessions.signed_in"))
     expect(page).to have_link("ログアウト")
     click_link "ログアウト"
 
