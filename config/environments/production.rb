@@ -57,6 +57,11 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
+  # メール送信は Resend を利用する。API キーは config/initializers/resend.rb で設定。
+  config.action_mailer.delivery_method = :resend
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "get-the-time.com" }
 
