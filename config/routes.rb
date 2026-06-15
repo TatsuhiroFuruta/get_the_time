@@ -1,7 +1,13 @@
 Rails.application.routes.draw do
+  # 送信メールをブラウザで確認する（開発環境のみ）
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
+  end
+
   devise_for :users, controllers: {
     registrations: "users/registrations",
-    sessions: "users/sessions"
+    sessions: "users/sessions",
+    passwords: "users/passwords"
   }
 
   # アカウント情報画面

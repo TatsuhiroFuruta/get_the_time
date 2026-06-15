@@ -17,4 +17,11 @@ class User < ApplicationRecord
   has_one :regret_summary, dependent: :destroy
 
   after_create :create_pomodoro_setting
+
+  # Devise のメール（パスワード再設定等）を同期送信する。
+  # 本番にバックグラウンドワーカー（Solid Queue）を常駐させなくても
+  # 確実にメールが届くよう、deliver_later ではなく deliver_now を使う。
+  def send_devise_notification(notification, *args)
+    devise_mailer.send(notification, self, *args).deliver_now
+  end
 end

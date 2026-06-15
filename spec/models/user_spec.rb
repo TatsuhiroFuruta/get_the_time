@@ -112,5 +112,24 @@ RSpec.describe User, type: :model do
 
       expect(user).to be_valid
     end
+
+    it "6文字未満だと無効" do
+      user = build(:user,
+        password: "pass1",
+        password_confirmation: "pass1"
+      )
+
+      expect(user).to be_invalid
+      expect(user.errors[:password]).to be_present
+    end
+
+    it "6文字以上なら有効" do
+      user = build(:user,
+        password: "pass12",
+        password_confirmation: "pass12"
+      )
+
+      expect(user).to be_valid
+    end
   end
 end

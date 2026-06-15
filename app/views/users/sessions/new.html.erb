@@ -30,8 +30,13 @@
         </div>
       <% end %>
 
-      <div class="mt-4 text-md text-center">
-        <%= link_to "新規登録はこちら", new_registration_path(resource_name), class: "text-blue-600 hover:underline" %>
+      <div class="mt-4 text-md text-center space-y-2">
+        <div>
+          <%= link_to "新規登録はこちら", new_registration_path(resource_name), class: "text-blue-600 hover:underline" %>
+        </div>
+        <div>
+          <%= link_to "パスワードをお忘れですか？", new_password_path(resource_name), class: "text-blue-600 hover:underline" %>
+        </div>
       </div>
 
     </div>

@@ -1,16 +1,31 @@
-<h2>Forgot your password?</h2>
+<div class="bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center min-h-screen">
+  <%= link_to "Get The Time", root_path, class: "mt-4 ml-6 inline-block bg-[url('grab_the_light.png')] bg-contain bg-center bg-black/90 bg-no-repeat text-white/90 px-2 md:px-4 py-2 rounded-lg text-sm md:text-base" %>
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="w-80 md:w-full max-w-md bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-2xl shadow-2xl p-8 text-zinc-800">
 
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-  <%= render "users/shared/error_messages", resource: resource %>
+      <h2 class="text-center text-2xl font-bold mb-6">パスワードの再設定</h2>
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+      <p class="text-sm mb-6">
+        登録済みのメールアドレスを入力してください。パスワード再設定用のリンクをお送りします。
+      </p>
+
+      <%= form_with(model: resource, as: resource_name, url: password_path(resource_name), method: :post, class: "space-y-4") do |f| %>
+        <%= render "users/shared/error_messages", resource: resource %>
+
+        <div>
+          <%= f.label :email, "メールアドレス", class: "block text-sm font-medium mb-1" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full bg-gray-200 rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+        </div>
+
+        <div>
+          <%= f.submit "再設定用のメールを送信する", class: "w-full py-2 rounded-md bg-blue-500 text-white/90 font-semibold hover:bg-blue-600 transition duration-200 shadow-md" %>
+        </div>
+      <% end %>
+
+      <div class="mt-4 text-md text-center">
+        <%= link_to "ログインはこちら", new_session_path(resource_name), class: "text-blue-600 hover:underline" %>
+      </div>
+
+    </div>
   </div>
-
-  <div class="actions">
-    <%= f.submit "Send me password reset instructions" %>
-  </div>
-<% end %>
-
-<%= render "users/shared/links" %>
+</div>
