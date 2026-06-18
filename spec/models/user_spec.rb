@@ -132,4 +132,85 @@ RSpec.describe User, type: :model do
       expect(user).to be_valid
     end
   end
+
+  # =========================================================
+  # .from_omniauth（Google 認証）
+  # =========================================================
+  describe ".from_omniauth" do
+    def build_auth(email:, name: "グーグル太郎", uid: "uid-123")
+      OmniAuth::AuthHash.new(
+        provider: "google_oauth2",
+        uid: uid,
+        info: { email: email, name: name }
+      )
+    end
+
+    context "未登録のメールアドレスの場合" do
+      it "provider/uid/名前を設定した新規ユーザーを作成する" do
+        auth = build_auth(email: "new@example.com", name: "新規太郎")
+
+        expect {
+          @user = described_class.from_omniauth(auth)
+        }.to change(described_class, :count).by(1)
+
+        aggregate_failures do
+          expect(@user).to be_persisted
+          expect(@user.email).to eq("new@example.com")
+          expect(@user.provider).to eq("google_oauth2")
+          expect(@user.uid).to eq("uid-123")
+          expect(@user.name).to eq("新規太郎")
+          # ランダムパスワードが設定され、有効なレコードになっている
+          expect(@user.encrypted_password).to be_present
+        end
+      end
+    end
+
+    context "同じメールアドレスの既存ユーザーがいる場合" do
+      let!(:existing_user) { create(:user, email: "existing@example.com", name: "既存花子") }
+
+      it "新規作成せず既存ユーザーに provider/uid を紐付ける" do
+        auth = build_auth(email: "existing@example.com", name: "別の名前")
+
+        expect {
+          described_class.from_omniauth(auth)
+        }.not_to change(described_class, :count)
+
+        existing_user.reload
+        aggregate_failures do
+          expect(existing_user.provider).to eq("google_oauth2")
+          expect(existing_user.uid).to eq("uid-123")
+          # 既存ユーザーの名前は上書きしない
+          expect(existing_user.name).to eq("既存花子")
+        end
+      end
+
+      it "既存ユーザーのパスワードを上書きしない" do
+        original_encrypted = existing_user.encrypted_password
+        auth = build_auth(email: "existing@example.com")
+
+        described_class.from_omniauth(auth)
+
+        expect(existing_user.reload.encrypted_password).to eq(original_encrypted)
+      end
+    end
+
+    context "provider/uid で連携済みのユーザーがメールアドレスを変更した場合" do
+      # 過去に Google 連携済み（uid 保存済み）のユーザー
+      let!(:linked_user) do
+        create(:user, email: "old@example.com", name: "連携済み太郎",
+               provider: "google_oauth2", uid: "uid-123")
+      end
+
+      it "メールが変わっても uid で同一ユーザーを引き当て、新規作成しない" do
+        # Google 側で別のメールアドレスになって戻ってきた（uid は不変）
+        auth = build_auth(email: "new@example.com", uid: "uid-123")
+
+        expect {
+          described_class.from_omniauth(auth)
+        }.not_to change(described_class, :count)
+
+        expect(described_class.find_by(uid: "uid-123").id).to eq(linked_user.id)
+      end
+    end
+  end
 end
