@@ -48,6 +48,11 @@ gem "devise"
 # deviseの日本語化
 gem "devise-i18n"
 
+# Google アカウントによる OmniAuth 認証
+gem "omniauth-google-oauth2"
+# OmniAuth 2.x の CSRF 対策（認証リクエストを POST に限定する）
+gem "omniauth-rails_csrf_protection"
+
 # activerecord、activemodelの日本語化
 gem "rails-i18n"
 
