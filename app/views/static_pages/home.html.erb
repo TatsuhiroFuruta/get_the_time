@@ -2,7 +2,7 @@
 <nav class="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100%">
   <%= link_to "Get The Time", root_path, class: "inline-block bg-[url('grab_the_light.png')] bg-contain bg-center bg-black/90 bg-no-repeat text-white/90 px-2 md:px-4 py-2 rounded-lg text-sm md:text-base" %>
   <div>
-    <%= link_to "新規登録", new_user_registration_path, class: "inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-2 md:px-4 py-2 rounded-lg transition duration-200 text-sm md:text-base" %>
+    <%= link_to t("shared.buttons.new"), new_user_registration_path, class: "inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-2 md:px-4 py-2 rounded-lg transition duration-200 text-sm md:text-base" %>
     <%= link_to "ログイン", new_user_session_path, class: "ml-6 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-2 md:px-4 py-2 rounded-lg transition duration-200 text-sm md:text-base" %>
   </div>
 </nav>

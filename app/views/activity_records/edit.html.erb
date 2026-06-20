@@ -29,7 +29,7 @@
 
       <!-- やること -->
       <div class="mb-4">
-        <%= f.label :task, "やること（任意）", class: "text-sm" %>
+        <%= optional_label f, :task, class: "text-sm" %>
         <%= f.text_field :task, class: "w-full mt-1 p-2 border rounded bg-gray-200" %>
       </div>
 
@@ -46,22 +46,22 @@
       </div>
 
       <!-- 評価 -->
-      <%= rating_field(f, :satisfaction, "満足度", left_label: "不満", right_label: "満足") %>
-      <%= rating_field(f, :progress, "進行度", left_label: "あまり進まなかった", right_label: "思ったより進んだ") %>
-      <%= rating_field(f, :quality, "作業の質", left_label: "理解の深掘りが進まなかった", right_label: "理解を深めることができた") %>
-      <%= rating_field(f, :focus, "集中度", left_label: "集中できなかった", right_label: "集中できた") %>
-      <%= rating_field(f, :fatigue, "疲労感", left_label: "元気", right_label: "疲れている") %>
+      <%= rating_field(f, :satisfaction, left_label: "不満", right_label: "満足") %>
+      <%= rating_field(f, :progress, left_label: "あまり進まなかった", right_label: "思ったより進んだ") %>
+      <%= rating_field(f, :quality, left_label: "理解の深掘りが進まなかった", right_label: "理解を深めることができた") %>
+      <%= rating_field(f, :focus, left_label: "集中できなかった", right_label: "集中できた") %>
+      <%= rating_field(f, :fatigue, left_label: "元気", right_label: "疲れている") %>
 
       <!-- コメント -->
       <div class="mt-6">
-        <label class="text-sm">コメント（任意）</label>
+        <%= optional_label f, :comment, class: "text-sm" %>
         <%= f.text_area :comment, class: "w-full mt-1 p-2 border rounded bg-gray-200" %>
       </div>
 
       <!-- ボタン -->
       <div class="flex justify-center gap-6 mt-10">
-        <%= f.submit "更新する", class: "bg-green-700 hover:bg-green-800 text-white/90 px-6 py-2 rounded-full transition duration-200" %>
-        <%= link_to "キャンセル", activity_record_path(@activity_record), class: "bg-red-500 hover:bg-red-600 text-white/90 px-6 py-2 rounded-full transition duration-200" %>
+        <%= f.submit t("shared.buttons.update"), class: "bg-green-700 hover:bg-green-800 text-white/90 px-6 py-2 rounded-full transition duration-200" %>
+        <%= link_to t("shared.buttons.cancel"), activity_record_path(@activity_record), class: "bg-red-500 hover:bg-red-600 text-white/90 px-6 py-2 rounded-full transition duration-200" %>
       </div>
 
     <% end %>

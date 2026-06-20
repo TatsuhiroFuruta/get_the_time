@@ -48,7 +48,9 @@ module ActivityRecordsHelper
     text.length > 10 ? "#{text.first(10)}..." : text
   end
 
-  def rating_field(form, field, label, left_label:, right_label:)
+  def rating_field(form, field, left_label:, right_label:)
+    label = form.object.class.human_attribute_name(field)
+
     content_tag(:div, class: "mb-6") do
       concat content_tag(:p, label, class: "mb-2 font-semibold")
 

@@ -62,4 +62,22 @@ RSpec.describe ActivityRecordsHelper, type: :helper do
       expect(helper.truncate_card_text("今日もよく頑張ったよヨヨヨ")).to eq "今日もよく頑張ったよ..."
     end
   end
+
+  describe "#rating_field" do
+    let(:form) { ActionView::Helpers::FormBuilder.new(:activity_record, ActivityRecord.new, helper, {}) }
+
+    it "見出しラベルを属性名の i18n 訳から生成すること" do
+      html = helper.rating_field(form, :satisfaction, left_label: "不満", right_label: "満足")
+      # 呼び出し側が文字列を渡さなくても human_attribute_name 由来の訳が見出しに出る
+      expect(html).to include(ActivityRecord.human_attribute_name(:satisfaction))
+    end
+
+    it "渡した左右ラベルを出力に含めること" do
+      html = helper.rating_field(form, :satisfaction, left_label: "不満", right_label: "満足")
+      aggregate_failures do
+        expect(html).to include("不満")
+        expect(html).to include("満足")
+      end
+    end
+  end
 end

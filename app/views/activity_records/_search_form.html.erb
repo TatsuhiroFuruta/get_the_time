@@ -3,10 +3,10 @@
 
 <!-- お気に入り絞り込みタブ -->
 <div class="flex gap-2 mb-3">
-  <%= link_to "すべて",
+  <%= link_to t("shared.buttons.all"),
               url_for(q: { comment_or_light_time_action_cont: keyword }),
               class: "px-4 py-2 rounded-t-lg font-bold transition duration-200 #{favorited_active ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-blue-500 text-white/90'}" %>
-  <%= link_to "★ お気に入り",
+  <%= link_to t("shared.buttons.favorite"),
               url_for(q: { comment_or_light_time_action_cont: keyword, favorited_eq: true }),
               class: "px-4 py-2 rounded-t-lg font-bold transition duration-200 #{favorited_active ? 'bg-blue-500 text-white/90' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}" %>
 </div>

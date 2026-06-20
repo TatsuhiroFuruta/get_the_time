@@ -9,7 +9,7 @@
 
       <% if both_times_present?(@dark_time, @light_time) %>
         <div class="hidden md:flex flex-col gap-2 items-stretch justify-center bg-stone-300/67 rounded-2xl px-4 py-3 shadow-xl w-40">
-          <%= link_to "新規登録", new_light_time_path, class: "w-full text-xs text-center text-zinc-800 inline-block py-1 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition duration-200" %>
+          <%= link_to t("shared.buttons.new"), new_light_time_path, class: "w-full text-xs text-center text-zinc-800 inline-block py-1 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition duration-200" %>
 
           <%= link_to "後悔したと思ったら", new_regret_record_path, class: "w-full text-xs leading-tight text-center text-white/90 inline-block py-1.5 rounded-2xl bg-linear-to-r from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% hover:from-violet-700 hover:via-indigo-500 hover:to-indigo-200 font-semibold transition duration-200" %>
         </div>
@@ -76,7 +76,7 @@
         <!-- スマホ対応画面における新規登録ボタン -->
         <% if both_times_present?(@dark_time, @light_time) %>
           <div class="md:hidden flex flex-col items-center gap-3">
-            <%= link_to "新規登録", new_light_time_path, class: "text-center text-zinc-800 inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition duration-200" %>
+            <%= link_to t("shared.buttons.new"), new_light_time_path, class: "text-center text-zinc-800 inline-block px-6 py-2 rounded-full bg-linear-to-r from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% hover:from-yellow-500 hover:via-yellow-300 hover:to-yellow-200 font-semibold transition duration-200" %>
 
             <%= link_to "後悔したと思ったら", new_regret_record_path, class: "text-center text-white/90 inline-block px-6 py-2 rounded-full bg-linear-to-r from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% hover:from-violet-700 hover:via-indigo-500 hover:to-indigo-200 font-semibold transition duration-200" %>
           </div>

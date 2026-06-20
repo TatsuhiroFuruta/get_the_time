@@ -45,8 +45,8 @@
 
         <!-- 更新ボタン -->
         <div class="flex justify-center gap-4 pt-2">
-          <%= f.submit "更新する", class: "px-6 py-2 rounded-full bg-green-700 text-white/90 font-semibold hover:bg-green-800 transition duration-200 shadow-md" %>
-          <%= link_to "キャンセル", user_account_path, class: "px-6 py-2 rounded-full bg-red-500 text-white/90 hover:bg-red-600 transition duration-200 shadow-md" %>
+          <%= f.submit t("shared.buttons.update"), class: "px-6 py-2 rounded-full bg-green-700 text-white/90 font-semibold hover:bg-green-800 transition duration-200 shadow-md" %>
+          <%= link_to t("shared.buttons.cancel"), user_account_path, class: "px-6 py-2 rounded-full bg-red-500 text-white/90 hover:bg-red-600 transition duration-200 shadow-md" %>
         </div>
       <% end %>
 
