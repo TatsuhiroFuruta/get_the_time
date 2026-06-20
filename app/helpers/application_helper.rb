@@ -1,4 +1,15 @@
 module ApplicationHelper
+  # 任意入力フィールドのラベル接尾辞
+  OPTIONAL_LABEL_SUFFIX = "（任意）"
+
+  # 「（任意）」付きのフォームラベルを生成する。
+  # ラベル名は i18n（activerecord/activemodel の attributes）から引くため、
+  # 属性名そのものはクリーンに保たれ、エラーメッセージには「（任意）」が混入しない。
+  def optional_label(form, attribute, **options)
+    label_text = "#{form.object.class.human_attribute_name(attribute)}#{OPTIONAL_LABEL_SUFFIX}"
+    form.label(attribute, label_text, **options)
+  end
+
   def format_datetime(dt)
     dt&.in_time_zone("Tokyo")&.strftime("%Y-%m-%d %H:%M")
   end

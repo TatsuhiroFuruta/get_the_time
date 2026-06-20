@@ -7,7 +7,7 @@
       後悔した1日の記録を編集
     </h2>
 
-    <%= render "form", regret_record: @regret_record, button_text: "更新する", button_class: "bg-green-700 hover:bg-green-800", cancel_path: regret_record_path(@regret_record) %>
+    <%= render "form", regret_record: @regret_record, button_text: t("shared.buttons.update"), button_class: "bg-green-700 hover:bg-green-800", cancel_path: regret_record_path(@regret_record) %>
 
   </div>
 </div>

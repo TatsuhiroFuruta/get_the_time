@@ -1,4 +1,16 @@
 ja:
+  shared:
+    buttons:
+      cancel: キャンセル
+      create: 登録する
+      update: 更新する
+      edit: 編集
+      destroy: 削除
+      new: 新規登録
+      back_to_mypage: マイページに戻る
+      all: すべて
+      favorite: ★ お気に入り
+      login_link: ログインはこちら
   defaults:
     flash_message:
       created: "%{item}を作成しました"

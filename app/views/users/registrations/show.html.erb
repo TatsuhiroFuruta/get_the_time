@@ -1,7 +1,7 @@
 <div class="bg-[url('bg_light_and_darkness_narrow.png')] md:bg-[url('bg_light_and_darkness_wide.png')] bg-cover bg-center min-h-screen pb-16">
 
   <!-- 戻るボタン -->
-  <%= link_to "← マイページに戻る", mypage_path, class: "mt-6 ml-6 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
+  <%= link_to "← #{t("shared.buttons.back_to_mypage")}", mypage_path, class: "mt-6 ml-6 inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-4 py-2 rounded-lg transition duration-200" %>
 
   <div class="flex items-center justify-center px-6 mt-10">
     <div class="w-full max-w-md bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% rounded-2xl shadow-2xl p-8 text-zinc-800">

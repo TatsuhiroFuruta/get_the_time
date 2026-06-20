@@ -65,4 +65,21 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(helper.format_datetime(nil)).to be_nil
     end
   end
+
+  describe "#optional_label" do
+    let(:form) { ActionView::Helpers::FormBuilder.new(:light_time, LightTime.new, helper, {}) }
+
+    it "属性名の i18n 訳に「（任意）」を付けたラベルを生成すること" do
+      html = helper.optional_label(form, :desired_self)
+      aggregate_failures do
+        expect(html).to include("なりたい自分（任意）")
+        expect(html).to include('for="light_time_desired_self"')
+      end
+    end
+
+    it "渡したオプション(class)をラベルに反映すること" do
+      html = helper.optional_label(form, :desired_self, class: "block text-lg")
+      expect(html).to include('class="block text-lg"')
+    end
+  end
 end
