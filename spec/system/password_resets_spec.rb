@@ -48,12 +48,18 @@ RSpec.describe "PasswordResets", type: :system do
     expect(page).to have_content("パスワード（確認用）とパスワードの入力が一致しません")
   end
 
-  it "申請画面でメールアドレスが空だとエラーになる" do
+  it "申請画面でメールアドレスが空だと送信できない" do
     visit new_user_password_path
 
     fill_in "メールアドレス", with: ""
     click_button "再設定用のメールを送信する"
 
-    expect(page).to have_content("メールアドレスを入力してください")
+    # email_field の required により、ブラウザが送信をブロックして申請画面に留まる。
+    # paranoid モードのためサーバ側は空でもリダイレクトしてしまうので、
+    # 「空 → 入力を促す」UX はクライアント側のバリデーションで担保している。
+    aggregate_failures do
+      expect(page).to have_current_path(new_user_password_path)
+      expect(page).to have_no_content(I18n.t("devise.passwords.send_paranoid_instructions"))
+    end
   end
 end
