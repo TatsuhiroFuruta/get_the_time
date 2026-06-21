@@ -1,3 +1,4 @@
+<% content_for(:title, t(".title")) %>
 <div data-controller="pomodoro"
      data-pomodoro-work-duration-value="<%= @pomodoro_setting.work_duration * 60 %>"
      data-pomodoro-break-duration-value="<%= @pomodoro_setting.break_duration * 60 %>"

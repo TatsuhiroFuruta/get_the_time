@@ -23,6 +23,16 @@ ja:
   activity_records:
     flash_message:
       require_timer_access: ポモドーロタイマーからアクセスしてください
+    index:
+      title: 活動記録一覧
+    show:
+      title: 活動記録の詳細
+    new:
+      title: 光の時間の特徴を記録
+    edit:
+      title: 活動記録の編集
+    pomodoro_timer:
+      title: ポモドーロタイマー
   regret_summaries:
     flash_message:
       generated: 後悔の傾向を要約しました
@@ -32,3 +42,56 @@ ja:
       appended: 闇の時間の特徴に追記しました
       summary_not_found: 先に要約を作成してください
       dark_time_not_found: 先に闇の時間を登録してください
+  dark_times:
+    show:
+      title: 闇の時間
+    new:
+      title: 闇の時間の登録
+    edit:
+      title: 闇の時間の編集
+  light_times:
+    show:
+      title: 光の時間
+    new:
+      title: 光の時間の登録
+    edit:
+      title: 光の時間の編集
+  mypages:
+    show:
+      title: マイページ
+  mystatuses:
+    show:
+      title: マイステータス
+  purification_times:
+    show:
+      title: 浄化タイマー
+  regret_records:
+    index:
+      title: 後悔の記録一覧
+    show:
+      title: 後悔の記録の詳細
+    new:
+      title: 後悔の記録の登録
+    edit:
+      title: 後悔の記録の編集
+  static_pages:
+    how_to_use:
+      title: 使い方
+    reflection_guide:
+      title: 振り返り方
+  users:
+    sessions:
+      new:
+        title: ログイン
+    registrations:
+      new:
+        title: アカウント作成
+      edit:
+        title: アカウント編集
+      show:
+        title: アカウント情報
+    passwords:
+      new:
+        title: パスワードの再設定
+      edit:
+        title: 新しいパスワードの設定
