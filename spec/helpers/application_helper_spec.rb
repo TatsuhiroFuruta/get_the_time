@@ -82,4 +82,15 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(html).to include('class="block text-lg"')
     end
   end
+
+  describe "#page_title" do
+    it "content_for(:title) があれば「ページ名 | Get The Time」を返すこと" do
+      helper.content_for(:title, "マイページ")
+      expect(helper.page_title).to eq "マイページ | Get The Time"
+    end
+
+    it "content_for(:title) が未設定ならサービス名のみを返すこと" do
+      expect(helper.page_title).to eq "Get The Time"
+    end
+  end
 end
