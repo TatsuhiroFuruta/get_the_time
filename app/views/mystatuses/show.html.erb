@@ -1,3 +1,4 @@
+<% content_for(:title, t(".title")) %>
 <% labels = @daily_series.map { |row| row[:date].strftime("%-m/%-d") } %>
 <% light_time_minutes = @daily_series.map { |row| row[:light_time_minutes] } %>
 <% desired_self_percentages = @daily_series.map { |row| row[:desired_self_percentage] } %>

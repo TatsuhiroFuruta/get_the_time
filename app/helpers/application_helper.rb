@@ -1,6 +1,17 @@
 module ApplicationHelper
+  # ブラウザタイトルのサービス名（接尾辞）
+  SITE_TITLE = "Get The Time"
+
   # 任意入力フィールドのラベル接尾辞
   OPTIONAL_LABEL_SUFFIX = "（任意）"
+
+  # <title> の文言を組み立てる。
+  # 各ビューで content_for(:title, ...) が設定されていれば
+  # 「ページ名 | Get The Time」、無ければサービス名のみを返す。
+  def page_title
+    page = content_for(:title)
+    page.present? ? "#{page} | #{SITE_TITLE}" : SITE_TITLE
+  end
 
   # 「（任意）」付きのフォームラベルを生成する。
   # ラベル名は i18n（activerecord/activemodel の attributes）から引くため、
