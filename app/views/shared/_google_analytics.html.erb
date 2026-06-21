@@ -1,0 +1,19 @@
+<%# Google Analytics 4（本番環境かつ測定IDが設定されている場合のみ出力） %>
+<% ga_id = Rails.application.credentials.dig(:google_analytics, :measurement_id) %>
+<% if Rails.env.production? && ga_id.present? %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= ga_id %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    <%# 自動の page_view 送信は切り、Turbo の遷移ごとに手動送信する %>
+    gtag('config', '<%= ga_id %>', { send_page_view: false });
+
+    document.addEventListener('turbo:load', function(event) {
+      gtag('event', 'page_view', {
+        page_location: event.detail.url,
+        page_title: document.title
+      });
+    });
+  </script>
+<% end %>
