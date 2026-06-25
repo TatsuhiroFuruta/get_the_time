@@ -3,7 +3,6 @@ class DarkTime < ApplicationRecord
   SUMMARY_HEADING = "【AIによる後悔の傾向まとめ】".freeze
 
   validates :behavior, presence: true
-  validates :user_id, uniqueness: true
 
   belongs_to :user
 

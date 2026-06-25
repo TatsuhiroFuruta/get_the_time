@@ -22,15 +22,6 @@ RSpec.describe DarkTime, type: :model do
       expect(dark_time.errors[:behavior]).to be_present
     end
 
-    it "userごとに1件のみ" do
-      user = create(:user)
-      create(:dark_time, user: user)
-
-      second = build(:dark_time, user: user)
-      expect(second).to be_invalid
-      expect(second.errors[:user_id]).to be_present
-    end
-
     it "userが紐付いていないと無効" do
       dark_time = build(:dark_time, user: nil)
       expect(dark_time).to be_invalid
