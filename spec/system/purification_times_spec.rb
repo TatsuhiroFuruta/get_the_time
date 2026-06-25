@@ -178,8 +178,10 @@ RSpec.describe "PurificationTimes", type: :system do
       click_on "スタート"
 
       # location.reload() 後の「終了する」ボタンが表示されるのを確認
-      expect(page).to have_button("終了する")
-      expect(purification_time.reload).to be_running
+      aggregate_failures do
+        expect(page).to have_button("終了する")
+        expect(purification_time.reload).to be_running
+      end
     end
   end
 
@@ -198,8 +200,10 @@ RSpec.describe "PurificationTimes", type: :system do
         end
 
         # reload 後、remaining_time が 0 になっている
-        expect(page).to have_content("0 分 00 秒")
-        expect(purification_time.reload.remaining_time).to eq 0
+        aggregate_failures do
+          expect(page).to have_content("0 分 00 秒")
+          expect(purification_time.reload.remaining_time).to eq 0
+        end
       end
     end
 

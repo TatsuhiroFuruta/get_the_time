@@ -35,26 +35,34 @@ RSpec.describe PomodoroSetting, type: :model do
 
       it "9 は無効" do
         pomodoro_setting.work_duration = 9
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:work_duration]).to be_present
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:work_duration]).to be_present
+        end
       end
 
       it "91 は無効" do
         pomodoro_setting.work_duration = 91
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:work_duration]).to be_present
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:work_duration]).to be_present
+        end
       end
 
       it "nil は無効" do
         pomodoro_setting.work_duration = nil
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:work_duration]).to be_present
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:work_duration]).to be_present
+        end
       end
 
       it "整数以外は無効" do
         pomodoro_setting.work_duration = 25.5
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:work_duration]).to be_present
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:work_duration]).to be_present
+        end
       end
     end
 
@@ -72,20 +80,26 @@ RSpec.describe PomodoroSetting, type: :model do
 
       it "0 は無効" do
         pomodoro_setting.break_duration = 0
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:break_duration]).to be_present
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:break_duration]).to be_present
+        end
       end
 
       it "31 は無効" do
         pomodoro_setting.break_duration = 31
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:break_duration]).to be_present
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:break_duration]).to be_present
+        end
       end
 
       it "nil は無効" do
         pomodoro_setting.break_duration = nil
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:break_duration]).to be_present
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:break_duration]).to be_present
+        end
       end
     end
 
@@ -99,15 +113,19 @@ RSpec.describe PomodoroSetting, type: :model do
       it "活動時間と同値の休憩時間は無効" do
         pomodoro_setting.work_duration = 10
         pomodoro_setting.break_duration = 10
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間未満で設定してください")
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間未満で設定してください")
+        end
       end
 
       it "活動時間より長い休憩時間は無効" do
         pomodoro_setting.work_duration = 10
         pomodoro_setting.break_duration = 20
-        expect(pomodoro_setting).to be_invalid
-        expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間未満で設定してください")
+        aggregate_failures do
+          expect(pomodoro_setting).to be_invalid
+          expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間未満で設定してください")
+        end
       end
     end
   end

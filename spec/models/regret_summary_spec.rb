@@ -8,14 +8,18 @@ RSpec.describe RegretSummary, type: :model do
 
     it "content が nil だと無効であること" do
       regret_summary = build(:regret_summary, content: nil)
-      expect(regret_summary).to be_invalid
-      expect(regret_summary.errors[:content]).to be_present
+      aggregate_failures do
+        expect(regret_summary).to be_invalid
+        expect(regret_summary.errors[:content]).to be_present
+      end
     end
 
     it "user が紐付いていないと無効であること" do
       regret_summary = build(:regret_summary, user: nil)
-      expect(regret_summary).to be_invalid
-      expect(regret_summary.errors[:user]).to be_present
+      aggregate_failures do
+        expect(regret_summary).to be_invalid
+        expect(regret_summary.errors[:user]).to be_present
+      end
     end
   end
 

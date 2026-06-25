@@ -33,14 +33,18 @@ RSpec.describe LightTime, type: :model do
 
     it "action が nil の場合は無効であること" do
       light_time = build(:light_time, action: nil)
-      expect(light_time).to be_invalid
-      expect(light_time.errors[:action]).to be_present
+      aggregate_failures do
+        expect(light_time).to be_invalid
+        expect(light_time.errors[:action]).to be_present
+      end
     end
 
     it "user が紐付いていない場合は無効であること" do
       light_time = build(:light_time, user: nil)
-      expect(light_time).to be_invalid
-      expect(light_time.errors[:user]).to be_present
+      aggregate_failures do
+        expect(light_time).to be_invalid
+        expect(light_time.errors[:user]).to be_present
+      end
     end
   end
 
@@ -66,8 +70,10 @@ RSpec.describe LightTime, type: :model do
 
       it "他の light_time は current ではなくなること" do
         described_class.switch_current!(user, next_light_time)
-        expect(current_light_time.reload.is_current).to be false
-        expect(third_light_time.reload.is_current).to be false
+        aggregate_failures do
+          expect(current_light_time.reload.is_current).to be false
+          expect(third_light_time.reload.is_current).to be false
+        end
       end
 
       it "current は1件だけになること" do
@@ -88,12 +94,14 @@ RSpec.describe LightTime, type: :model do
       it "update! 失敗時は rollback されること" do
         allow(next_light_time).to receive(:update!).and_raise(ActiveRecord::RecordInvalid)
 
-        expect { described_class.switch_current!(user, next_light_time)
-        }.to raise_error(ActiveRecord::RecordInvalid)
+        aggregate_failures do
+          expect { described_class.switch_current!(user, next_light_time)
+          }.to raise_error(ActiveRecord::RecordInvalid)
 
-        expect(current_light_time.reload.is_current).to be true
-        expect(next_light_time.reload.is_current).to be false
-        expect(third_light_time.reload.is_current).to be false
+          expect(current_light_time.reload.is_current).to be true
+          expect(next_light_time.reload.is_current).to be false
+          expect(third_light_time.reload.is_current).to be false
+        end
       end
     end
   end

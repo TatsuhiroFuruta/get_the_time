@@ -40,14 +40,18 @@ RSpec.describe ActivityRecord, type: :model do
 
       it "負の値は無効" do
         activity_record.idle_duration = -1
-        expect(activity_record).to be_invalid
-        expect(activity_record.errors[:idle_duration]).to be_present
+        aggregate_failures do
+          expect(activity_record).to be_invalid
+          expect(activity_record.errors[:idle_duration]).to be_present
+        end
       end
 
       it "total_duration を超えると無効" do
         activity_record.idle_duration = activity_record.total_duration + 1
-        expect(activity_record).to be_invalid
-        expect(activity_record.errors[:idle_duration]).to include("は合計時間以下にしてください")
+        aggregate_failures do
+          expect(activity_record).to be_invalid
+          expect(activity_record.errors[:idle_duration]).to include("は合計時間以下にしてください")
+        end
       end
 
       it "total_duration と同値は有効" do
@@ -71,8 +75,10 @@ RSpec.describe ActivityRecord, type: :model do
           [ 0, 6 ].each do |v|
             it "#{v} は無効" do
               activity_record.send(:"#{attr}=", v)
-              expect(activity_record).to be_invalid
-              expect(activity_record.errors[attr]).to be_present
+              aggregate_failures do
+                expect(activity_record).to be_invalid
+                expect(activity_record.errors[attr]).to be_present
+              end
             end
           end
         end
@@ -265,11 +271,13 @@ RSpec.describe ActivityRecord, type: :model do
     context "PurificationTime がまだ存在しないとき" do
       context ":long_session (90 分) のとき" do
         it "PurificationTime が新規作成されて 1800 秒セットされること" do
-          expect {
-            create(:activity_record, :long_session, user: user, light_time: light_time)
-          }.to change(PurificationTime, :count).by(1)
+          aggregate_failures do
+            expect {
+              create(:activity_record, :long_session, user: user, light_time: light_time)
+            }.to change(PurificationTime, :count).by(1)
 
-          expect(user.reload.purification_time.remaining_time).to eq 1800
+            expect(user.reload.purification_time.remaining_time).to eq 1800
+          end
         end
       end
 
@@ -436,8 +444,10 @@ RSpec.describe ActivityRecord, type: :model do
 
       it "同日の合計時間が分単位で合算されること" do
         # SUM(60 + 120) = 180 分
-        expect(series.size).to eq 1
-        expect(series.first[:light_time_minutes]).to eq 180
+        aggregate_failures do
+          expect(series.size).to eq 1
+          expect(series.first[:light_time_minutes]).to eq 180
+        end
       end
 
       it "同日の本来の自分が平均化されること" do

@@ -18,33 +18,37 @@ RSpec.describe "DarkTimes", type: :request do
 
     context "正常系" do
       it "DarkTimeを作成できる" do
-        expect {
-          post dark_time_path, params: {
-            dark_time: {
-              behavior: "スマホを触りすぎる",
-              characteristic: "集中力がない",
-              unwanted_future: "生産性が下がる"
+        aggregate_failures do
+          expect {
+            post dark_time_path, params: {
+              dark_time: {
+                behavior: "スマホを触りすぎる",
+                characteristic: "集中力がない",
+                unwanted_future: "生産性が下がる"
+              }
             }
-          }
-        }.to change(DarkTime, :count).by(1)
+          }.to change(DarkTime, :count).by(1)
 
-        expect(response).to redirect_to(mypage_path)
-        expect(flash[:notice]).to eq(success_message)
+          expect(response).to redirect_to(mypage_path)
+          expect(flash[:notice]).to eq(success_message)
+        end
       end
     end
 
     context "異常系" do
       it "behaviorがないと作成できない" do
-        expect {
-          post dark_time_path, params: {
-            dark_time: {
-              behavior: ""
+        aggregate_failures do
+          expect {
+            post dark_time_path, params: {
+              dark_time: {
+                behavior: ""
+              }
             }
-          }
-        }.not_to change(DarkTime, :count)
+          }.not_to change(DarkTime, :count)
 
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(flash[:alert]).to eq(failure_message)
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(flash[:alert]).to eq(failure_message)
+        end
       end
     end
 
@@ -52,16 +56,18 @@ RSpec.describe "DarkTimes", type: :request do
       let!(:existing_dark_time) { create(:dark_time, user: user) }
 
       it "2件目は作成できず、編集画面にリダイレクトされる" do
-        expect {
-          post dark_time_path, params: {
-            dark_time: { behavior: "別の行動" }
-          }
-        }.not_to change(DarkTime, :count)
+        aggregate_failures do
+          expect {
+            post dark_time_path, params: {
+              dark_time: { behavior: "別の行動" }
+            }
+          }.not_to change(DarkTime, :count)
 
-        expect(response).to redirect_to(edit_dark_time_path)
-        expect(flash[:alert]).to eq(
-          I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
-        )
+          expect(response).to redirect_to(edit_dark_time_path)
+          expect(flash[:alert]).to eq(
+            I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
+          )
+        end
       end
     end
   end
@@ -82,9 +88,11 @@ RSpec.describe "DarkTimes", type: :request do
         dark_time: { behavior: "改善後" }
       }
 
-      expect(response).to redirect_to(dark_time_path)
-      expect(flash[:notice]).to eq(success_message)
-      expect(dark_time.reload.behavior).to eq("改善後")
+      aggregate_failures do
+        expect(response).to redirect_to(dark_time_path)
+        expect(flash[:notice]).to eq(success_message)
+        expect(dark_time.reload.behavior).to eq("改善後")
+      end
     end
 
     it "バリデーションエラー時は更新されない" do
@@ -92,9 +100,11 @@ RSpec.describe "DarkTimes", type: :request do
         dark_time: { behavior: "" }
       }
 
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(flash[:alert]).to eq(failure_message)
-      expect(dark_time.reload.behavior).not_to eq("")
+      aggregate_failures do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(flash[:alert]).to eq(failure_message)
+        expect(dark_time.reload.behavior).not_to eq("")
+      end
     end
   end
 
@@ -121,10 +131,12 @@ RSpec.describe "DarkTimes", type: :request do
 
       it "編集画面にリダイレクトされる" do
         get new_dark_time_path
-        expect(response).to redirect_to(edit_dark_time_path)
-        expect(flash[:alert]).to eq(
-          I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
-        )
+        aggregate_failures do
+          expect(response).to redirect_to(edit_dark_time_path)
+          expect(flash[:alert]).to eq(
+            I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
+          )
+        end
       end
     end
   end
@@ -142,10 +154,12 @@ RSpec.describe "DarkTimes", type: :request do
     context "DarkTimeが存在しない場合" do
       it "新規作成画面にリダイレクトされる" do
         get edit_dark_time_path
-        expect(response).to redirect_to(new_dark_time_path)
-        expect(flash[:alert]).to eq(
-          I18n.t("defaults.flash_message.not_found", item: DarkTime.model_name.human)
-        )
+        aggregate_failures do
+          expect(response).to redirect_to(new_dark_time_path)
+          expect(flash[:alert]).to eq(
+            I18n.t("defaults.flash_message.not_found", item: DarkTime.model_name.human)
+          )
+        end
       end
     end
   end

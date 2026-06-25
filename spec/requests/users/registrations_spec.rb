@@ -56,6 +56,26 @@ RSpec.describe "User Registrations", type: :request do
         end
       end
 
+      it "登録失敗する（emailが既に登録済み）" do
+        create(:user, email: "taken@example.com")
+
+        aggregate_failures do
+          expect {
+            post user_registration_path, params: {
+              user: {
+                name: "山田太郎",
+                email: "taken@example.com",
+                password: "password123",
+                password_confirmation: "password123",
+                agreement: "1"
+              }
+            }
+          }.not_to change(User, :count)
+
+          expect(response.body).to include("メールアドレスが登録できません。別のメールアドレスで登録してください")
+        end
+      end
+
       it "nameがないと登録できない" do
         aggregate_failures do
           expect {

@@ -25,14 +25,18 @@ RSpec.describe RegretRecord, type: :model do
 
     it "content が nil の場合は無効であること" do
       regret_record = build(:regret_record, content: nil)
-      expect(regret_record).to be_invalid
-      expect(regret_record.errors[:content]).to be_present
+      aggregate_failures do
+        expect(regret_record).to be_invalid
+        expect(regret_record.errors[:content]).to be_present
+      end
     end
 
     it "user が紐付いていない場合は無効であること" do
       regret_record = build(:regret_record, user: nil)
-      expect(regret_record).to be_invalid
-      expect(regret_record.errors[:user]).to be_present
+      aggregate_failures do
+        expect(regret_record).to be_invalid
+        expect(regret_record.errors[:user]).to be_present
+      end
     end
   end
 

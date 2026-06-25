@@ -39,14 +39,18 @@ RSpec.describe ActivityRecordForm, type: :model do
     describe "idle_duration" do
       it "負の値は無効" do
         form.idle_duration = -1
-        expect(form).to be_invalid
-        expect(form.errors[:idle_duration]).to be_present
+        aggregate_failures do
+          expect(form).to be_invalid
+          expect(form.errors[:idle_duration]).to be_present
+        end
       end
 
       it "total_duration を超えると無効" do
         form.idle_duration = form.total_duration + 1
-        expect(form).to be_invalid
-        expect(form.errors[:idle_duration]).to include("は合計時間以下にしてください")
+        aggregate_failures do
+          expect(form).to be_invalid
+          expect(form.errors[:idle_duration]).to include("は合計時間以下にしてください")
+        end
       end
 
       it "total_duration と同値は有効" do
@@ -60,14 +64,18 @@ RSpec.describe ActivityRecordForm, type: :model do
         context attr.to_s do
           it "0 は無効" do
             form.send(:"#{attr}=", 0)
-            expect(form).to be_invalid
-            expect(form.errors[attr]).to be_present
+            aggregate_failures do
+              expect(form).to be_invalid
+              expect(form.errors[attr]).to be_present
+            end
           end
 
           it "6 は無効" do
             form.send(:"#{attr}=", 6)
-            expect(form).to be_invalid
-            expect(form.errors[attr]).to be_present
+            aggregate_failures do
+              expect(form).to be_invalid
+              expect(form.errors[attr]).to be_present
+            end
           end
 
           it "3 は有効" do

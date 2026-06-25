@@ -66,19 +66,23 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
     it "「集中できない、やる気が出ないときは」をクリックするとモチベーション画面が表示されること" do
       click_on "集中できない、やる気が出ないときは", visible: true
-      expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
-      expect(page).to have_selector('[data-pomodoro-target="workScreen"].hidden')
-      expect(page).to have_content("夜更かししてしまう")
-      expect(page).to have_content("健康を損なう")
+      aggregate_failures do
+        expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
+        expect(page).to have_selector('[data-pomodoro-target="workScreen"].hidden')
+        expect(page).to have_content("夜更かししてしまう")
+        expect(page).to have_content("健康を損なう")
+      end
     end
 
     it "モチベーション画面で「いいえ、もう少し頑張ります！」をクリックすると作業画面に戻ること" do
       click_on "集中できない、やる気が出ないときは", visible: true
       click_on "いいえ、もう少し頑張ります！"
-      expect(page).to have_selector('[data-pomodoro-target="workScreen"]:not(.hidden)')
-      expect(page).to have_selector('[data-pomodoro-target="motivationScreen"].hidden')
-      expect(page).to have_content("25:00")
-      expect(page).to have_button("スタート")
+      aggregate_failures do
+        expect(page).to have_selector('[data-pomodoro-target="workScreen"]:not(.hidden)')
+        expect(page).to have_selector('[data-pomodoro-target="motivationScreen"].hidden')
+        expect(page).to have_content("25:00")
+        expect(page).to have_button("スタート")
+      end
     end
 
     context "やること入力フォームに入力して「更新する」をクリックしたとき" do
@@ -280,10 +284,12 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
         click_on "記録する"
 
-        expect(page).to have_current_path(activity_records_path)
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.created", item: ActivityRecordForm.model_name.human)
-        )
+        aggregate_failures do
+          expect(page).to have_current_path(activity_records_path)
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.created", item: ActivityRecordForm.model_name.human)
+          )
+        end
       end
 
       it "浄化タイマー獲得モーダルが表示され、OKをクリックすると閉じること" do
@@ -381,8 +387,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
       it "光の時間の活動内容とコメントが一覧に表示されること" do
         visit activity_records_path
-        expect(page).to have_content("朝のランニング")
-        expect(page).to have_content("集中できた日")
+        aggregate_failures do
+          expect(page).to have_content("朝のランニング")
+          expect(page).to have_content("集中できた日")
+        end
       end
 
       it "レコードをクリックすると詳細ページへ遷移すること" do
@@ -433,8 +441,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         visit activity_records_path
         fill_in "コメント or 活動内容で検索", with: "検索ヒット"
         click_on "検索"
-        expect(page).to have_content("検索ヒット")
-        expect(page).not_to have_content("対象外")
+        aggregate_failures do
+          expect(page).to have_content("検索ヒット")
+          expect(page).not_to have_content("対象外")
+        end
       end
 
       it "一致しないワードのとき「検索結果が見つかりませんでした」と表示されること" do
@@ -465,8 +475,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         visit activity_records_path(q: { favorited_eq: true })
 
         # まずお気に入りのみ表示されていることを確認
-        expect(page).to have_content("お気に入り対象")
-        expect(page).not_to have_content("通常レコード")
+        aggregate_failures do
+          expect(page).to have_content("お気に入り対象")
+          expect(page).not_to have_content("通常レコード")
+        end
 
         click_on "すべて"
 
@@ -516,8 +528,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       visit activity_records_path
 
       within("##{ActionView::RecordIdentifier.dom_id(record)}") do
-        expect(page).to have_content("今日もよく頑張ったよ...")
-        expect(page).not_to have_content("今日もよく頑張ったよヨヨヨ")
+        aggregate_failures do
+          expect(page).to have_content("今日もよく頑張ったよ...")
+          expect(page).not_to have_content("今日もよく頑張ったよヨヨヨ")
+        end
       end
     end
 
@@ -631,8 +645,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
     before { visit edit_activity_record_path(activity_record) }
 
     it "編集フォームが表示されること" do
-      expect(page).to have_content("光の時間の活動記録編集")
-      expect(page).to have_field("activity_record[comment]", with: "元のコメント")
+      aggregate_failures do
+        expect(page).to have_content("光の時間の活動記録編集")
+        expect(page).to have_field("activity_record[comment]", with: "元のコメント")
+      end
     end
 
     context "正常な値に変更して「更新する」をクリックしたとき" do

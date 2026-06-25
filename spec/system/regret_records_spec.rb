@@ -207,8 +207,10 @@ RSpec.describe "RegretRecords", type: :system do
         visit regret_records_path(q: { favorited_eq: true })
 
         # まずお気に入りのみ表示されていることを確認
-        expect(page).to have_content("お気に入り対象")
-        expect(page).not_to have_content("通常レコード")
+        aggregate_failures do
+          expect(page).to have_content("お気に入り対象")
+          expect(page).not_to have_content("通常レコード")
+        end
 
         click_on "すべて"
 

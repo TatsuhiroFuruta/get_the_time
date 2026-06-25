@@ -18,14 +18,16 @@ RSpec.describe "LightTimes", type: :system do
 
         click_button "登録する"
 
-        expect(page).to have_current_path(mypage_path)
+        aggregate_failures do
+          expect(page).to have_current_path(mypage_path)
 
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.created", item: LightTime.model_name.human)
-        )
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.created", item: LightTime.model_name.human)
+          )
 
-        expect(page).to have_content("朝のヨガ")
-        expect(page).to have_content("穏やかな自分")
+          expect(page).to have_content("朝のヨガ")
+          expect(page).to have_content("穏やかな自分")
+        end
       end
 
       it "必須項目未入力では作成できないこと" do
@@ -35,12 +37,14 @@ RSpec.describe "LightTimes", type: :system do
 
         click_button "登録する"
 
-        expect(page).to have_content("光の時間での行動を入力してください")
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.not_created", item: LightTime.model_name.human)
-        )
+        aggregate_failures do
+          expect(page).to have_content("光の時間での行動を入力してください")
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.not_created", item: LightTime.model_name.human)
+          )
 
-        expect(page).to have_current_path(new_light_time_path)
+          expect(page).to have_current_path(new_light_time_path)
+        end
       end
 
       it "キャンセルでマイページへ戻ること" do
@@ -58,9 +62,11 @@ RSpec.describe "LightTimes", type: :system do
       it "詳細が表示されること" do
         visit light_time_path(light_time)
 
-        expect(page).to have_content("朝のヨガ")
-        expect(page).to have_content("穏やかな自分")
-        expect(page).to have_content("リラックス効果")
+        aggregate_failures do
+          expect(page).to have_content("朝のヨガ")
+          expect(page).to have_content("穏やかな自分")
+          expect(page).to have_content("リラックス効果")
+        end
       end
 
       it "マイページへ戻れること" do
@@ -92,14 +98,16 @@ RSpec.describe "LightTimes", type: :system do
         fill_in "光の時間での行動", with: "夜の読書"
         click_button "更新する"
 
-        expect(page).to have_current_path(
-          light_time_path(light_time)
-        )
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.updated", item: LightTime.model_name.human)
-        )
+        aggregate_failures do
+          expect(page).to have_current_path(
+            light_time_path(light_time)
+          )
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.updated", item: LightTime.model_name.human)
+          )
 
-        expect(page).to have_content("夜の読書")
+          expect(page).to have_content("夜の読書")
+        end
       end
 
       it "必須項目未入力では更新できないこと" do
@@ -109,13 +117,15 @@ RSpec.describe "LightTimes", type: :system do
 
         click_button "更新する"
 
-        expect(page).to have_content("光の時間での行動を入力してください")
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.not_updated", item: LightTime.model_name.human)
-        )
-        expect(page).to have_current_path(
-          edit_light_time_path(light_time)
-        )
+        aggregate_failures do
+          expect(page).to have_content("光の時間での行動を入力してください")
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.not_updated", item: LightTime.model_name.human)
+          )
+          expect(page).to have_current_path(
+            edit_light_time_path(light_time)
+          )
+        end
       end
 
       it "キャンセルで詳細画面へ戻ること" do
@@ -139,11 +149,13 @@ RSpec.describe "LightTimes", type: :system do
           click_link "削除"
         end
 
-        expect(page).to have_current_path(mypage_path)
+        aggregate_failures do
+          expect(page).to have_current_path(mypage_path)
 
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.deleted", item: LightTime.model_name.human)
-        )
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.deleted", item: LightTime.model_name.human)
+          )
+        end
       end
 
       context "current を削除した場合" do
@@ -157,8 +169,10 @@ RSpec.describe "LightTimes", type: :system do
             click_link "削除"
           end
 
-          expect(page).to have_current_path(mypage_path)
-          expect(page).to have_content("夜の読書")
+          aggregate_failures do
+            expect(page).to have_current_path(mypage_path)
+            expect(page).to have_content("夜の読書")
+          end
         end
       end
     end
@@ -176,9 +190,11 @@ RSpec.describe "LightTimes", type: :system do
 
         find("button", text: ">").click
 
-        expect(page).to have_content("夜の読書")
+        aggregate_failures do
+          expect(page).to have_content("夜の読書")
 
-        expect(light_time2.reload.is_current).to be true
+          expect(light_time2.reload.is_current).to be true
+        end
       end
     end
 
@@ -220,9 +236,11 @@ RSpec.describe "LightTimes", type: :system do
       it "新規登録導線が表示されること" do
         visit mypage_path
 
-        expect(page).to have_content("登録されていません")
+        aggregate_failures do
+          expect(page).to have_content("登録されていません")
 
-        expect(page).to have_link("新規登録", href: new_light_time_path)
+          expect(page).to have_link("新規登録", href: new_light_time_path)
+        end
       end
     end
 
@@ -234,8 +252,10 @@ RSpec.describe "LightTimes", type: :system do
       it "切り替えボタンが表示されないこと" do
         visit mypage_path
 
-        expect(page).not_to have_button("<")
-        expect(page).not_to have_button(">")
+        aggregate_failures do
+          expect(page).not_to have_button("<")
+          expect(page).not_to have_button(">")
+        end
       end
     end
 
@@ -248,8 +268,10 @@ RSpec.describe "LightTimes", type: :system do
       it "切り替えボタンが表示されること" do
         visit mypage_path
 
-        expect(page).to have_button("<")
-        expect(page).to have_button(">")
+        aggregate_failures do
+          expect(page).to have_button("<")
+          expect(page).to have_button(">")
+        end
       end
     end
   end

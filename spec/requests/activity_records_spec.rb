@@ -32,6 +32,22 @@ RSpec.describe "ActivityRecords", type: :request do
       end
     end
 
+    context "自分と他ユーザーの活動記録があるとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, comment: "自分のコメント")
+        create(:activity_record, user: other_user, light_time: other_light_time, comment: "他人のコメント")
+      end
+
+      it "自分の活動記録のみが表示され、他ユーザーの活動記録は表示されないこと" do
+        get activity_records_path
+
+        aggregate_failures do
+          expect(response.body).to include("自分のコメント")
+          expect(response.body).not_to include("他人のコメント")
+        end
+      end
+    end
+
     context "検索パラメータがあるとき" do
       before do
         create(:activity_record, user: user, light_time: light_time, comment: "マッチするコメント")
@@ -92,10 +108,12 @@ RSpec.describe "ActivityRecords", type: :request do
     context "activity_record_form パラメータがないとき" do
       it "ポモドーロタイマーページへリダイレクトすること" do
         get new_activity_record_path
-        expect(response).to redirect_to(pomodoro_timer_activity_records_path)
-        expect(flash[:alert]).to eq(
-          I18n.t("activity_records.flash_message.require_timer_access")
-        )
+        aggregate_failures do
+          expect(response).to redirect_to(pomodoro_timer_activity_records_path)
+          expect(flash[:alert]).to eq(
+            I18n.t("activity_records.flash_message.require_timer_access")
+          )
+        end
       end
     end
   end
