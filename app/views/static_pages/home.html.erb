@@ -40,5 +40,12 @@
       <%= link_to "はじめる", new_user_registration_path, class: "inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-2 md:px-4 py-2 rounded-lg transition duration-200 text-sm md:text-base" %>
       <%= link_to "ログイン", new_user_session_path, class: "inline-block bg-blue-500 hover:bg-blue-600 text-white/90 px-2 md:px-4 py-2 rounded-lg transition duration-200 text-sm md:text-base" %>
     </div>
+
+    <!-- 利用規約・プライバシーポリシーへの導線 -->
+    <div class="flex justify-center items-center gap-4 mt-6 text-xs md:text-sm">
+      <%= link_to "利用規約", terms_path, class: "text-blue-700 hover:text-blue-800 underline" %>
+      <span class="text-zinc-500">|</span>
+      <%= link_to "プライバシーポリシー", privacy_path, class: "text-blue-700 hover:text-blue-800 underline" %>
+    </div>
   </div>
 </main>

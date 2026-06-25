@@ -16,3 +16,13 @@
   </svg>
   <span>Google で続行</span>
 <% end %>
+
+<%# Google 認証は未登録なら新規登録を兼ねる（User.from_omniauth）。
+    登録・ログインどちらの画面でも規約等への同意を明示するためここに注記を置く。 %>
+<p class="mt-3 text-xs text-center text-zinc-700 leading-relaxed">
+  「Google で続行」での登録の場合も、
+  <%= link_to "利用規約", terms_path, target: "_blank", rel: "noopener", class: "text-blue-600 hover:underline" %>
+  および
+  <%= link_to "プライバシーポリシー", privacy_path, target: "_blank", rel: "noopener", class: "text-blue-600 hover:underline" %>
+  に同意したものとみなします。
+</p>

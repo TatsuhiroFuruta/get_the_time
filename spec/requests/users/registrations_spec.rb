@@ -11,7 +11,8 @@ RSpec.describe "User Registrations", type: :request do
                 name: "山田太郎",
                 email: "new@example.com",
                 password: "password123",
-                password_confirmation: "password123"
+                password_confirmation: "password123",
+                agreement: "1"
               }
             }
           }.to change(User, :count).by(1)
@@ -29,7 +30,8 @@ RSpec.describe "User Registrations", type: :request do
               name: valid_name,
               email: "new@example.com",
               password: "password123",
-              password_confirmation: "password123"
+              password_confirmation: "password123",
+              agreement: "1"
             }
           }
         }.to change(User, :count).by(1)
@@ -104,6 +106,24 @@ RSpec.describe "User Registrations", type: :request do
           }.not_to change(User, :count)
 
           expect(response.body).to include("パスワードにスペースを含めることはできません")
+        end
+      end
+
+      it "利用規約・プライバシーポリシーに同意しない（agreement=\"0\"）と登録できない" do
+        aggregate_failures do
+          expect {
+            post user_registration_path, params: {
+              user: {
+                name: "山田太郎",
+                email: "new@example.com",
+                password: "password123",
+                password_confirmation: "password123",
+                agreement: "0"
+              }
+            }
+          }.not_to change(User, :count)
+
+          expect(response.body).to include("利用規約・プライバシーポリシーに同意してください")
         end
       end
     end

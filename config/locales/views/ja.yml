@@ -79,6 +79,10 @@ ja:
       title: 使い方
     reflection_guide:
       title: 振り返り方
+    terms:
+      title: 利用規約
+    privacy:
+      title: プライバシーポリシー
   users:
     sessions:
       new:
