@@ -38,8 +38,10 @@ RSpec.describe "User Sessions", type: :request do
       delete destroy_user_session_path
 
       # 1. リダイレクトの指示が来ているか確認 (303)
-      expect(response).to have_http_status(:see_other)
-      expect(response).to redirect_to(new_user_session_path)
+      aggregate_failures do
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(new_user_session_path)
+      end
 
       # 2. 指示に従って次のページへ移動する
       follow_redirect!

@@ -76,8 +76,10 @@ RSpec.describe User, type: :model do
 
     it "nameがないと無効" do
       user = build(:user, name: nil)
-      expect(user).to be_invalid
-      expect(user.errors[:name]).to be_present
+      aggregate_failures do
+        expect(user).to be_invalid
+        expect(user.errors[:name]).to be_present
+      end
     end
 
     it "nameが30文字以内なら有効" do
@@ -87,8 +89,10 @@ RSpec.describe User, type: :model do
 
     it "nameが31文字以上だと無効" do
       user = build(:user, name: "a" * 31)
-      expect(user).to be_invalid
-      expect(user.errors[:name]).to be_present
+      aggregate_failures do
+        expect(user).to be_invalid
+        expect(user.errors[:name]).to be_present
+      end
     end
   end
 
@@ -99,9 +103,11 @@ RSpec.describe User, type: :model do
         password_confirmation: "pass word"
       )
 
-      expect(user).to be_invalid
-      # カスタムメッセージを書いているから、includeを記述
-      expect(user.errors[:password]).to include("にスペースを含めることはできません")
+      aggregate_failures do
+        expect(user).to be_invalid
+        # カスタムメッセージを書いているから、includeを記述
+        expect(user.errors[:password]).to include("にスペースを含めることはできません")
+      end
     end
 
     it "スペースがなければ有効" do
@@ -119,8 +125,10 @@ RSpec.describe User, type: :model do
         password_confirmation: "pass1"
       )
 
-      expect(user).to be_invalid
-      expect(user.errors[:password]).to be_present
+      aggregate_failures do
+        expect(user).to be_invalid
+        expect(user.errors[:password]).to be_present
+      end
     end
 
     it "6文字以上なら有効" do
@@ -235,11 +243,13 @@ RSpec.describe User, type: :model do
         # Google 側で別のメールアドレスになって戻ってきた（uid は不変）
         auth = build_auth(email: "new@example.com", uid: "uid-123")
 
-        expect {
-          described_class.from_omniauth(auth)
-        }.not_to change(described_class, :count)
+        aggregate_failures do
+          expect {
+            described_class.from_omniauth(auth)
+          }.not_to change(described_class, :count)
 
-        expect(described_class.find_by(uid: "uid-123").id).to eq(linked_user.id)
+          expect(described_class.find_by(uid: "uid-123").id).to eq(linked_user.id)
+        end
       end
     end
   end

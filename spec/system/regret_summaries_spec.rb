@@ -30,8 +30,10 @@ RSpec.describe "RegretSummaries", type: :system do
         click_on "要約する"
 
         # 要約パネルに生成結果と追記ボタンが表示される
-        expect(page).to have_content(summary_text)
-        expect(page).to have_button("闇の時間の特徴へ追記する")
+        aggregate_failures do
+          expect(page).to have_content(summary_text)
+          expect(page).to have_button("闇の時間の特徴へ追記する")
+        end
 
         click_on "闇の時間の特徴へ追記する"
 

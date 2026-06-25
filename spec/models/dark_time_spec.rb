@@ -18,14 +18,18 @@ RSpec.describe DarkTime, type: :model do
 
     it "behaviorがnilだと無効" do
       dark_time = build(:dark_time, behavior: nil)
-      expect(dark_time).to be_invalid
-      expect(dark_time.errors[:behavior]).to be_present
+      aggregate_failures do
+        expect(dark_time).to be_invalid
+        expect(dark_time.errors[:behavior]).to be_present
+      end
     end
 
     it "userが紐付いていないと無効" do
       dark_time = build(:dark_time, user: nil)
-      expect(dark_time).to be_invalid
-      expect(dark_time.errors[:user]).to be_present
+      aggregate_failures do
+        expect(dark_time).to be_invalid
+        expect(dark_time.errors[:user]).to be_present
+      end
     end
   end
 

@@ -17,11 +17,13 @@ RSpec.describe "RegretSummaries", type: :request do
 
     context "正常系" do
       it "RegretSummary が作成されること" do
-        expect {
-          patch generate_regret_summary_path
-        }.to change { user.reload.regret_summary }.from(nil)
+        aggregate_failures do
+          expect {
+            patch generate_regret_summary_path
+          }.to change { user.reload.regret_summary }.from(nil)
 
-        expect(user.regret_summary.content).to eq(summary_text)
+          expect(user.regret_summary.content).to eq(summary_text)
+        end
       end
 
       it "既存の要約があるときは内容が更新されること" do

@@ -21,17 +21,19 @@ RSpec.describe "DarkTimes", type: :system do
         # 作成ボタンをクリック
         click_button "登録する"
 
-        # マイページにリダイレクトされる
-        expect(page).to have_current_path(mypage_path)
+        aggregate_failures do
+          # マイページにリダイレクトされる
+          expect(page).to have_current_path(mypage_path)
 
-        # フラッシュメッセージが表示される
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.created", item: DarkTime.model_name.human)
-        )
+          # フラッシュメッセージが表示される
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.created", item: DarkTime.model_name.human)
+          )
 
-        # 作成したDarkTimeが表示される
-        expect(page).to have_content("スマホを触りすぎる")
-        expect(page).to have_content("生産性が下がる")
+          # 作成したDarkTimeが表示される
+          expect(page).to have_content("スマホを触りすぎる")
+          expect(page).to have_content("生産性が下がる")
+        end
       end
 
       it "キャンセルするとマイページへ戻る" do
@@ -51,14 +53,16 @@ RSpec.describe "DarkTimes", type: :system do
         fill_in "避けたい未来", with: "生産性が下がる"
         click_button "登録する"
 
-        # エラーメッセージが表示される
-        expect(page).to have_content("闇の時間での行動を入力してください")
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.not_created", item: DarkTime.model_name.human)
-        )
+        aggregate_failures do
+          # エラーメッセージが表示される
+          expect(page).to have_content("闇の時間での行動を入力してください")
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.not_created", item: DarkTime.model_name.human)
+          )
 
-        # 作成画面に留まる
-        expect(page).to have_current_path(new_dark_time_path)
+          # 作成画面に留まる
+          expect(page).to have_current_path(new_dark_time_path)
+        end
       end
     end
   end
@@ -73,11 +77,13 @@ RSpec.describe "DarkTimes", type: :system do
         fill_in "闇の時間での行動", with: "改善後の行動"
         click_button "更新する"
 
-        expect(page).to have_current_path(dark_time_path)
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.updated", item: DarkTime.model_name.human)
-        )
-        expect(page).to have_content("改善後の行動")
+        aggregate_failures do
+          expect(page).to have_current_path(dark_time_path)
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.updated", item: DarkTime.model_name.human)
+          )
+          expect(page).to have_content("改善後の行動")
+        end
       end
 
       it "キャンセルすると詳細画面へ戻る" do
@@ -96,11 +102,13 @@ RSpec.describe "DarkTimes", type: :system do
         fill_in "闇の時間での行動", with: ""
         click_button "更新する"
 
-        expect(page).to have_content("闇の時間での行動を入力してください")
-        expect(page).to have_content(
-          I18n.t("defaults.flash_message.not_updated", item: DarkTime.model_name.human)
-        )
-        expect(page).to have_current_path(edit_dark_time_path)
+        aggregate_failures do
+          expect(page).to have_content("闇の時間での行動を入力してください")
+          expect(page).to have_content(
+            I18n.t("defaults.flash_message.not_updated", item: DarkTime.model_name.human)
+          )
+          expect(page).to have_current_path(edit_dark_time_path)
+        end
       end
     end
   end
@@ -111,9 +119,11 @@ RSpec.describe "DarkTimes", type: :system do
     it "詳細ページで内容が表示される" do
       visit dark_time_path
 
-      expect(page).to have_content("スマホを触りすぎる")
-      expect(page).to have_content(dark_time.unwanted_future)
-      expect(page).to have_content(dark_time.characteristic)
+      aggregate_failures do
+        expect(page).to have_content("スマホを触りすぎる")
+        expect(page).to have_content(dark_time.unwanted_future)
+        expect(page).to have_content(dark_time.characteristic)
+      end
     end
 
     it "マイページへ戻れる" do
@@ -140,9 +150,11 @@ RSpec.describe "DarkTimes", type: :system do
     it "newページにアクセスすると新規作成画面が表示される" do
       visit new_dark_time_path
 
-      expect(page).to have_content("闇の時間での活動内容登録")
-      expect(page).to have_field("闇の時間での行動")
-      expect(page).to have_button("登録する")
+      aggregate_failures do
+        expect(page).to have_content("闇の時間での活動内容登録")
+        expect(page).to have_field("闇の時間での行動")
+        expect(page).to have_button("登録する")
+      end
     end
   end
 
@@ -152,10 +164,12 @@ RSpec.describe "DarkTimes", type: :system do
     it "newページにアクセスすると編集画面にリダイレクトされる" do
       visit new_dark_time_path
 
-      expect(page).to have_current_path(edit_dark_time_path)
-      expect(page).to have_content(
-        I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
-      )
+      aggregate_failures do
+        expect(page).to have_current_path(edit_dark_time_path)
+        expect(page).to have_content(
+          I18n.t("defaults.flash_message.already_exists", item: DarkTime.model_name.human)
+        )
+      end
     end
   end
 end
