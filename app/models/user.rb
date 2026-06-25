@@ -5,6 +5,13 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :omniauthable, omniauth_providers: [ :google_oauth2 ]
 
+  # 利用規約・プライバシーポリシーへの同意（DB カラムを持たない仮想属性）。
+  # メール+パスワード登録フォームのチェックボックスから受け取り、新規登録時のみ必須。
+  # on: :create に限定しているため、既存ユーザーの各種更新や OmniAuth 経由の作成
+  # （agreement が nil のときバリデータはスキップ）には影響しない。
+  attr_accessor :agreement
+  validates :agreement, acceptance: { message: "に同意してください" }, on: :create
+
   validates :name, presence: true, length: { maximum: 30 }
 
   validates :password, format: { without: /\s/, message: "にスペースを含めることはできません" }, if: :password_required?

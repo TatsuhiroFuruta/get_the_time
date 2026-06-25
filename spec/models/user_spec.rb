@@ -134,6 +134,36 @@ RSpec.describe User, type: :model do
   end
 
   # =========================================================
+  # agreement（利用規約・プライバシーポリシーへの同意）のバリデーション
+  # =========================================================
+  describe "agreementのバリデーション" do
+    it "チェックあり（\"1\"）なら新規登録時に有効" do
+      user = build(:user, agreement: "1")
+      expect(user).to be_valid(:create)
+    end
+
+    it "チェックなし（\"0\"）だと新規登録時に無効でメッセージが出る" do
+      user = build(:user, agreement: "0")
+
+      aggregate_failures do
+        expect(user).to be_invalid(:create)
+        expect(user.errors[:agreement]).to include("に同意してください")
+      end
+    end
+
+    it "agreement 未設定（nil）でも有効（OmniAuth 経由の作成を壊さないよう acceptance は nil をスキップする）" do
+      user = build(:user, agreement: nil)
+      expect(user).to be_valid(:create)
+    end
+
+    it "既存ユーザーの更新（:update）では同意を問わない" do
+      user = create(:user, agreement: "1")
+      user.agreement = "0"
+      expect(user).to be_valid(:update)
+    end
+  end
+
+  # =========================================================
   # .from_omniauth（Google 認証）
   # =========================================================
   describe ".from_omniauth" do

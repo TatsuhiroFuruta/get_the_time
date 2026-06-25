@@ -29,6 +29,16 @@
           <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full bg-gray-200 rounded-md border border-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" %>
         </div>
 
+        <div class="flex items-start gap-2">
+          <%= f.check_box :agreement, class: "mt-1 h-4 w-4 rounded border-gray-400 text-blue-500 focus:ring-blue-400" %>
+          <%= f.label :agreement, class: "text-sm leading-relaxed" do %>
+            <%= link_to "利用規約", terms_path, target: "_blank", rel: "noopener", class: "text-blue-600 hover:underline" %>
+            および
+            <%= link_to "プライバシーポリシー", privacy_path, target: "_blank", rel: "noopener", class: "text-blue-600 hover:underline" %>
+            に同意します
+          <% end %>
+        </div>
+
         <div>
           <%= f.submit "アカウント作成", class: "w-full py-2 rounded-md bg-blue-500 text-white/90 font-semibold hover:bg-blue-600 transition duration-200 shadow-md" %>
         </div>

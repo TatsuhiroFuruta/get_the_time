@@ -98,4 +98,80 @@ RSpec.describe "StaticPages", type: :system do
       end
     end
   end
+
+  # =========================================================
+  # 利用規約・プライバシーポリシー
+  # =========================================================
+  describe "利用規約・プライバシーポリシー" do
+    context "未ログインのとき" do
+      it "ホーム画面のフッターリンクから利用規約ページへ遷移できること" do
+        visit root_path
+        click_link "利用規約"
+
+        aggregate_failures do
+          expect(page).to have_current_path(terms_path)
+          expect(page).to have_content("第6条（禁止事項）")
+        end
+      end
+
+      it "ホーム画面のフッターリンクからプライバシーポリシーページへ遷移できること" do
+        visit root_path
+        click_link "プライバシーポリシー"
+
+        aggregate_failures do
+          expect(page).to have_current_path(privacy_path)
+          expect(page).to have_content("第6条（外部サービスへの取り扱いの委託）")
+        end
+      end
+
+      it "未ログインでも利用規約ページが直接開けること" do
+        visit terms_path
+
+        aggregate_failures do
+          expect(page).to have_current_path(terms_path)
+          expect(page).to have_content("利用規約")
+          expect(page).to have_link("← トップに戻る", href: root_path)
+        end
+      end
+
+      it "未ログインでもプライバシーポリシーページが直接開けること" do
+        visit privacy_path
+
+        aggregate_failures do
+          expect(page).to have_current_path(privacy_path)
+          expect(page).to have_content("プライバシーポリシー")
+          expect(page).to have_link("← トップに戻る", href: root_path)
+        end
+      end
+    end
+
+    context "ログイン済みのとき（ハンバーガーメニュー）" do
+      let(:user) { create(:user) }
+      let!(:light_time) { create(:light_time, :current, user: user) }
+      let!(:dark_time)  { create(:dark_time, user: user) }
+
+      before do
+        sign_in user
+        visit mypage_path
+      end
+
+      it "メニューから利用規約ページへ遷移できること" do
+        find('[data-hamburger-target="button"]').click
+        within('[data-hamburger-target="menu"]') do
+          click_on "利用規約"
+        end
+
+        expect(page).to have_current_path(terms_path)
+      end
+
+      it "メニューからプライバシーポリシーページへ遷移できること" do
+        find('[data-hamburger-target="button"]').click
+        within('[data-hamburger-target="menu"]') do
+          click_on "プライバシーポリシー"
+        end
+
+        expect(page).to have_current_path(privacy_path)
+      end
+    end
+  end
 end

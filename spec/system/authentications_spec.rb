@@ -10,6 +10,7 @@ RSpec.describe "Authentications", type: :system do
     fill_in "メールアドレス", with: "new@example.com"
     fill_in "パスワード", with: "password123"
     fill_in "パスワード確認", with: "password123"
+    check "user_agreement"
     click_button "アカウント作成"
 
     aggregate_failures do
@@ -17,6 +18,32 @@ RSpec.describe "Authentications", type: :system do
       expect(page).to have_content(
         I18n.t("devise.registrations.signed_up")
       )
+    end
+  end
+
+  it "利用規約・プライバシーポリシーに同意しないと新規登録できない" do
+    visit new_user_registration_path
+
+    fill_in "名前", with: "山田太郎"
+    fill_in "メールアドレス", with: "new@example.com"
+    fill_in "パスワード", with: "password123"
+    fill_in "パスワード確認", with: "password123"
+    # 同意チェックボックスは未チェックのまま
+    click_button "アカウント作成"
+
+    aggregate_failures do
+      expect(page).to have_current_path(new_user_registration_path)
+      expect(page).to have_content("利用規約・プライバシーポリシーに同意してください")
+    end
+  end
+
+  it "登録・ログイン画面に Google 登録時の同意みなし注記が表示される" do
+    aggregate_failures do
+      visit new_user_registration_path
+      expect(page).to have_content("「Google で続行」での登録の場合も")
+
+      visit new_user_session_path
+      expect(page).to have_content("「Google で続行」での登録の場合も")
     end
   end
 

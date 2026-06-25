@@ -85,4 +85,10 @@ Rails.application.routes.draw do
 
   # 振り返り方ページ
   get "/reflection_guide", to: "static_pages#reflection_guide", as: "reflection_guide"
+
+  # 利用規約
+  get "/terms", to: "static_pages#terms", as: "terms"
+
+  # プライバシーポリシー
+  get "/privacy", to: "static_pages#privacy", as: "privacy"
 end

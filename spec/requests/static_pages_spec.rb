@@ -49,4 +49,30 @@ RSpec.describe "StaticPages", type: :request do
       end
     end
   end
+
+  describe "GET /terms（利用規約）" do
+    it "未ログインでも 200 が返り、主要な条項が表示されること" do
+      get terms_path
+
+      aggregate_failures do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("利用規約")
+        expect(response.body).to include("第6条（禁止事項）")
+        expect(response.body).to include("第16条（準拠法・裁判管轄）")
+      end
+    end
+  end
+
+  describe "GET /privacy（プライバシーポリシー）" do
+    it "未ログインでも 200 が返り、主要な条項が表示されること" do
+      get privacy_path
+
+      aggregate_failures do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("プライバシーポリシー")
+        expect(response.body).to include("第6条（外部サービスへの取り扱いの委託）")
+        expect(response.body).to include("OpenAI, L.L.C.")
+      end
+    end
+  end
 end

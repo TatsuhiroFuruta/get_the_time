@@ -1,6 +1,7 @@
 ja:
   activerecord:
     models:
+      user: ユーザー
       dark_time: 闇の時間の活動内容
       light_time: 光の時間の活動内容
       activity_record: 光の時間の活動記録
@@ -8,6 +9,8 @@ ja:
       pomodoro_setting: ポモドーロ時間設定
       regret_record: 後悔した1日の記録
     attributes:
+      user:
+        agreement: 利用規約・プライバシーポリシー
       dark_time:
         behavior: 闇の時間での行動
         unwanted_future: 避けたい未来

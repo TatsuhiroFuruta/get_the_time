@@ -26,6 +26,8 @@
           <li><%= link_to "マイステータス", mystatus_path, data: { action: "click->hamburger#close" }, class: nav_link_class(mystatus_path) %></li>
           <li><%= link_to "後悔した1日の記録一覧", regret_records_path, data: { action: "click->hamburger#close" }, class: nav_link_class(regret_records_path) %></li>
         <% end %>
+        <li><%= link_to "利用規約", terms_path, data: { action: "click->hamburger#close" }, class: nav_link_class(terms_path) %></li>
+        <li><%= link_to "プライバシーポリシー", privacy_path, data: { action: "click->hamburger#close" }, class: nav_link_class(privacy_path) %></li>
       </ul>
     </nav>
   </div>
