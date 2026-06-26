@@ -1,0 +1,70 @@
+<details id="step6" class="mt-10 mb-30 group border border-zinc-800 rounded-lg p-4 open:shadow-lg transition-all duration-300">
+  <summary class="text-2xl font-bold cursor-pointer list-item">
+    Step6: 後悔した1日の記録
+  </summary>
+  <div class="my-6">
+    <p class="mb-2 text-lg">後悔した1日を書き残し、お気に入りした記録から傾向をAIにまとめてもらえる機能です</p>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">1. マイページの「後悔したと思ったら」ボタンをクリック</p>
+    <p class="mb-2 text-md">※ PCでは右上のカード、スマホでは光の時間のカードの下にあります。</p>
+    <%= image_tag "how_to_use/mypage_regret_record_button.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">2. タイトルと内容を入力して投稿</p>
+    <p class="mb-2 text-md">
+      何に時間を使い、どう感じ、なぜそうなったのかを振り返って書きます。アプリ外での気づきや反省を含めても大丈夫です（タイトルは任意）。
+    </p>
+    <%= image_tag "how_to_use/regret_record_new_form.png" %>
+    <p class="mt-4 mb-2 text-md">登録するボタンをクリックすると、一覧に追加されます。</p>
+    <%= image_tag "how_to_use/regret_record_create.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">3. 一覧で確認・お気に入り登録</p>
+    <p class="mb-2 text-md">
+      各記録の右上の星マークで、お気に入りに登録（★）・解除（☆）できます。
+    </p>
+    <%= image_tag "how_to_use/regret_record_index_display.png" %>
+    <p class="mt-4 mb-2 text-md">
+      上部の「すべて／お気に入り」タブで絞り込めます。お気に入りを登録すると、まとめ欄に「要約する」ボタンが現れます。
+    </p>
+    <%= image_tag "how_to_use/regret_record_filter_favorited.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">4. AIで後悔の傾向をまとめる</p>
+    <p class="mb-2 text-md">
+      お気に入り（★）に登録した記録をもとに「要約する」ボタンをクリックすると、闇の時間に陥りやすい傾向をAIが要約します（お気に入りのうち最新の数件が対象）。
+    </p>
+    <p class="mb-2 text-md">※ お気に入りが無いと要約できません。先に★を登録しましょう。</p>
+    <%= image_tag "how_to_use/regret_summary_generated.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">5. 闇の時間の特徴へ追記</p>
+    <p class="mb-2 text-md">
+      「闇の時間の特徴へ追記する」ボタンをクリックすると、要約された傾向を闇の時間の特徴に反映できます。
+    </p>
+    <%= image_tag "how_to_use/regret_summary_append_dark_time.png" %>
+    <p class="mt-4 mb-2 text-md">
+      闇の時間の活動内容を開くと、特徴に要約が追記されているのを確認できます。
+    </p>
+    <%= image_tag "how_to_use/dark_time_regret_summary_reflected.png" %>
+  </div>
+  <details class="group rounded-lg p-4 open:shadow-lg transition-all duration-300">
+    <!-- タイトル部分 -->
+    <summary class="font-bold cursor-pointer list-item">
+      登録内容を変更・削除したい場合
+    </summary>
+    <!-- コンテンツ部分 -->
+    <div class="mt-4">
+      <div class="my-6">
+        <p class="mb-2 text-lg">1. 一覧から変更したい記録をクリック</p>
+        <%= image_tag "how_to_use/regret_record_show_display.png" %>
+      </div>
+      <div class="my-6">
+        <p class="mb-2 text-lg">2. 編集ボタンをクリックして内容を変更し、更新ボタンをクリック</p>
+        <p class="mb-2 text-md text-red-700">※ 削除ボタンをクリックすると、登録内容が削除されるため、注意!</p>
+        <%= image_tag "how_to_use/regret_record_edit_display.png" %>
+      </div>
+    </div>
+  </details>
+</details>

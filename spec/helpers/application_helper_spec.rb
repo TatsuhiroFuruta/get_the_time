@@ -93,4 +93,16 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(helper.page_title).to eq "Get The Time"
     end
   end
+
+  describe "#site_title" do
+    it "SITE_TITLE を返すこと" do
+      expect(helper.site_title).to eq ApplicationHelper::SITE_TITLE
+    end
+  end
+
+  describe "#site_description" do
+    it "SITE_DESCRIPTION を返すこと" do
+      expect(helper.site_description).to eq ApplicationHelper::SITE_DESCRIPTION
+    end
+  end
 end

@@ -2,8 +2,22 @@ module ApplicationHelper
   # ブラウザタイトルのサービス名（接尾辞）
   SITE_TITLE = "Get The Time"
 
+  # サービスの紹介文（OGP / PWA manifest 等のメタデータで共用）
+  SITE_DESCRIPTION = "自由時間を「光の時間」と「闇の時間」に分け、本来の自分を計測するサービス"
+
   # 任意入力フィールドのラベル接尾辞
   OPTIONAL_LABEL_SUFFIX = "（任意）"
+
+  # ビュー（ERB）から定数を安全に参照するためのアクセサ。
+  # ERB テンプレート内の裸の定数は字句スコープの都合で解決されないため、
+  # メタデータ用途ではこれらのヘルパー経由で取得する。
+  def site_title
+    SITE_TITLE
+  end
+
+  def site_description
+    SITE_DESCRIPTION
+  end
 
   # <title> の文言を組み立てる。
   # 各ビューで content_for(:title, ...) が設定されていれば

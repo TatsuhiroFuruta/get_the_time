@@ -20,6 +20,18 @@ RSpec.describe "StaticPages", type: :request do
         expect(response.body).to include("自由時間を「光の時間」と「闇の時間」に分け、本来の自分を計測するサービス")
       end
     end
+
+    # rails new のデフォルト値 "Myapp" がサイト名メタに混入した不具合の回帰ガード。
+    # サイト名・紹介文は ApplicationHelper の定数に集約されている。
+    it "サイト名メタが SITE_TITLE で出力され、デフォルト値 Myapp が残っていないこと" do
+      get root_path
+
+      aggregate_failures do
+        expect(response.body).to include(%(<meta name="application-name" content="#{ApplicationHelper::SITE_TITLE}">))
+        expect(response.body).to include(%(<meta property="og:site_name" content="#{ApplicationHelper::SITE_TITLE}">))
+        expect(response.body).not_to include("Myapp")
+      end
+    end
   end
 
   describe "GET /reflection_guide" do
