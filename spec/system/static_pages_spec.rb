@@ -54,6 +54,7 @@ RSpec.describe "StaticPages", type: :system do
         aggregate_failures do
           expect(page).to have_current_path(how_to_use_path)
           expect(page).to have_content("概要")
+          expect(page).to have_content("Step6: 後悔した1日の記録")
           expect(page).to have_link("マイページに戻る", href: mypage_path)
         end
       end
