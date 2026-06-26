@@ -3,7 +3,6 @@ class ActivityRecord < ApplicationRecord
   belongs_to :light_time
 
   before_save :calculate_desired_self_percentage
-  after_create :grant_purification_time
 
   # ===== バリデーション =====
   validates :idle_duration, numericality: { greater_than_or_equal_to: 0 }
@@ -121,20 +120,6 @@ class ActivityRecord < ApplicationRecord
 
     if idle_duration > total_duration
       errors.add(:idle_duration, "は合計時間以下にしてください")
-    end
-  end
-
-  # 浄化タイマーの時間を付与するメソッド
-  def grant_purification_time
-    minutes = self.class.calculate_purification_time(total_duration)
-    return if minutes <= 0
-
-    user.with_lock do
-      purification_time = user.purification_time || user.build_purification_time
-
-      purification_time.remaining_time += minutes * 60
-
-      purification_time.save!
     end
   end
 end

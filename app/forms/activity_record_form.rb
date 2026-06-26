@@ -5,6 +5,10 @@ class ActivityRecordForm
   # ===== ActivityRecord =====
   attr_accessor :task, :comment
 
+  # 保存時に付与した浄化タイマーの分数（コントローラのフラッシュ表示用）。
+  # 付与計算は乱数を含むため、保存時に 1 回だけ算出した実値をここで公開する。
+  attr_reader :granted_purification_minutes
+
   # ===== 他モデル =====
   attr_accessor :light_time_characteristic, :dark_time_characteristic
 
@@ -59,6 +63,9 @@ class ActivityRecordForm
       user.dark_time&.update!(
         characteristic: dark_time_characteristic
       )
+
+      # 浄化タイマーの付与（計算は乱数を含むためここで 1 回だけ実行し、実値を保持）
+      @granted_purification_minutes = PurificationTimeGranter.new(user).call(total_duration)
     end
 
     true

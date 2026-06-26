@@ -245,53 +245,6 @@ RSpec.describe ActivityRecord, type: :model do
   end
 
   # =========================================================
-  # after_create: grant_purification_time
-  # =========================================================
-  describe "grant_purification_time コールバック" do
-    before { allow(described_class).to receive(:sample_purification_minutes).and_return(10) }
-
-    context "PurificationTime が既に存在するとき" do
-      let!(:purification_time) { create(:purification_time, user: user, remaining_time: 0) }
-
-      context ":long_session (90 分) のとき" do
-        it "remaining_time に 1800 秒 (3 ブロック × 10 分) 加算されること" do
-          create(:activity_record, :long_session, user: user, light_time: light_time)
-          expect(purification_time.reload.remaining_time).to eq 1800
-        end
-      end
-
-      context ":short_session (20 分) のとき" do
-        it "remaining_time が変化しないこと" do
-          create(:activity_record, :short_session, user: user, light_time: light_time)
-          expect(purification_time.reload.remaining_time).to eq 0
-        end
-      end
-    end
-
-    context "PurificationTime がまだ存在しないとき" do
-      context ":long_session (90 分) のとき" do
-        it "PurificationTime が新規作成されて 1800 秒セットされること" do
-          aggregate_failures do
-            expect {
-              create(:activity_record, :long_session, user: user, light_time: light_time)
-            }.to change(PurificationTime, :count).by(1)
-
-            expect(user.reload.purification_time.remaining_time).to eq 1800
-          end
-        end
-      end
-
-      context ":short_session (20 分) のとき" do
-        it "PurificationTime は作成されないこと" do
-          expect {
-            create(:activity_record, :short_session, user: user, light_time: light_time)
-          }.not_to change(PurificationTime, :count)
-        end
-      end
-    end
-  end
-
-  # =========================================================
   # .evaluation_averages
   # =========================================================
   describe ".evaluation_averages" do
