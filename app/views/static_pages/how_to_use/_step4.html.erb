@@ -15,7 +15,7 @@
       サボった時間
     </p>
     <p class="mb-2 text-md">
-      計測時間のうち自分がサボったと思ったおおよその時間を入力します。計測時間より小さく入力する必要があります。入力内容について、登録後に付与される浄化タイマーには影響しないです。
+      計測時間のうち自分がサボったと思ったおおよその時間を入力します。計測時間以下で入力する必要があります。入力内容について、登録後に付与される浄化タイマーには影響しないです。
     </p>
     <p class="mb-2 text-lg underline">
       評価項目: 満足度、進行度、作業の質、集中度、疲労感
@@ -59,6 +59,27 @@
   <div class="my-6">
     <p class="mb-2 text-lg">4. 一覧画面で登録されていることを確認</p>
     <%= image_tag "how_to_use/activity_record_index_display.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">5. お気に入り登録・絞り込み</p>
+    <p class="mb-2 text-md">
+      各活動記録の右下の星マークをクリックすると、お気に入りに登録（★）・解除（☆）できます。
+    </p>
+    <%= image_tag "how_to_use/activity_record_before_favorite.png" %>
+    <p class="mt-4 mb-2 text-md">
+      クリックすると星マークが点灯（★）し、お気に入りに登録されます。
+    </p>
+    <%= image_tag "how_to_use/activity_record_after_favorite.png" %>
+    <p class="mt-4 mb-2 text-md">
+      一覧上部の「すべて／お気に入り」タブでお気に入りだけを絞り込めるほか、コメントや光の時間での行動でキーワード検索もできます。
+    </p>
+    <%= image_tag "how_to_use/activity_record_filter_favorited.png" %>
+  </div>
+  <div class="my-6">
+    <p class="mb-2 text-lg">6. マイステータスで推移・傾向を確認</p>
+    <p class="mb-2 text-md">
+      左上のハンバーガーメニューから「マイステータス」を開くと、記録した活動をもとに、直近2週間の光の時間（分）の推移・本来の自分の平均・評価項目（満足度・進行度・作業の質・集中度）のレーダーチャート・疲労感の平均をグラフで確認できます。記録が貯まるほど振り返りに役立ちます。
+    </p>
   </div>
   <details class="group rounded-lg p-4 open:shadow-lg transition-all duration-300">
     <!-- タイトル部分 -->
