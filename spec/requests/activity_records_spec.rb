@@ -182,6 +182,24 @@ RSpec.describe "ActivityRecords", type: :request do
           expect(flash[:purification_time]).to be_nil
         end
       end
+
+      # 付与計算が表示と保存で二重に走ると乱数で値がズレるため、
+      # ブロックごとに異なる分数を返す系列でスタブして「表示＝保存」を保証する。
+      context "付与分数が乱数で変動するとき（表示と保存の一致）" do
+        before do
+          # 60 分 = 2 ブロック。1 回しか計算しなければ 8 + 10 = 18 分が確定する。
+          allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(8, 10)
+        end
+
+        it "フラッシュの分数と実際に付与された残り時間が一致すること" do
+          post activity_records_path, params: valid_params
+
+          aggregate_failures do
+            expect(flash[:purification_time]).to eq "浄化タイマーを18分獲得！"
+            expect(user.purification_time.remaining_time).to eq 18 * 60
+          end
+        end
+      end
     end
 
     context "不正なパラメータのとき（satisfaction が範囲外）" do

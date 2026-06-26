@@ -19,7 +19,8 @@ class ActivityRecordsController < ApplicationController
     @form = ActivityRecordForm.new(activity_record_form_params)
 
     if @form.save(current_user)
-      minutes = ActivityRecord.calculate_purification_time(@form.total_duration)
+      # 付与済みの実値を表示（再計算すると乱数で別の値になり、表示と保存がズレるため）
+      minutes = @form.granted_purification_minutes.to_i
 
       # 0分のとき以外のみ追加！
       if minutes > 0
