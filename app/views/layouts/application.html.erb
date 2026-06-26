@@ -4,7 +4,7 @@
     <title><%= page_title %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Myapp">
+    <meta name="application-name" content="<%= site_title %>">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -12,10 +12,10 @@
     <%= render "shared/google_analytics" %>
 
     <%# OGP / Twitter Card（SNS シェア用。既定はサービス紹介カード） %>
-    <meta property="og:site_name" content="Get The Time">
+    <meta property="og:site_name" content="<%= site_title %>">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="<%= content_for(:og_title).presence || "Get The Time" %>">
-    <meta property="og:description" content="<%= content_for(:og_description).presence || "自由時間を「光の時間」と「闇の時間」に分け、本来の自分を計測するサービス" %>">
+    <meta property="og:title" content="<%= content_for(:og_title).presence || site_title %>">
+    <meta property="og:description" content="<%= content_for(:og_description).presence || site_description %>">
     <meta property="og:url" content="<%= request.original_url %>">
     <meta property="og:image" content="<%= image_url("ogp.png") %>">
     <meta name="twitter:card" content="summary_large_image">
