@@ -4,7 +4,8 @@ require "selenium-webdriver"
 # CI の高負荷時、Turbo Drive の遷移＋描画がデフォルトの待機（2秒）を超えて
 # システムスペックが間欠的に落ちることがあるため、待機時間を延長する。
 # 待機を延ばすだけなのでパスするテストには影響せず、本物の失敗もタイムアウト後に検出される。
-Capybara.default_max_wait_time = 5
+# 5秒でも main マージ後 CI で間欠失敗(#218)したため 10秒へ引き上げ。
+Capybara.default_max_wait_time = 10
 
 # Docker開発環境用(リモートChromeコンテナを使用)
 Capybara.register_driver :remote_chrome do |app|

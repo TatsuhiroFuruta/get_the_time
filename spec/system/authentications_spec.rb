@@ -74,8 +74,11 @@ RSpec.describe "Authentications", type: :system do
     fill_in "パスワード", with: "password123"
     click_button "ログイン"
 
+    # 先に Turbo 遷移の完了(URL が root へ変わる)を待ってから内容を検証する。
+    # CI 高負荷時に遷移が遅れてもログイン画面のまま即評価して落ちないようにする。
+    expect(page).to have_current_path(root_path, wait: 10)
+
     aggregate_failures do
-      expect(page).to have_current_path(root_path)
       expect(page).to have_content(
         I18n.t("devise.sessions.signed_in")
       )
@@ -94,7 +97,9 @@ RSpec.describe "Authentications", type: :system do
     fill_in "パスワード", with: "password123"
     click_button "ログイン"
 
-    # ログイン後のリダイレクト完了を待ってからログアウト操作
+    # ログイン後のリダイレクト(Turbo 遷移)完了を待ってからログアウト操作。
+    # 先に URL の変化を同期点として待つことで、CI 高負荷時の遅延に強くする。
+    expect(page).to have_current_path(root_path, wait: 10)
     aggregate_failures do
       expect(page).to have_content(I18n.t("devise.sessions.signed_in"))
       expect(page).to have_link("ログアウト")
