@@ -63,10 +63,18 @@ class ActivityRecordsController < ApplicationController
   end
 
   def pomodoro_timer
-    # タスク内容を登録のためこちらでインスタンス化
-    @activity_record = current_user.activity_records.build(task: params.permit(:task)[:task])
     @light_time = current_user.light_times.find_by(is_current: true)
     @dark_time = current_user.dark_time
+
+    # 光の時間・闇の時間が揃っていないと画面描画で nil 参照になるため早期リダイレクト。
+    # マイページのタイマー起動ボタンと同じガード条件を URL 直打ちにも適用する。
+    unless helpers.both_times_present?(@dark_time, @light_time)
+      redirect_to mypage_path, alert: t("activity_records.flash_message.require_both_times")
+      return
+    end
+
+    # タスク内容を登録のためこちらでインスタンス化
+    @activity_record = current_user.activity_records.build(task: params.permit(:task)[:task])
     @pomodoro_setting = current_user.pomodoro_setting
   end
 

@@ -80,6 +80,35 @@ RSpec.describe "ActivityRecords", type: :request do
         end
       end
     end
+
+    context "光の時間が 0 件のとき" do
+      before { user.light_times.destroy_all }
+
+      it "マイページへリダイレクトすること" do
+        get pomodoro_timer_activity_records_path
+
+        aggregate_failures do
+          expect(response).to redirect_to(mypage_path)
+          expect(flash[:alert]).to eq(I18n.t("activity_records.flash_message.require_both_times"))
+        end
+      end
+    end
+
+    context "闇の時間が未設定のとき" do
+      before do
+        user.dark_time.destroy
+        user.reload # has_one の関連キャッシュ（破棄済みインスタンス）をクリア
+      end
+
+      it "マイページへリダイレクトすること" do
+        get pomodoro_timer_activity_records_path
+
+        aggregate_failures do
+          expect(response).to redirect_to(mypage_path)
+          expect(flash[:alert]).to eq(I18n.t("activity_records.flash_message.require_both_times"))
+        end
+      end
+    end
   end
 
   # =========================================================

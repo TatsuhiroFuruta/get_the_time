@@ -106,6 +106,71 @@ RSpec.describe LightTime, type: :model do
     end
   end
 
+  describe ".destroy_with_current_reassignment!" do
+    let(:user) { create(:user) }
+
+    context "current を削除するとき" do
+      let!(:current_light_time) { create(:light_time, :current, user: user) }
+      let!(:oldest_light_time) { create(:light_time, user: user) }
+      let!(:newest_light_time) { create(:light_time, user: user) }
+
+      it "レコードが削除されること" do
+        expect {
+          described_class.destroy_with_current_reassignment!(user, current_light_time)
+        }.to change(described_class, :count).by(-1)
+      end
+
+      it "最古の残レコードが current に昇格すること" do
+        described_class.destroy_with_current_reassignment!(user, current_light_time)
+        aggregate_failures do
+          expect(oldest_light_time.reload.is_current).to be true
+          expect(newest_light_time.reload.is_current).to be false
+          expect(user.light_times.where(is_current: true).count).to eq 1
+        end
+      end
+    end
+
+    context "非 current を削除するとき" do
+      let!(:current_light_time) { create(:light_time, :current, user: user) }
+      let!(:other_light_time) { create(:light_time, user: user) }
+
+      it "current は変わらないこと" do
+        described_class.destroy_with_current_reassignment!(user, other_light_time)
+        expect(current_light_time.reload.is_current).to be true
+      end
+    end
+
+    context "唯一の current を削除して 0 件になるとき" do
+      let!(:only_light_time) { create(:light_time, :current, user: user) }
+
+      it "エラーにならず 0 件になること" do
+        aggregate_failures do
+          expect {
+            described_class.destroy_with_current_reassignment!(user, only_light_time)
+          }.to change(user.light_times, :count).to(0)
+        end
+      end
+    end
+
+    context "昇格に失敗するとき" do
+      let!(:current_light_time) { create(:light_time, :current, user: user) }
+      let!(:next_light_time) { create(:light_time, user: user) }
+
+      it "削除も rollback され current が保たれること" do
+        allow(described_class).to receive(:switch_current!).and_raise(ActiveRecord::RecordInvalid)
+
+        aggregate_failures do
+          expect {
+            described_class.destroy_with_current_reassignment!(user, current_light_time)
+          }.to raise_error(ActiveRecord::RecordInvalid)
+
+          expect(described_class.exists?(current_light_time.id)).to be true
+          expect(current_light_time.reload.is_current).to be true
+        end
+      end
+    end
+  end
+
   describe ".ransackable_attributes" do
     it "action カラムのみ検索可能" do
       expect(described_class.ransackable_attributes).to eq [ "action" ]
