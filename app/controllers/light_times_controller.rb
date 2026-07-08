@@ -40,13 +40,7 @@ class LightTimesController < ApplicationController
   end
 
   def destroy
-    was_current = @light_time.is_current
-    @light_time.destroy!
-
-    if was_current
-      next_light_time = current_user.light_times.order(:created_at).first
-      LightTime.switch_current!(current_user, next_light_time) if next_light_time
-    end
+    LightTime.destroy_with_current_reassignment!(current_user, @light_time)
 
     redirect_to mypage_path, notice: t("defaults.flash_message.deleted", item: LightTime.model_name.human), status: :see_other
   end
