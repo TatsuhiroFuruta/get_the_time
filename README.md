@@ -3,7 +3,7 @@
 ![](app/assets/images/ogp.png)
 
 ## アプリURL
-https://get-the-time.onrender.com/
+https://get-the-time.com/
 
 ## サービス概要
 **Get The Time** は学校や仕事、家事などで拘束されていない自由時間を
