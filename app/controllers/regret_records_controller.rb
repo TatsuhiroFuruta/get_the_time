@@ -49,6 +49,10 @@ class RegretRecordsController < ApplicationController
 
   private
 
+  def not_found_redirect_path
+    regret_records_path
+  end
+
   def set_regret_record
     @regret_record = current_user.regret_records.find(params[:id])
   end

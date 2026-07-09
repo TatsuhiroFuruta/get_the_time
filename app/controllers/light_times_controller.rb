@@ -2,8 +2,6 @@ class LightTimesController < ApplicationController
   before_action :set_light_time, only: %i[show edit update destroy switch]
 
   def switch
-    return head :not_found unless @light_time
-
     LightTime.switch_current!(current_user, @light_time)
 
     respond_to do |format|

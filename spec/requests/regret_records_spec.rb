@@ -4,6 +4,8 @@ RSpec.describe "RegretRecords", type: :request do
   let(:user) { create(:user) }
   let(:other_user) { create(:user) }
 
+  let(:not_found_message) { I18n.t("defaults.flash_message.record_not_found") }
+
   before do
     sign_in user
   end
@@ -46,12 +48,15 @@ RSpec.describe "RegretRecords", type: :request do
       end
     end
 
-    it "他人の記録にアクセスすると 404 を返す" do
+    it "他人の記録にアクセスすると一覧へ戻される" do
       other_regret_record = create(:regret_record, user: other_user)
 
       get regret_record_path(other_regret_record)
 
-      expect(response).to have_http_status(:not_found)
+      aggregate_failures do
+        expect(response).to redirect_to(regret_records_path)
+        expect(flash[:alert]).to eq(not_found_message)
+      end
     end
   end
 
@@ -67,12 +72,15 @@ RSpec.describe "RegretRecords", type: :request do
       end
     end
 
-    it "他人の記録の編集画面にアクセスすると 404 を返す" do
+    it "他人の記録の編集画面にアクセスすると一覧へ戻される" do
       other_regret_record = create(:regret_record, user: other_user)
 
       get edit_regret_record_path(other_regret_record)
 
-      expect(response).to have_http_status(:not_found)
+      aggregate_failures do
+        expect(response).to redirect_to(regret_records_path)
+        expect(flash[:alert]).to eq(not_found_message)
+      end
     end
   end
 
@@ -108,13 +116,14 @@ RSpec.describe "RegretRecords", type: :request do
       end
     end
 
-    it "他人の記録を更新しようとすると 404 を返す" do
+    it "他人の記録を更新しようとすると一覧へ戻される" do
       other_regret_record = create(:regret_record, user: other_user, content: "他人の内容")
 
       patch regret_record_path(other_regret_record), params: { regret_record: { content: "改ざん" } }
 
       aggregate_failures do
-        expect(response).to have_http_status(:not_found)
+        expect(response).to redirect_to(regret_records_path)
+        expect(flash[:alert]).to eq(not_found_message)
         expect(other_regret_record.reload.content).to eq("他人の内容")
       end
     end
@@ -192,14 +201,16 @@ RSpec.describe "RegretRecords", type: :request do
       end
     end
 
-    it "他人の記録を削除しようとすると 404 を返し、削除されない" do
+    it "他人の記録を削除しようとすると一覧へ戻され、削除されない" do
       other_regret_record = create(:regret_record, user: other_user)
 
       aggregate_failures do
         expect {
           delete regret_record_path(other_regret_record)
         }.not_to change(RegretRecord, :count)
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(regret_records_path)
+        expect(flash[:alert]).to eq(not_found_message)
       end
     end
   end
@@ -242,12 +253,13 @@ RSpec.describe "RegretRecords", type: :request do
     context "他ユーザーのレコードに対して操作すると" do
       let!(:other_regret_record) { create(:regret_record, user: other_user, favorited: false) }
 
-      it "更新できず 404 を返すこと" do
+      it "更新できず一覧へ戻されること" do
         aggregate_failures do
           expect {
             patch favorite_regret_record_path(other_regret_record)
           }.not_to change { other_regret_record.reload.favorited }
-          expect(response).to have_http_status(:not_found)
+          expect(response).to redirect_to(regret_records_path)
+          expect(flash[:alert]).to eq(not_found_message)
         end
       end
     end

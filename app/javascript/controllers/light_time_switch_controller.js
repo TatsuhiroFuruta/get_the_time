@@ -63,9 +63,21 @@ export default class extends Controller {
         "X-CSRF-Token": csrfToken || "",
         "Accept": "text/vnd.turbo-stream.html"
       },
-      credentials: "same-origin"
+      credentials: "same-origin",
+      // 自動追従するとリダイレクト先の HTML を Turbo Stream として描画しようとして
+      // 何も起きず、追従先のリクエストでフラッシュも消費されてしまう
+      redirect: "manual"
     })
-    .then(response => response.text())
-    .then(html => Turbo.renderStreamMessage(html))
+    .then(response => {
+      // 削除済みの光の時間へ切り替えようとした場合、サーバはリダイレクトを返す
+      if (response.type === "opaqueredirect") {
+        Turbo.visit(window.location.href)
+        return null
+      }
+      return response.text()
+    })
+    .then(html => {
+      if (html) Turbo.renderStreamMessage(html)
+    })
   }
 }
