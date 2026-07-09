@@ -68,6 +68,63 @@ RSpec.describe User, type: :model do
     end
   end
 
+  # =========================================================
+  # #light_and_dark_times_present?
+  # =========================================================
+  describe "#light_and_dark_times_present?" do
+    let(:user) { create(:user) }
+
+    context "闇の時間と current の光の時間が両方あるとき" do
+      before do
+        create(:dark_time, user: user)
+        create(:light_time, :current, user: user)
+      end
+
+      it "true を返すこと" do
+        expect(user.light_and_dark_times_present?).to be true
+      end
+    end
+
+    context "闇の時間がないとき" do
+      before { create(:light_time, :current, user: user) }
+
+      it "false を返すこと" do
+        expect(user.light_and_dark_times_present?).to be false
+      end
+    end
+
+    context "光の時間が 1 件もないとき" do
+      before { create(:dark_time, user: user) }
+
+      it "false を返すこと" do
+        expect(user.light_and_dark_times_present?).to be false
+      end
+    end
+
+    context "光の時間はあるが current が 1 件もないとき" do
+      before do
+        create(:dark_time, user: user)
+        create(:light_time, user: user, is_current: false)
+      end
+
+      it "false を返すこと（光の時間の存在は is_current: true で定義する）" do
+        expect(user.light_and_dark_times_present?).to be false
+      end
+    end
+
+    context "他ユーザーが両方揃えているとき" do
+      before do
+        other_user = create(:user)
+        create(:dark_time, user: other_user)
+        create(:light_time, :current, user: other_user)
+      end
+
+      it "false を返すこと（他ユーザーのレコードを拾わない）" do
+        expect(user.light_and_dark_times_present?).to be false
+      end
+    end
+  end
+
   describe "nameのバリデーション" do
     it "nameがあれば有効" do
       user = build(:user, name: "テスト")

@@ -26,6 +26,16 @@ class User < ApplicationRecord
 
   after_create :create_pomodoro_setting
 
+  # 光の時間（current）と闇の時間が両方登録済みか。
+  # ポモドーロタイマーの起動可否も、ハンバーガーメニューの記録系リンクの出し分けも、
+  # すべてこの状態から導かれる帰結なので、判定はここに一本化する。
+  # 「光の時間の存在」は is_current: true で定義する。LightTime は作成時に必ず
+  # switch_current! を通り、削除時は destroy_with_current_reassignment! で current を
+  # 昇格させるため、「1 件以上ある」と「current が 1 件ある」は常に一致する。
+  def light_and_dark_times_present?
+    dark_time.present? && light_times.exists?(is_current: true)
+  end
+
   # OmniAuth（Google）認証情報からユーザーを取得・作成する。
   # 検索は次の二段構えで行う:
   #   1. provider/uid（不変かつ一意な外部アカウントの正体）で既存ユーザーを探す。

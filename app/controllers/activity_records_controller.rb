@@ -68,7 +68,7 @@ class ActivityRecordsController < ApplicationController
 
     # 光の時間・闇の時間が揃っていないと画面描画で nil 参照になるため早期リダイレクト。
     # マイページのタイマー起動ボタンと同じガード条件を URL 直打ちにも適用する。
-    unless helpers.both_times_present?(@dark_time, @light_time)
+    unless current_user.light_and_dark_times_present?
       redirect_to mypage_path, alert: t("activity_records.flash_message.require_both_times")
       return
     end
