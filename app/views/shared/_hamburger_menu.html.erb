@@ -17,7 +17,7 @@
 
     <!-- ハンバーガーメニュー展開時 -->
     <nav data-hamburger-target="menu" class="fixed top-0 left-0 h-full w-1/2 md:w-1/3 bg-linear-to-b from-yellow-400 from-0% via-yellow-200 via-80% to-yellow-100 to-100% z-50 transform -translate-x-full transition-transform duration-300">
-      <% setup_complete = both_times_present?(current_user.dark_time, current_user.light_times.first) %>
+      <% setup_complete = current_user.light_and_dark_times_present? %>
       <ul class="pt-35 last:border-b last:border-amber-500">
         <li><%= link_to "マイページ", mypage_path, data: { action: "click->hamburger#close" }, class: nav_link_class(mypage_path) %></li>
         <li><%= link_to "アカウント情報", user_account_path, data: { action: "click->hamburger#close" }, class: nav_link_class(user_account_path) %></li>
