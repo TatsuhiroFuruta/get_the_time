@@ -90,6 +90,26 @@ RSpec.describe LightTime, type: :model do
       end
     end
 
+    context "既に current のレコードを渡すとき" do
+      it "渡した light_time は current のままであること" do
+        described_class.switch_current!(user, current_light_time)
+        expect(current_light_time.reload.is_current).to be true
+      end
+
+      it "current は1件のまま保たれること" do
+        described_class.switch_current!(user, current_light_time)
+        expect(user.light_times.where(is_current: true).count).to eq 1
+      end
+
+      it "他の light_time は current ではないままであること" do
+        described_class.switch_current!(user, current_light_time)
+        aggregate_failures do
+          expect(next_light_time.reload.is_current).to be false
+          expect(third_light_time.reload.is_current).to be false
+        end
+      end
+    end
+
     context "異常系" do
       it "update! 失敗時は rollback されること" do
         allow(next_light_time).to receive(:update!).and_raise(ActiveRecord::RecordInvalid)

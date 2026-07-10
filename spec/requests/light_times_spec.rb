@@ -233,6 +233,16 @@ RSpec.describe "LightTimes", type: :request do
           expect(light_time2.reload.is_current).to be true
         end
       end
+
+      it "既に current のレコードへ切り替えても current が1件のまま保たれる" do
+        patch switch_light_time_path(light_time1), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+
+        aggregate_failures do
+          expect(response).to have_http_status(:ok)
+          expect(light_time1.reload.is_current).to be true
+          expect(user.light_times.where(is_current: true).count).to eq 1
+        end
+      end
     end
 
     context "異常系" do
