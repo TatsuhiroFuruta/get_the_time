@@ -216,6 +216,35 @@ RSpec.describe "LightTimes", type: :system do
       end
     end
 
+    context "別タブで current の光の時間が削除済みの場合" do
+      let!(:dark_time) { create(:dark_time, user: user) }
+
+      it "切り替え後もポモドーロタイマーを開始できること" do
+        visit mypage_path
+
+        expect(page).to have_content("朝のヨガ")
+        expect(page).to have_button("スタート")
+
+        # 別タブでの削除を再現する。DB 上は「夜の読書」が current へ昇格するが、
+        # 画面は「朝のヨガ」を current と信じたまま矢印を描画している。
+        # そのため矢印は「既に current の光の時間」への切り替えを送ることになる。
+        LightTime.destroy_with_current_reassignment!(user, light_time1)
+
+        find("button", text: ">").click
+
+        expect(page).to have_content("夜の読書")
+
+        # 切り替え直後は #light-time-switch しか差し替わらないため、
+        # current が失われても再表示するまで症状が現れない
+        visit mypage_path
+
+        aggregate_failures do
+          expect(page).to have_button("スタート")
+          expect(user.light_times.where(is_current: true).count).to eq 1
+        end
+      end
+    end
+
     context "キーボード操作（デスクトップ）" do
       before do
         page.driver.browser.manage.window.resize_to(1200, 800)
