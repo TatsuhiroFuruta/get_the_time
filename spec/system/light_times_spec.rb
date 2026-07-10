@@ -198,6 +198,24 @@ RSpec.describe "LightTimes", type: :system do
       end
     end
 
+    context "切り替え先が別タブで削除済みの場合" do
+      it "マイページへ戻され、見つからない旨のメッセージが表示されること" do
+        visit mypage_path
+
+        expect(page).to have_content("朝のヨガ")
+
+        # 別タブでの削除を再現する（画面に描画済みの id だけが残る）
+        light_time2.destroy!
+
+        find("button", text: ">").click
+
+        aggregate_failures do
+          expect(page).to have_content(I18n.t("defaults.flash_message.record_not_found"))
+          expect(page).to have_content("朝のヨガ")
+        end
+      end
+    end
+
     context "キーボード操作（デスクトップ）" do
       before do
         page.driver.browser.manage.window.resize_to(1200, 800)

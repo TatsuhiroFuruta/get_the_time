@@ -7,6 +7,8 @@ RSpec.describe "ActivityRecords", type: :request do
   let(:other_light_time) { create(:light_time, :current, user: other_user) }
   let!(:dark_time)  { create(:dark_time, user: user) }
 
+  let(:not_found_message) { I18n.t("defaults.flash_message.record_not_found") }
+
   before { sign_in user }
 
   # =========================================================
@@ -260,11 +262,15 @@ RSpec.describe "ActivityRecords", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "他ユーザーのレコードにアクセスすると 404 を返すこと" do
+    it "他ユーザーのレコードにアクセスすると一覧へ戻されること" do
       other_activity_record = create(:activity_record, user: other_user, light_time: other_light_time)
 
       get activity_record_path(other_activity_record)
-      expect(response).to have_http_status(:not_found)
+
+      aggregate_failures do
+        expect(response).to redirect_to(activity_records_path)
+        expect(flash[:alert]).to eq(not_found_message)
+      end
     end
 
     it "本来の自分が計測済みのとき X 投稿画面へのリンクと文面が描画されること" do
@@ -295,11 +301,15 @@ RSpec.describe "ActivityRecords", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "他ユーザーのレコードにアクセスすると 404 を返すこと" do
+    it "他ユーザーのレコードにアクセスすると一覧へ戻されること" do
       other_activity_record = create(:activity_record, user: other_user, light_time: other_light_time)
 
       get edit_activity_record_path(other_activity_record)
-      expect(response).to have_http_status(:not_found)
+
+      aggregate_failures do
+        expect(response).to redirect_to(activity_records_path)
+        expect(flash[:alert]).to eq(not_found_message)
+      end
     end
   end
 
@@ -378,10 +388,11 @@ RSpec.describe "ActivityRecords", type: :request do
 
       let(:other_activity_record) { create(:activity_record, user: other_user, light_time: other_light_time) }
 
-      it "更新できず 404 を返すこと" do
+      it "更新できず一覧へ戻されること" do
         patch activity_record_path(other_activity_record), params: other_bad_params
         aggregate_failures do
-          expect(response).to have_http_status(:not_found)
+          expect(response).to redirect_to(activity_records_path)
+          expect(flash[:alert]).to eq(not_found_message)
           expect(other_activity_record.reload.comment).not_to eq("改ざん")
         end
       end
@@ -433,12 +444,13 @@ RSpec.describe "ActivityRecords", type: :request do
         create(:activity_record, user: other_user, light_time: other_light_time, favorited: false)
       end
 
-      it "更新できず 404 を返すこと" do
+      it "更新できず一覧へ戻されること" do
         aggregate_failures do
           expect {
             patch favorite_activity_record_path(other_activity_record)
           }.not_to change { other_activity_record.reload.favorited }
-          expect(response).to have_http_status(:not_found)
+          expect(response).to redirect_to(activity_records_path)
+          expect(flash[:alert]).to eq(not_found_message)
         end
       end
     end
@@ -470,12 +482,14 @@ RSpec.describe "ActivityRecords", type: :request do
     context "他ユーザーのレコードに削除すると" do
       let!(:other_activity_record) { create(:activity_record, user: other_user, light_time: other_light_time) }
 
-      it "削除できず 404 を返すこと" do
+      it "削除できず一覧へ戻されること" do
         aggregate_failures do
           expect {
             delete activity_record_path(other_activity_record)
           }.not_to change(ActivityRecord, :count)
-          expect(response).to have_http_status(:not_found)
+          expect(response).to have_http_status(:see_other)
+          expect(response).to redirect_to(activity_records_path)
+          expect(flash[:alert]).to eq(not_found_message)
         end
       end
     end

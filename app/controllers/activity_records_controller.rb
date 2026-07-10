@@ -80,6 +80,10 @@ class ActivityRecordsController < ApplicationController
 
   private
 
+  def not_found_redirect_path
+    activity_records_path
+  end
+
   def set_activity_record
     @activity_record = current_user.activity_records.find(params[:id])
   end

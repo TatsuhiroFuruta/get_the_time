@@ -4,6 +4,8 @@ RSpec.describe "LightTimes", type: :request do
   let(:user) { create(:user) }
   let(:other_user) { create(:user) }
 
+  let(:not_found_message) { I18n.t("defaults.flash_message.record_not_found") }
+
   before do
     sign_in user
   end
@@ -23,10 +25,14 @@ RSpec.describe "LightTimes", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "他人のデータにはアクセスできない" do
+    it "他人のデータにはアクセスできず、マイページへ戻される" do
       other_light_time = create(:light_time, user: other_user)
       get light_time_path(other_light_time)
-      expect(response).to have_http_status(:not_found)
+
+      aggregate_failures do
+        expect(response).to redirect_to(mypage_path)
+        expect(flash[:alert]).to eq(not_found_message)
+      end
     end
   end
 
@@ -38,10 +44,14 @@ RSpec.describe "LightTimes", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "他人のデータにはアクセスできない" do
+    it "他人のデータにはアクセスできず、マイページへ戻される" do
       other_light_time = create(:light_time, user: other_user)
       get edit_light_time_path(other_light_time)
-      expect(response).to have_http_status(:not_found)
+
+      aggregate_failures do
+        expect(response).to redirect_to(mypage_path)
+        expect(flash[:alert]).to eq(not_found_message)
+      end
     end
   end
 
@@ -160,7 +170,8 @@ RSpec.describe "LightTimes", type: :request do
         }
 
         aggregate_failures do
-          expect(response).to have_http_status(:not_found)
+          expect(response).to redirect_to(mypage_path)
+          expect(flash[:alert]).to eq(not_found_message)
           expect(other_light_time.reload.action).not_to eq("不正更新")
         end
       end
@@ -201,7 +212,9 @@ RSpec.describe "LightTimes", type: :request do
           delete light_time_path(other_light_time)
         }.not_to change(LightTime, :count)
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(mypage_path)
+        expect(flash[:alert]).to eq(not_found_message)
       end
     end
   end
@@ -223,10 +236,15 @@ RSpec.describe "LightTimes", type: :request do
     end
 
     context "異常系" do
-      it "他人のデータにはアクセスできない" do
+      it "他人のデータにはアクセスできず、マイページへ戻される" do
         other_light_time = create(:light_time, user: other_user)
         patch switch_light_time_path(other_light_time), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
-        expect(response).to have_http_status(:not_found)
+
+        aggregate_failures do
+          expect(response).to have_http_status(:see_other)
+          expect(response).to redirect_to(mypage_path)
+          expect(flash[:alert]).to eq(not_found_message)
+        end
       end
     end
   end

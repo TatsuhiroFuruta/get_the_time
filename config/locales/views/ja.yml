@@ -20,6 +20,7 @@ ja:
       deleted: "%{item}を削除しました"
       already_exists: "%{item}は既に作成済みです"
       not_found: "%{item}が見つかりません"
+      record_not_found: 対象のデータは見つかりませんでした
   activity_records:
     flash_message:
       require_timer_access: ポモドーロタイマーからアクセスしてください
