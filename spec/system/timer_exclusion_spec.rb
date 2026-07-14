@@ -82,7 +82,13 @@ RSpec.describe "タイマーの排他制御", type: :system do
   describe "両タブを先に開いてから、後出しでどちらかをスタートしたとき" do
     let!(:purification_time) { create(:purification_time, :idle_with_time, user: user) }
 
-    it "浄化タイマー画面を開いたまま、別タブでポモドーロを開始したとき、浄化のスタートを押しても開始できないこと" do
+    # このケースを実際に止めているのは storage イベントによる追い返しである。
+    # 別タブがリースを書いた瞬間に浄化タイマー画面がマイページへ退避するため、
+    # スタートボタンを押す機会そのものが無くなる。
+    # purification_timer_controller#start にも heldByOther? の確認を入れてあるが、
+    # それは storage イベントを取り逃した場合の最後の砦であり、ブラウザ上では
+    # 再現できないため、この spec では検証していない（多層防御として残している）。
+    it "浄化タイマー画面を開いたまま、別タブでポモドーロを開始すると、浄化タイマー画面が追い返されて開始できないこと" do
       # 浄化タイマー画面を先に開く（この時点ではまだどちらのロックも無いのでガードは通る）
       visit purification_time_path
 
@@ -93,10 +99,6 @@ RSpec.describe "タイマーの排他制御", type: :system do
         # リースが書き込まれるのを待つ
         expect(page).to have_css("[data-pomodoro-target='startButton'].hidden", visible: :all)
       end
-
-      # 元の浄化タイマー画面に戻ってスタートを押す。storage イベントによって
-      # 押す前に既に追い返されていることもあり得るため、ボタンが残っていれば押す。
-      click_button "スタート" if page.has_button?("スタート", wait: 1)
 
       aggregate_failures do
         expect(page).to have_current_path(mypage_path, ignore_query: true)
