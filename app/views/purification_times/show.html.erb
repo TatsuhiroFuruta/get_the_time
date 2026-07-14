@@ -1,7 +1,10 @@
 <% content_for(:title, t(".title")) %>
+<%# 排他ロックのガードは、浄化タイマー本体とは別の要素に持たせる。
+    data-controller に併記すると `[data-controller="purification-timer"]` の完全一致セレクタが外れる。 %>
+<div data-controller="activity-lock"
+     data-activity-lock-redirect-to-value="<%= mypage_path(locked: "activity") %>">
 <div
-  data-controller="purification-timer activity-lock"
-  data-activity-lock-redirect-to-value="<%= mypage_path(locked: "activity") %>"
+  data-controller="purification-timer"
   data-purification-timer-remaining-value="<%= @purification_time.remaining_time %>"
   data-purification-timer-started-at-value="<%= @purification_time.started_at&.to_i %>"
   data-purification-timer-running-value="<%= @purification_time.running? %>"
@@ -46,4 +49,5 @@
       終了する
     </button>
   <% end %>
+</div>
 </div>
