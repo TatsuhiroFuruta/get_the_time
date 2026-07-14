@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { heldByOther } from "../lib/activity_lock"
 
 // Connects to data-controller="purification-timer"
 export default class extends Controller {
@@ -55,6 +56,14 @@ export default class extends Controller {
   }
 
   start() {
+    // ✅ 別タブが光の時間の活動中なら、スタート押下の瞬間に弾く。画面を開いた
+    // 時点のガード（activity-lock コントローラ）だけでは、両タブを開いた後で
+    // ポモドーロが後から開始されたケースを検知できない。
+    if (heldByOther()) {
+      location.replace("/mypage?locked=activity")
+      return
+    }
+
     this.request("/purification_time/start")
   }
 

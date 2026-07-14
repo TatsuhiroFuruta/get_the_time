@@ -62,6 +62,7 @@ ja:
   mypages:
     flash_message:
       activity_locked: 別のタブで光の時間の活動を実行中です
+      purification_counting: 浄化タイマーの実行中はポモドーロタイマーを開始できません
     show:
       title: マイページ
   mystatuses:

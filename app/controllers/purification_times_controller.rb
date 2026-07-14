@@ -5,8 +5,12 @@ class PurificationTimesController < ApplicationController
     respond_to do |format|
       format.html
       format.json do
+        # has_one なので、まだ浄化タイマーを一度も付与されていないユーザーは
+        # @purification_time が nil になりうる。ポモドーロ画面の始点チェックが
+        # 全ユーザーに対して無条件でこの JSON を叩くため、ここで 500 にしない。
         render json: {
-          running: @purification_time.running?
+          running: @purification_time&.running? || false,
+          counting: @purification_time&.counting? || false
         }
       end
     end
