@@ -9,7 +9,7 @@
       光の時間の活動記録登録
     </h1>
 
-    <%= form_with model: @form, url: activity_records_path, class: "space-y-4" do |f| %>
+    <%= form_with model: @form, url: activity_records_path, class: "space-y-4", data: { action: "submit->activity-lock#release" } do |f| %>
       <%= render "shared/error_messages", object: @form %>
 
       <!-- 時間 -->

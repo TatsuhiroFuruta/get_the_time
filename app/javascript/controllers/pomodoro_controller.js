@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { acquire, renew, HEARTBEAT_MS } from "../lib/activity_lock"
 
 // Connects to data-controller="pomodoro"
 export default class extends Controller {
@@ -55,6 +56,11 @@ export default class extends Controller {
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
     }
+
+    // ✅ heartbeat を止めるだけ。release() は呼ばない。
+    // 離脱（ブラウザバック / タブ閉じ）とフォームへの正常遷移をここで区別し始めると
+    // PR #88 と同じ破綻に戻る。更新が止まればリースは TTL で勝手に腐る。
+    clearInterval(this.lockHeartbeat)
   }
 
   // タイトル更新（デバウンス付き）
@@ -73,6 +79,8 @@ export default class extends Controller {
       this.firstStartedAt = new Date()
       // ✅ 離脱警告を有効化
       this.addBeforeUnloadListener()
+      // ✅ ここから活動記録の登録完了までを「光の時間の活動中」とし、浄化タイマーを排他する
+      this.startActivityLock()
     }
 
     // ✅ タイマー開始時は無操作チェックを停止
@@ -289,6 +297,14 @@ export default class extends Controller {
     } else {
       alert("スタートボタンを押してください")
     }
+  }
+
+  // ✅ 光の時間の活動リースを取得し、以後 heartbeat で更新し続ける。
+  // タイマー画面 → 活動記録フォームへの遷移は同一タブなので、遷移先の
+  // activity-lock コントローラが同じリースをそのまま引き継いで更新する。
+  startActivityLock() {
+    acquire()
+    this.lockHeartbeat = setInterval(() => renew(), HEARTBEAT_MS)
   }
 
   saveActivityRecord(lastEndedAt) {
