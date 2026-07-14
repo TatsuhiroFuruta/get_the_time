@@ -1,14 +1,19 @@
 <% content_for(:title, t(".title")) %>
-<div data-controller="pomodoro"
-     data-pomodoro-work-duration-value="<%= @pomodoro_setting.work_duration * 60 %>"
-     data-pomodoro-break-duration-value="<%= @pomodoro_setting.break_duration * 60 %>"
-     data-pomodoro-task-value="<%= @activity_record.task %>"
-     data-pomodoro-light-time-id-value="<%= @light_time&.id %>">
+<%# 排他ロックのガードは、ポモドーロ本体とは別の要素に持たせる。
+    data-controller に併記すると `[data-controller="pomodoro"]` の完全一致セレクタが外れる。 %>
+<div data-controller="activity-lock"
+     data-activity-lock-redirect-to-value="<%= mypage_path(locked: "activity") %>">
+  <div data-controller="pomodoro"
+       data-pomodoro-work-duration-value="<%= @pomodoro_setting.work_duration * 60 %>"
+       data-pomodoro-break-duration-value="<%= @pomodoro_setting.break_duration * 60 %>"
+       data-pomodoro-task-value="<%= @activity_record.task %>"
+       data-pomodoro-light-time-id-value="<%= @light_time&.id %>">
 
-  <%= render "activity_records/pomodoro/work_screen" %>
+    <%= render "activity_records/pomodoro/work_screen" %>
 
-  <%= render "activity_records/pomodoro/break_screen" %>
+    <%= render "activity_records/pomodoro/break_screen" %>
 
-  <%= render "activity_records/pomodoro/motivation_screen" %>
+    <%= render "activity_records/pomodoro/motivation_screen" %>
 
+  </div>
 </div>

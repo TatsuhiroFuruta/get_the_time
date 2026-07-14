@@ -7,6 +7,13 @@ class PurificationTime < ApplicationRecord
     remaining_time.to_i <= 0
   end
 
+  # 実時間ベースで「いま計測中か」を導出する。status だけを見ると、時間切れ後に
+  # stop! が呼ばれないまま（タブを閉じた等）running が残り、ポモドーロを永久に
+  # ブロックしてしまうため、排他制御の判定にはこちらを使う。
+  def counting?
+    running? && started_at.present? && Time.current < started_at + total_time
+  end
+
   def start!
     return unless idle? || paused?
 

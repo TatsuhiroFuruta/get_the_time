@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { acquire, renew, orphan, HEARTBEAT_MS } from "../lib/activity_lock"
 
 // Connects to data-controller="pomodoro"
 export default class extends Controller {
@@ -55,6 +56,17 @@ export default class extends Controller {
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
     }
+
+    // ✅ release() は呼ばない。離脱（ブラウザバック / タブ閉じ）とフォームへの
+    // 正常遷移をここで区別し始めると PR #88 と同じ破綻に戻る。
+    clearInterval(this.lockHeartbeat)
+
+    // Turbo Drive はページ内リンクの遷移で document を作り直さないため
+    // pagehide は発火しない。Stimulus の disconnect() は Turbo 遷移でも
+    // 確実に呼ばれるので、ここで自分のロックを orphan（期限を 5 秒に短縮）する。
+    // 削除ではなく短縮なので、活動記録フォームへの正常遷移では遷移先の
+    // activity-lock コントローラが 1 秒以内に acquire() し直して満了期限が戻る。
+    orphan()
   }
 
   // タイトル更新（デバウンス付き）
@@ -65,14 +77,24 @@ export default class extends Controller {
     // this.taskInputTarget.value = ''
   }
 
-  start() {
+  async start() {
     if (this.timerInterval) return
 
     // ✅ 最初のスタート時のみ記録
     if (this.firstStartedAt === null) {
+      // ✅ 浄化タイマーが別タブで計測中なら、スタート押下の瞬間にサーバへ問い合わせて
+      // 弾く。画面を開いた時点のガードだけでは、両タブを開いた後で浄化タイマーが
+      // 後から開始されたケースを検知できない。
+      if (await this.isPurificationCounting()) {
+        location.replace("/mypage?locked=purification")
+        return
+      }
+
       this.firstStartedAt = new Date()
       // ✅ 離脱警告を有効化
       this.addBeforeUnloadListener()
+      // ✅ ここから活動記録の登録完了までを「光の時間の活動中」とし、浄化タイマーを排他する
+      this.startActivityLock()
     }
 
     // ✅ タイマー開始時は無操作チェックを停止
@@ -84,6 +106,23 @@ export default class extends Controller {
 
     this.startTimer()
     this.startButtonTarget.classList.add("hidden")
+  }
+
+  // 浄化タイマーはサーバに状態を持つので、判定はサーバに問い合わせる
+  // （localStorage では判定できない、非対称なガード）。通信に失敗した場合は
+  // 排他制御のために本来の機能を止めない方針で、計測中ではないものとして扱う。
+  async isPurificationCounting() {
+    try {
+      const response = await fetch("/purification_time", {
+        headers: { Accept: "application/json" }
+      })
+      if (!response.ok) return false
+
+      const data = await response.json()
+      return Boolean(data.counting)
+    } catch {
+      return false
+    }
   }
 
   // ✅ 破壊的でない実装にする
@@ -289,6 +328,14 @@ export default class extends Controller {
     } else {
       alert("スタートボタンを押してください")
     }
+  }
+
+  // ✅ 光の時間の活動リースを取得し、以後 heartbeat で更新し続ける。
+  // タイマー画面 → 活動記録フォームへの遷移は同一タブなので、遷移先の
+  // activity-lock コントローラが同じリースをそのまま引き継いで更新する。
+  startActivityLock() {
+    acquire()
+    this.lockHeartbeat = setInterval(() => renew(), HEARTBEAT_MS)
   }
 
   saveActivityRecord(lastEndedAt) {

@@ -194,4 +194,55 @@ RSpec.describe PurificationTime, type: :model do
       end
     end
   end
+
+  # =========================================================
+  # #counting?
+  # =========================================================
+  describe "#counting?" do
+    let!(:user) { create(:user) }
+
+    context "idle のとき" do
+      let!(:purification_time) { create(:purification_time, :idle_with_time, user: user) }
+
+      it "false を返すこと" do
+        expect(purification_time.counting?).to be false
+      end
+    end
+
+    context "paused のとき" do
+      let!(:purification_time) { create(:purification_time, :paused, user: user) }
+
+      it "false を返すこと（残り時間を保持して止まっているだけで、計測はしていない）" do
+        expect(purification_time.counting?).to be false
+      end
+    end
+
+    context "running かつ終了時刻を過ぎていないとき" do
+      let!(:purification_time) { create(:purification_time, :running, user: user) }
+
+      it "true を返すこと" do
+        travel_to(5.minutes.from_now) do
+          expect(purification_time.counting?).to be true
+        end
+      end
+    end
+
+    context "running のまま終了時刻を過ぎているとき" do
+      let!(:purification_time) { create(:purification_time, :running, user: user) }
+
+      it "false を返すこと（タブを閉じたまま時間切れになり stop! が呼ばれなかったケース。ここで true を返すと永久ロックになる）" do
+        travel_to(11.minutes.from_now) do
+          expect(purification_time.counting?).to be false
+        end
+      end
+    end
+
+    context "running だが started_at が nil のとき" do
+      let!(:purification_time) { create(:purification_time, :running, user: user, started_at: nil) }
+
+      it "false を返すこと（不正なデータで例外を出さない）" do
+        expect(purification_time.counting?).to be false
+      end
+    end
+  end
 end
