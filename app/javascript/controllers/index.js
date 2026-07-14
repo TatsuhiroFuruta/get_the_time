@@ -30,3 +30,6 @@ application.register("mystatus-chart", MystatusChartController)
 
 import MystatusRadarChartController from "./mystatus_radar_chart_controller"
 application.register("mystatus-radar-chart", MystatusRadarChartController)
+
+import ActivityLockController from "./activity_lock_controller"
+application.register("activity-lock", ActivityLockController)

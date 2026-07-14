@@ -1,5 +1,6 @@
 <% content_for(:title, t(".title")) %>
-<div data-controller="pomodoro"
+<div data-controller="pomodoro activity-lock"
+     data-activity-lock-redirect-to-value="<%= mypage_path(locked: "activity") %>"
      data-pomodoro-work-duration-value="<%= @pomodoro_setting.work_duration * 60 %>"
      data-pomodoro-break-duration-value="<%= @pomodoro_setting.break_duration * 60 %>"
      data-pomodoro-task-value="<%= @activity_record.task %>"

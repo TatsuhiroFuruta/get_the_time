@@ -60,6 +60,8 @@ ja:
     edit:
       title: 光の時間の編集
   mypages:
+    flash_message:
+      activity_locked: 別のタブで光の時間の活動を実行中です
     show:
       title: マイページ
   mystatuses:
