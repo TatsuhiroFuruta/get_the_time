@@ -494,4 +494,52 @@ RSpec.describe "ActivityRecords", type: :request do
       end
     end
   end
+
+  describe "GET /activity_records/pomodoro_timer 浄化タイマーとの排他制御" do
+    let(:user) { create(:user) }
+    let!(:light_time) { create(:light_time, :current, user: user) }
+    let!(:dark_time) { create(:dark_time, user: user) }
+
+    before { sign_in user }
+
+    context "浄化タイマーが計測中のとき" do
+      let!(:purification_time) { create(:purification_time, :running, user: user) }
+
+      it "マイページへリダイレクトし、アラートを表示すること" do
+        get pomodoro_timer_activity_records_path
+
+        aggregate_failures do
+          expect(response).to redirect_to(mypage_path)
+          expect(flash[:alert]).to eq "浄化タイマーの実行中はポモドーロタイマーを開始できません"
+        end
+      end
+    end
+
+    context "浄化タイマーが running のまま時間切れになっているとき" do
+      let!(:purification_time) { create(:purification_time, :running, user: user) }
+
+      it "ポモドーロ画面を表示すること（永久ロックさせない）" do
+        travel_to(11.minutes.from_now) do
+          get pomodoro_timer_activity_records_path
+          expect(response).to have_http_status(:ok)
+        end
+      end
+    end
+
+    context "浄化タイマーが一時停止中のとき" do
+      let!(:purification_time) { create(:purification_time, :paused, user: user) }
+
+      it "ポモドーロ画面を表示すること" do
+        get pomodoro_timer_activity_records_path
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "浄化タイマーが存在しないとき" do
+      it "ポモドーロ画面を表示すること" do
+        get pomodoro_timer_activity_records_path
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
 end

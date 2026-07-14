@@ -25,6 +25,7 @@ ja:
     flash_message:
       require_timer_access: ポモドーロタイマーからアクセスしてください
       require_both_times: 光の時間と闇の時間を設定してからタイマーを開始してください
+      purification_time_counting: 浄化タイマーの実行中はポモドーロタイマーを開始できません
     index:
       title: 活動記録一覧
     show:

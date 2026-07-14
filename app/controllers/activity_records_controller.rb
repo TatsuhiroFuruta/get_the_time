@@ -1,6 +1,7 @@
 class ActivityRecordsController < ApplicationController
   before_action :set_light_and_dark_times, only: %i[new create]
   before_action :set_activity_record, only: %i[show edit update destroy favorite]
+  before_action :ensure_purification_not_counting, only: %i[pomodoro_timer]
 
   def index
     @q = current_user.activity_records.ransack(params[:q])
@@ -79,6 +80,15 @@ class ActivityRecordsController < ApplicationController
   end
 
   private
+
+  # 浄化タイマーが実際に計測中の間は、光の時間の活動を開始させない。
+  # 浄化タイマーはタブを閉じても走り続けるサーバ側の状態なので、この向きの
+  # ガードはサーバで判定する（クライアントの localStorage では判定できない）。
+  def ensure_purification_not_counting
+    return unless current_user.purification_time&.counting?
+
+    redirect_to mypage_path, alert: t("activity_records.flash_message.purification_time_counting")
+  end
 
   def not_found_redirect_path
     activity_records_path
