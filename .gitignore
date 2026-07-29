@@ -53,5 +53,12 @@
 /vendor/bundle
 /vendor/cache
 
-# Claude Code のローカル状態（メモリ等）
-/.claude/
+# Claude Code: 共有設定はコミットし、個人のローカル状態（メモリ等）は無視する
+# 末尾スラッシュ付きの /.claude/ ではディレクトリごと除外され、中のファイルを ! で
+# 復活させられないため、/.claude/* の形にしている
+/.claude/*
+!/.claude/settings.json
+!/.claude/commands/
+!/.claude/agents/
+!/.claude/skills/
+!/.claude/hooks/
