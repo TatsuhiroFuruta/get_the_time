@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 技術スタック
 
-- Ruby 3.3.6, Rails 8.1.3
+- Ruby 3.3.6, Rails 8.1.3.1
 - PostgreSQL（本番は Neon）、デプロイ先は Render
 - Hotwire (Turbo + Stimulus)、esbuild、Tailwind CSS v4
 - Solid Queue / Solid Cache / Solid Cable
