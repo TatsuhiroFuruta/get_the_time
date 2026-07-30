@@ -99,10 +99,10 @@ RSpec.describe "PomodoroSettings", type: :system do
     end
 
     context "異常系" do
-      it "休憩時間が活動時間以上だとエラーメッセージが表示されること" do
+      it "休憩時間が活動時間を超えるとエラーメッセージが表示されること" do
         within('[data-pomodoro-setting-modal-target="modal"]') do
           fill_in "活動時間", with: 10
-          fill_in "休憩時間", with: 10
+          fill_in "休憩時間", with: 20
           click_on "保存する"
         end
 
@@ -110,7 +110,7 @@ RSpec.describe "PomodoroSettings", type: :system do
         expect(page).to have_current_path(mypage_path)
 
         aggregate_failures do
-          expect(page).to have_content("活動時間未満")
+          expect(page).to have_content("活動時間以下")
           expect(user.pomodoro_setting.reload.work_duration).to eq 25
         end
       end
