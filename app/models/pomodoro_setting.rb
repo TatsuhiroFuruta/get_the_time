@@ -18,11 +18,11 @@ class PomodoroSetting < ApplicationRecord
               greater_than_or_equal_to: BREAK_DURATION_RANGE.min,
               less_than_or_equal_to: BREAK_DURATION_RANGE.max
             }
-  validate :break_duration_must_be_less_than_or_equal_to_work_duration
+  validate :break_duration_cannot_exceed_work_duration
 
   private
 
-  def break_duration_must_be_less_than_or_equal_to_work_duration
+  def break_duration_cannot_exceed_work_duration
     return if work_duration.blank? || break_duration.blank?
 
     if break_duration > work_duration
