@@ -103,19 +103,25 @@ RSpec.describe PomodoroSetting, type: :model do
       end
     end
 
-    describe "break_duration < work_duration の制約" do
+    describe "break_duration <= work_duration の制約" do
       it "活動時間より短い休憩時間は有効" do
         pomodoro_setting.work_duration = 25
         pomodoro_setting.break_duration = 5
         expect(pomodoro_setting).to be_valid
       end
 
-      it "活動時間と同値の休憩時間は無効" do
+      it "活動時間と同値の休憩時間は有効" do
         pomodoro_setting.work_duration = 10
         pomodoro_setting.break_duration = 10
+        expect(pomodoro_setting).to be_valid
+      end
+
+      it "活動時間を 1 分超える休憩時間は無効" do
+        pomodoro_setting.work_duration = 10
+        pomodoro_setting.break_duration = 11
         aggregate_failures do
           expect(pomodoro_setting).to be_invalid
-          expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間未満で設定してください")
+          expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間以下で設定してください")
         end
       end
 
@@ -124,7 +130,7 @@ RSpec.describe PomodoroSetting, type: :model do
         pomodoro_setting.break_duration = 20
         aggregate_failures do
           expect(pomodoro_setting).to be_invalid
-          expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間未満で設定してください")
+          expect(pomodoro_setting.errors[:break_duration]).to include("は活動時間以下で設定してください")
         end
       end
     end

@@ -75,14 +75,14 @@ RSpec.describe "PomodoroSettings", type: :request do
         end
       end
 
-      it "休憩時間が活動時間以上だと更新されず、alert が表示される" do
+      it "休憩時間が活動時間を超えると更新されず、alert が表示される" do
         patch pomodoro_setting_path, params: {
-          pomodoro_setting: { work_duration: 10, break_duration: 10 }
+          pomodoro_setting: { work_duration: 10, break_duration: 20 }
         }
 
         aggregate_failures do
           expect(response).to redirect_to(mypage_path)
-          expect(flash[:alert]).to include("活動時間未満")
+          expect(flash[:alert]).to include("活動時間以下")
           expect(user.pomodoro_setting.reload.work_duration).to eq 25
         end
       end
