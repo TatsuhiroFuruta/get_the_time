@@ -182,7 +182,7 @@ https://get-the-time.com/
 
 ## 使用する技術スタック
 - Ruby 3.3.6
-- フレームワーク（バックエンド）：Ruby on Rails 8.1.3
+- フレームワーク（バックエンド）：Ruby on Rails 8.1.3.1
 - フレームワーク（フロントエンド）：Hotwire
 - CSSフレームワーク：Tailwind CSS
 - データベース：PostgreSQL (Neon)
