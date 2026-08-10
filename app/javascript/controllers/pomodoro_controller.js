@@ -47,6 +47,15 @@ export default class extends Controller {
     this.updateUI()
 
     this.startButtonTarget.classList.remove("hidden")
+
+    // ✅ Turbo Drive は離脱時の（＝入れ替え済みの）DOM をキャッシュするため、
+    //    ブラウザバック → フォワードの復元では hidden が入れ替わったまま戻ってくる。
+    //    connect() は firstStartedAt を null に戻すので、出口も未スタートの状態へ
+    //    揃えないと「キャンセルが無く、終了するを押してもアラートが出るだけ」という
+    //    行き止まりが復活する。startButton を毎回 remove しているのと同じ理由。
+    this.cancelButtonTarget.classList.remove("hidden")
+    this.finishButtonTarget.classList.add("hidden")
+    this.motivationButtonTargets.forEach(el => el.classList.add("hidden"))
   }
 
   disconnect() {

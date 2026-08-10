@@ -22,6 +22,30 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
     end
 
+    it "スタート後にブラウザバック・フォワードで戻ってきても、未スタートの出口に揃うこと" do
+      visit mypage_path
+      click_on "スタート"
+      expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+
+      click_on "スタート", visible: true
+      # 計測が始まって出口が入れ替わるのを待つ
+      expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+
+      # Turbo Drive は離脱時の（＝入れ替え済みの）DOM をキャッシュするので、
+      # 復元では hidden が入れ替わったまま戻ってくる。connect() が未スタートの
+      # 表示状態へ揃え直さないと、キャンセルの無い行き止まりが復活する。
+      page.go_back
+      expect(page).to have_current_path(mypage_path, ignore_query: true)
+      page.go_forward
+      expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+
+      aggregate_failures do
+        expect(page).to have_link("キャンセル", visible: true)
+        expect(page).to have_no_button("終了する", visible: true)
+        expect(page).to have_no_button("集中できない、やる気が出ないときは", visible: true)
+      end
+    end
+
     it "「やること」未入力でスタートしてもポモドーロタイマー画面に遷移できること" do
       visit mypage_path
       # やることを入力せずにスタート
@@ -166,6 +190,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
     context "休憩時間が終了したとき" do
       it "作業画面に戻りスタートボタンが表示されること" do
         click_on "スタート", visible: true
+        # start() は fetch を await した後に隠すので、先に「隠れたこと」を待たないと
+        # まだ見えている元のボタンにマッチし、休憩サイクルを回さずに通ってしまう
+        expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+
         aggregate_failures do
           # 作業3秒 + 休憩2秒 終了後にスタートボタンが再表示される
           expect(page).to have_button("スタート", visible: true, wait: 15)
@@ -175,6 +203,8 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
       it "スタートと一緒に終了するとモチベーションボタンが並び、キャンセルは戻らないこと" do
         click_on "スタート", visible: true
+        # 同上。ここを飛ばすと休憩明けを経ずに assertion が満たされてしまう
+        expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
         expect(page).to have_button("スタート", visible: true, wait: 15)
 
         # 初回スタートで入れ替えた出口は、休憩明けの作業画面でも元に戻さない
