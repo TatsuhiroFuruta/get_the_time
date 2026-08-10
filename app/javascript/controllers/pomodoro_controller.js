@@ -3,7 +3,7 @@ import { acquire, renew, orphan, HEARTBEAT_MS } from "../lib/activity_lock"
 
 // Connects to data-controller="pomodoro"
 export default class extends Controller {
-  static targets = ["workScreen", "breakScreen", "motivationScreen", "display", "savedTask", "taskInput", "startButton", "pomodoroCount"]
+  static targets = ["workScreen", "breakScreen", "motivationScreen", "display", "savedTask", "taskInput", "startButton", "cancelButton", "finishButton", "motivationButton", "pomodoroCount"]
   static values = {
     workDuration: { type: Number, default: 1500 },
     breakDuration: { type: Number, default: 300 },
@@ -95,6 +95,13 @@ export default class extends Controller {
       this.addBeforeUnloadListener()
       // ✅ ここから活動記録の登録完了までを「光の時間の活動中」とし、浄化タイマーを排他する
       this.startActivityLock()
+
+      // ✅ 計測データが生まれたので出口を入れ替える。一度切り替えたら元に戻さない
+      //（休憩明けの作業画面ではスタートと終了するが並ぶ）。
+      this.cancelButtonTarget.classList.add("hidden")
+      this.finishButtonTarget.classList.remove("hidden")
+      // 作業画面と休憩画面の 2 つ（同じ partial）をまとめて表示する
+      this.motivationButtonTargets.forEach(el => el.classList.remove("hidden"))
     }
 
     // ✅ タイマー開始時は無操作チェックを停止

@@ -51,37 +51,57 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
     end
 
-    it "スタートボタンと終了するボタンが表示されること" do
+    it "スタート前はキャンセルだけが出口で、終了するとモチベーションボタンは表示されないこと" do
       aggregate_failures do
-        expect(page).to have_button("スタート")
-        expect(page).to have_button("終了する")
+        expect(page).to have_button("スタート", visible: true)
+        expect(page).to have_link("キャンセル", visible: true)
+        # Capybara.ignore_hidden_elements = false なので visible: true の明示が要る
+        expect(page).to have_no_button("終了する", visible: true)
+        expect(page).to have_no_button("集中できない、やる気が出ないときは", visible: true)
       end
     end
 
-    it "スタートせずに「終了する」をクリックするとアラートが表示されること" do
-      accept_alert("スタートボタンを押してください") do
-        click_on "終了する", visible: true
+    it "キャンセルをクリックするとマイページへ戻ること" do
+      click_on "キャンセル", visible: true
+
+      aggregate_failures do
+        expect(page).to have_current_path(mypage_path, ignore_query: true)
+        expect(user.activity_records.count).to eq(0)
       end
     end
 
-    it "「集中できない、やる気が出ないときは」をクリックするとモチベーション画面が表示されること" do
-      click_on "集中できない、やる気が出ないときは", visible: true
-      aggregate_failures do
-        expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
-        expect(page).to have_selector('[data-pomodoro-target="workScreen"].hidden')
-        expect(page).to have_content("夜更かししてしまう")
-        expect(page).to have_content("健康を損なう")
+    context "スタートボタンをクリックした後" do
+      before do
+        click_on "スタート", visible: true
+        # 出口の入れ替えが済むのを待つ
+        expect(page).to have_button("集中できない、やる気が出ないときは", visible: true)
       end
-    end
 
-    it "モチベーション画面で「いいえ、もう少し頑張ります！」をクリックすると作業画面に戻ること" do
-      click_on "集中できない、やる気が出ないときは", visible: true
-      click_on "いいえ、もう少し頑張ります！"
-      aggregate_failures do
-        expect(page).to have_selector('[data-pomodoro-target="workScreen"]:not(.hidden)')
-        expect(page).to have_selector('[data-pomodoro-target="motivationScreen"].hidden')
-        expect(page).to have_content("25:00")
-        expect(page).to have_button("スタート")
+      it "キャンセルが消えて終了するとモチベーションボタンが表示されること" do
+        aggregate_failures do
+          expect(page).to have_button("終了する", visible: true)
+          expect(page).to have_no_link("キャンセル", visible: true)
+        end
+      end
+
+      it "「集中できない、やる気が出ないときは」をクリックするとモチベーション画面が表示されること" do
+        click_on "集中できない、やる気が出ないときは", visible: true
+        aggregate_failures do
+          expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
+          expect(page).to have_selector('[data-pomodoro-target="workScreen"].hidden')
+          expect(page).to have_content("夜更かししてしまう")
+          expect(page).to have_content("健康を損なう")
+        end
+      end
+
+      it "モチベーション画面で「いいえ、もう少し頑張ります！」をクリックすると作業画面に戻ること" do
+        click_on "集中できない、やる気が出ないときは", visible: true
+        click_on "いいえ、もう少し頑張ります！"
+        aggregate_failures do
+          expect(page).to have_selector('[data-pomodoro-target="workScreen"]:not(.hidden)')
+          expect(page).to have_selector('[data-pomodoro-target="motivationScreen"].hidden')
+          expect(page).to have_content("朝のランニング")
+        end
       end
     end
 
