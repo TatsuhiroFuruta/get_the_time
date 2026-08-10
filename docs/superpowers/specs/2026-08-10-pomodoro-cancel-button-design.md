@@ -66,16 +66,30 @@
 
 `start()` の「初回のみ」ブロック内、`this.firstStartedAt = new Date()` の直後に置く。
 
+切り替えは 1 つのメソッドに寄せ、`connect()` と `start()` の 2 箇所から同じ真偽値で呼ぶ。
+
 ```js
-this.cancelButtonTarget.classList.add("hidden")
-this.finishButtonTarget.classList.remove("hidden")
-// 作業画面と休憩画面の 2 つ（同じ partial）をまとめて表示する
-this.motivationButtonTargets.forEach(el => el.classList.remove("hidden"))
+// 出口の表示は「初回スタート済みか」だけで決まる
+updateExitButtons(started) {
+  this.cancelButtonTarget.classList.toggle("hidden", started)
+  this.finishButtonTarget.classList.toggle("hidden", !started)
+  this.motivationButtonTargets.forEach(el => el.classList.toggle("hidden", !started))
+}
 ```
 
-浄化タイマーのガード（`isPurificationCounting()`）に引っかかるとその手前で `location.replace` するため、**ガードを通過した後にだけ入れ替わる**位置であることが要点。ブロックの外に出すと、計測を開始していないのにキャンセルだけが消える。
+`start()` の初回ブロックで `this.updateExitButtons(true)` を呼ぶ。浄化タイマーのガード（`isPurificationCounting()`）に引っかかるとその手前で `location.replace` するため、**ガードを通過した後にだけ入れ替わる**位置であることが要点。ブロックの外に出すと、計測を開始していないのにキャンセルだけが消える。
 
-一度切り替えたら元に戻さない。`switchToWorkMode()` は「スタート」を戻すだけで、この 3 つには触れない。
+`switchToWorkMode()` は「スタート」を戻すだけで、この 3 つには触れない。だから休憩明けの作業画面でも並んだままになる。
+
+### `connect()` でも揃え直す（実装中に判明）
+
+**Turbo Drive は離脱時の（＝入れ替え済みの）DOM をスナップショットとしてキャッシュする。** そのため「スタート → ブラウザバック → フォワード」の復元では、`hidden` が入れ替わった状態の DOM がそのまま戻ってくる。一方で `connect()` は再実行され、`firstStartedAt` は `null` に戻る。
+
+揃え直さないと、**キャンセルが無く、「終了する」を押してもアラートが出るだけ**という、この設計が消したはずの行き止まりがそのまま復活する。したがって `connect()` の末尾で `this.updateExitButtons(false)` を呼ぶ。既存コードが `startButton` に対して毎回 `classList.remove("hidden")` しているのとまったく同じ理由である。
+
+これは設計時に想定できていなかった。System Spec（マイページ → ポモドーロ → スタート → `go_back` → `go_forward`）で実ブラウザでの再現を確認したうえで修正している。
+
+なお真の bfcache 復元（`pageshow` の `persisted: true`）ではこの問題は起きない。JS のヒープごと保存されるため、表示と `firstStartedAt` が整合したまま復元されるからである。だから `pageshow` ではなく `connect()` に置くのが正しい。
 
 ### 確認ダイアログと `finish()` の分割
 

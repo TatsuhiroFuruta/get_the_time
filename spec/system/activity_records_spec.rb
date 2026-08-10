@@ -78,7 +78,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
     it "スタート前はキャンセルだけが出口で、終了するとモチベーションボタンは表示されないこと" do
       aggregate_failures do
         expect(page).to have_button("スタート", visible: true)
-        expect(page).to have_link("キャンセル", visible: true)
+        expect(page).to have_link("キャンセル", href: mypage_path, visible: true)
         # Capybara.ignore_hidden_elements = false なので visible: true の明示が要る
         expect(page).to have_no_button("終了する", visible: true)
         expect(page).to have_no_button("集中できない、やる気が出ないときは", visible: true)
@@ -201,7 +201,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         end
       end
 
-      it "スタートと一緒に終了するとモチベーションボタンが並び、キャンセルは戻らないこと" do
+      it "休憩明けの作業画面では「スタート」「終了する」「集中できない…」が並び、「キャンセル」は戻らないこと" do
         click_on "スタート", visible: true
         # 同上。ここを飛ばすと休憩明けを経ずに assertion が満たされてしまう
         expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
@@ -237,7 +237,9 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         # 作業時間（3秒）終了を待つ → 休憩画面へ切り替わる
         expect(page).to have_selector('[data-pomodoro-target="breakScreen"]:not(.hidden)', wait: 10)
         # 休憩時間（2秒）終了を待つ → 作業画面に戻りスタートボタンが表示される
-        expect(page).to have_button("スタート", wait: 10)
+        # visible: true が無いと、ignore_hidden_elements = false のせいで hidden の
+        # ままのボタンに即マッチし、休憩明けを待たずに次へ進んでしまう
+        expect(page).to have_button("スタート", visible: true, wait: 10)
         # この時点で inactivityCheck が開始されている
       end
 
@@ -330,6 +332,13 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
       context "休憩画面から終了したとき" do
         before do
+          # 休憩2秒のままだと、休憩画面の検出 → 終了するのクリックが2秒を超えた瞬間に
+          # switchToWorkMode() が走り、breakScreen が hidden のまま二度と戻らない。
+          # 作業は3秒のままにして休憩画面へ速く入り、休憩尺だけ伸ばす。
+          page.execute_script(<<~JS)
+            document.querySelector('[data-controller="pomodoro"]').dataset.pomodoroBreakDurationValue = 30
+          JS
+
           click_on "スタート", visible: true
           # 作業時間終了を待つ → 休憩画面へ
           expect(page).to have_selector('[data-pomodoro-target="breakScreen"]:not(.hidden)', wait: 10)
@@ -348,6 +357,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
       context "モチベーション画面の「それでいいもん」をクリックしたとき" do
         before do
+          # 作業3秒のままだと、モチベーションボタンのクリックが3秒を超えた瞬間に
+          # 休憩画面へ切り替わり、workScreen が hidden になってクリック対象を見失う
+          relax_timer_durations
+
           click_on "スタート", visible: true
           within('[data-pomodoro-target="workScreen"]') do
             click_on "集中できない、やる気が出ないときは", visible: true

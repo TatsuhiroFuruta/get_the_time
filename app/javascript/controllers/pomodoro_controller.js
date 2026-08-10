@@ -50,12 +50,10 @@ export default class extends Controller {
 
     // ✅ Turbo Drive は離脱時の（＝入れ替え済みの）DOM をキャッシュするため、
     //    ブラウザバック → フォワードの復元では hidden が入れ替わったまま戻ってくる。
-    //    connect() は firstStartedAt を null に戻すので、出口も未スタートの状態へ
-    //    揃えないと「キャンセルが無く、終了するを押してもアラートが出るだけ」という
-    //    行き止まりが復活する。startButton を毎回 remove しているのと同じ理由。
-    this.cancelButtonTarget.classList.remove("hidden")
-    this.finishButtonTarget.classList.add("hidden")
-    this.motivationButtonTargets.forEach(el => el.classList.add("hidden"))
+    //    connect() は firstStartedAt を null に戻すので、出口も未スタートへ揃え直さないと
+    //    「キャンセルが無く、終了するを押してもアラートが出るだけ」の行き止まりが復活する。
+    //    startButton を毎回 remove しているのと同じ理由。
+    this.updateExitButtons(false)
   }
 
   disconnect() {
@@ -105,12 +103,9 @@ export default class extends Controller {
       // ✅ ここから活動記録の登録完了までを「光の時間の活動中」とし、浄化タイマーを排他する
       this.startActivityLock()
 
-      // ✅ 計測データが生まれたので出口を入れ替える。一度切り替えたら元に戻さない
-      //（休憩明けの作業画面ではスタートと終了するが並ぶ）。
-      this.cancelButtonTarget.classList.add("hidden")
-      this.finishButtonTarget.classList.remove("hidden")
-      // 作業画面と休憩画面の 2 つ（同じ partial）をまとめて表示する
-      this.motivationButtonTargets.forEach(el => el.classList.remove("hidden"))
+      // ✅ 計測データが生まれたので出口を入れ替える。switchToWorkMode() は戻さないので
+      //    休憩明けの作業画面でもスタートと並んだままになる。
+      this.updateExitButtons(true)
     }
 
     // ✅ タイマー開始時は無操作チェックを停止
@@ -322,6 +317,16 @@ export default class extends Controller {
   toggleMotivation() {
     this.isMotivationOpen = !this.isMotivationOpen
     this.updateUI()
+  }
+
+  // 出口（キャンセル / 終了する / 集中できない…）の表示は「初回スタート済みか」だけで
+  // 決まる。connect()（Turbo の復元を含む）と start() の 2 箇所から同じ真偽値で呼ぶ。
+  // 逆向きの記述を 2 箇所に散らすと、片方を直し忘れて行き止まりが復活する。
+  // モチベーションボタンは作業画面と休憩画面の 2 つ（同じ partial）に出るので複数形。
+  updateExitButtons(started) {
+    this.cancelButtonTarget.classList.toggle("hidden", started)
+    this.finishButtonTarget.classList.toggle("hidden", !started)
+    this.motivationButtonTargets.forEach(el => el.classList.toggle("hidden", !started))
   }
 
   // 「終了する」（作業画面・休憩画面）から呼ばれる。確認を取ってから終了する。
