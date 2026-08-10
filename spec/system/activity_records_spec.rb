@@ -264,8 +264,32 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         JS
       end
 
+      # 作業画面の「終了する」を押す系のテストでは、作業3秒のままだと
+      # 「スタート → startButton の hidden 待ち → 終了するのクリック」が
+      # 3秒を超えた瞬間に作業画面が隠れ、クリック対象を見失う（CI 高負荷時）。
+      # 尺を伸ばしてこのレースを外す。
+      def relax_timer_durations
+        page.execute_script(<<~JS)
+          const el = document.querySelector('[data-controller="pomodoro"]')
+          el.dataset.pomodoroWorkDurationValue = 60
+          el.dataset.pomodoroBreakDurationValue = 30
+        JS
+      end
+
+      # 作業タイマーの締切を直近に動かす。setInterval が生きていれば 1 秒以内に
+      # onTimerComplete が走って休憩画面へ切り替わり、死んでいれば何も起きない。
+      # 「実時間が経ったか」ではなく「タイマーが生きているか」だけを見るための細工。
+      def expire_work_timer_soon
+        page.execute_script(<<~JS)
+          const el = document.querySelector('[data-controller="pomodoro"]')
+          const controller = window.Stimulus.getControllerForElementAndIdentifier(el, 'pomodoro')
+          controller.endedAt = new Date(Date.now() + 500)
+        JS
+      end
+
       context "作業画面から終了したとき" do
         it "スタート後に終了すると確認ダイアログを経て新規作成画面へ遷移すること" do
+          relax_timer_durations
           click_on "スタート", visible: true
           # スタート直後はタイマーが動いているので startButton が hidden になることを確認
           expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
@@ -280,6 +304,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         end
 
         it "確認ダイアログをキャンセルするとタイマーが継続すること" do
+          relax_timer_durations
           click_on "スタート", visible: true
           expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
 
@@ -289,11 +314,14 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
             end
           end
 
+          # 確認を clearInterval より前に通していれば、キャンセル後もタイマーは生きている
+          expire_work_timer_soon
+
           aggregate_failures do
             # 遷移していないこと
             expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
-            # タイマーが生きていれば、作業時間（この context では 3 秒）の満了で
-            # 休憩画面へ切り替わる。clearInterval されていればここで止まったままになる。
+            # タイマーが生きていれば締切の到来で休憩画面へ切り替わる。
+            # clearInterval されていればここで止まったままになる。
             expect(page).to have_selector('[data-pomodoro-target="breakScreen"]:not(.hidden)', wait: 10)
             expect(page).to have_content("ポモドーロ数：1", wait: 10)
           end
