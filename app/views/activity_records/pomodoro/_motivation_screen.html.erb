@@ -32,7 +32,9 @@
 
     <br>
 
-    <button type="submit" data-action="click->pomodoro#finish" class="bg-red-500 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition duration-200">
+    <%# この画面が「本当にそれでいいですか？」と確認を兼ねているので、
+        finish() ではなく確認なしの giveUp() を呼ぶ。 %>
+    <button type="submit" data-action="click->pomodoro#giveUp" class="bg-red-500 text-lg px-8 py-2 rounded-full hover:bg-red-600 transition duration-200">
       それでいいもん
     </button>
   </div>

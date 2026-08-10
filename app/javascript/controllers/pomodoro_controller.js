@@ -315,8 +315,32 @@ export default class extends Controller {
     this.updateUI()
   }
 
+  // 「終了する」（作業画面・休憩画面）から呼ばれる。確認を取ってから終了する。
   finish() {
+    // ✅ 確認ダイアログで迷っていた時間を活動時間に加算しないよう、押した瞬間を先に取る
     const lastEndedAt = new Date()
+
+    // ✅ 確認は必ず副作用より前に通す。clearInterval の後ろに置くと、
+    //    キャンセルした時にタイマーだけ止まって画面が残るという壊れ方をする。
+    if (!window.confirm("終了してよろしいでしょうか？")) return
+
+    this.completeSession(lastEndedAt)
+  }
+
+  // モチベーション画面「それでいいもん」から呼ばれる。あの画面自体が
+  // 「本当にそれでいいですか？」と確認を兼ねているので、二重に確認しない。
+  giveUp() {
+    this.completeSession(new Date())
+  }
+
+  // 計測を止めて活動記録フォームへ遷移する。finish() / giveUp() の共通処理。
+  completeSession(lastEndedAt) {
+    // ✅ 2 つの入口の合流点なので、ここで未スタートを弾いておく。表示制御によって
+    //    UI からは到達しないが、外すと差分計算が NaN になり total_duration が壊れる。
+    if (!this.firstStartedAt) {
+      alert("スタートボタンを押してください")
+      return
+    }
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
@@ -326,15 +350,10 @@ export default class extends Controller {
     // ✅ タイマー終了時に離脱警告を無効化
     this.removeBeforeUnloadListener()
 
-
-    if (this.firstStartedAt) {
-      // ✅ 最初のスタート時刻からの差分を計算
-      const params = this.saveActivityRecord(lastEndedAt)
-      // ✅ 確認フォーム画面に遷移
-      location.replace(`/activity_records/new?${params.toString()}`)
-    } else {
-      alert("スタートボタンを押してください")
-    }
+    // ✅ 最初のスタート時刻からの差分を計算
+    const params = this.saveActivityRecord(lastEndedAt)
+    // ✅ 確認フォーム画面に遷移
+    location.replace(`/activity_records/new?${params.toString()}`)
   }
 
   // ✅ 光の時間の活動リースを取得し、以後 heartbeat で更新し続ける。

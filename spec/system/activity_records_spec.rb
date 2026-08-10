@@ -221,17 +221,38 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
 
       context "作業画面から終了したとき" do
-        it "スタート後に終了すると新規作成画面へ遷移すること" do
+        it "スタート後に終了すると確認ダイアログを経て新規作成画面へ遷移すること" do
           click_on "スタート", visible: true
           # スタート直後はタイマーが動いているので startButton が hidden になることを確認
           expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
 
-          # 作業画面の終了ボタンを直接クリック（アラートは出ない）
-          within('[data-pomodoro-target="workScreen"]') do
-            click_on "終了する", visible: true
+          accept_confirm("終了してよろしいでしょうか？") do
+            within('[data-pomodoro-target="workScreen"]') do
+              click_on "終了する", visible: true
+            end
           end
 
           expect(page).to have_current_path(new_activity_record_path, ignore_query: true, wait: 10)
+        end
+
+        it "確認ダイアログをキャンセルするとタイマーが継続すること" do
+          click_on "スタート", visible: true
+          expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+
+          dismiss_confirm("終了してよろしいでしょうか？") do
+            within('[data-pomodoro-target="workScreen"]') do
+              click_on "終了する", visible: true
+            end
+          end
+
+          aggregate_failures do
+            # 遷移していないこと
+            expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+            # タイマーが生きていれば、作業時間（この context では 3 秒）の満了で
+            # 休憩画面へ切り替わる。clearInterval されていればここで止まったままになる。
+            expect(page).to have_selector('[data-pomodoro-target="breakScreen"]:not(.hidden)', wait: 10)
+            expect(page).to have_content("ポモドーロ数：1", wait: 10)
+          end
         end
       end
 
@@ -243,8 +264,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         end
 
         it "新規作成画面へ遷移すること" do
-          within('[data-pomodoro-target="breakScreen"]') do
-            click_on "終了する", visible: true
+          accept_confirm("終了してよろしいでしょうか？") do
+            within('[data-pomodoro-target="breakScreen"]') do
+              click_on "終了する", visible: true
+            end
           end
 
           expect(page).to have_current_path(new_activity_record_path, ignore_query: true, wait: 10)
