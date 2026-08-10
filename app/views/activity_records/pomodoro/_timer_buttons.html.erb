@@ -4,7 +4,14 @@
     スタート
   </button>
 
-  <button type="submit" data-action="click->pomodoro#finish" class="bg-red-500 text-white/90 px-6 py-2 rounded-full hover:bg-red-600 transition duration-200">
+  <%# スタート前だけの出口。まだ計測データが無く失うものがないので確認は挟まない。
+      浄化タイマー画面（purification_times/show）の idle / paused と同じ作法。 %>
+  <%= link_to t("shared.buttons.cancel"), mypage_path, data: { pomodoro_target: "cancelButton" }, class: "bg-red-500 text-white/90 px-6 py-2 rounded-full hover:bg-red-600 transition duration-200" %>
+
+  <%# 初期状態はマークアップを正とする（HTML パース〜Stimulus 接続の間のチラつきを避ける）。
+      初回スタートで updateExitButtons(true) が hidden を外し、connect()
+      （Turbo の復元を含む）が updateExitButtons(false) で付け直す。 %>
+  <button type="submit" data-pomodoro-target="finishButton" data-action="click->pomodoro#finish" class="hidden bg-red-500 text-white/90 px-6 py-2 rounded-full hover:bg-red-600 transition duration-200">
     終了する
   </button>
 

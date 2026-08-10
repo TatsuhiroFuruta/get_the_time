@@ -140,8 +140,10 @@ RSpec.describe "タイマーの排他制御", type: :system do
       click_button "スタート", visible: true
       expect(page).to have_css("[data-pomodoro-target='startButton'].hidden", visible: :all)
 
-      within('[data-pomodoro-target="workScreen"]') do
-        click_on "終了する", visible: true
+      accept_confirm("終了してよろしいでしょうか？") do
+        within('[data-pomodoro-target="workScreen"]') do
+          click_on "終了する", visible: true
+        end
       end
       expect(page).to have_current_path(new_activity_record_path, ignore_query: true, wait: 10)
 

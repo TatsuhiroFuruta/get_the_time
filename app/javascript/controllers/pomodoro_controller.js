@@ -3,7 +3,7 @@ import { acquire, renew, orphan, HEARTBEAT_MS } from "../lib/activity_lock"
 
 // Connects to data-controller="pomodoro"
 export default class extends Controller {
-  static targets = ["workScreen", "breakScreen", "motivationScreen", "display", "savedTask", "taskInput", "startButton", "pomodoroCount"]
+  static targets = ["workScreen", "breakScreen", "motivationScreen", "display", "savedTask", "taskInput", "startButton", "cancelButton", "finishButton", "motivationButton", "pomodoroCount"]
   static values = {
     workDuration: { type: Number, default: 1500 },
     breakDuration: { type: Number, default: 300 },
@@ -47,6 +47,13 @@ export default class extends Controller {
     this.updateUI()
 
     this.startButtonTarget.classList.remove("hidden")
+
+    // ✅ Turbo Drive は離脱時の（＝入れ替え済みの）DOM をキャッシュするため、
+    //    ブラウザバック → フォワードの復元では hidden が入れ替わったまま戻ってくる。
+    //    connect() は firstStartedAt を null に戻すので、出口も未スタートへ揃え直さないと
+    //    「キャンセルが無く、終了するを押してもアラートが出るだけ」の行き止まりが復活する。
+    //    startButton を毎回 remove しているのと同じ理由。
+    this.updateExitButtons(false)
   }
 
   disconnect() {
@@ -95,6 +102,10 @@ export default class extends Controller {
       this.addBeforeUnloadListener()
       // ✅ ここから活動記録の登録完了までを「光の時間の活動中」とし、浄化タイマーを排他する
       this.startActivityLock()
+
+      // ✅ 計測データが生まれたので出口を入れ替える。switchToWorkMode() は戻さないので
+      //    休憩明けの作業画面でもスタートと並んだままになる。
+      this.updateExitButtons(true)
     }
 
     // ✅ タイマー開始時は無操作チェックを停止
@@ -308,8 +319,42 @@ export default class extends Controller {
     this.updateUI()
   }
 
+  // 出口（キャンセル / 終了する / 集中できない…）の表示は「初回スタート済みか」だけで
+  // 決まる。connect()（Turbo の復元を含む）と start() の 2 箇所から同じ真偽値で呼ぶ。
+  // 逆向きの記述を 2 箇所に散らすと、片方を直し忘れて行き止まりが復活する。
+  // モチベーションボタンは作業画面と休憩画面の 2 つ（同じ partial）に出るので複数形。
+  updateExitButtons(started) {
+    this.cancelButtonTarget.classList.toggle("hidden", started)
+    this.finishButtonTarget.classList.toggle("hidden", !started)
+    this.motivationButtonTargets.forEach(el => el.classList.toggle("hidden", !started))
+  }
+
+  // 「終了する」（作業画面・休憩画面）から呼ばれる。確認を取ってから終了する。
   finish() {
+    // ✅ 確認ダイアログで迷っていた時間を活動時間に加算しないよう、押した瞬間を先に取る
     const lastEndedAt = new Date()
+
+    // ✅ 確認は必ず副作用より前に通す。clearInterval の後ろに置くと、
+    //    キャンセルした時にタイマーだけ止まって画面が残るという壊れ方をする。
+    if (!window.confirm("終了してよろしいでしょうか？")) return
+
+    this.completeSession(lastEndedAt)
+  }
+
+  // モチベーション画面「それでいいもん」から呼ばれる。あの画面自体が
+  // 「本当にそれでいいですか？」と確認を兼ねているので、二重に確認しない。
+  giveUp() {
+    this.completeSession(new Date())
+  }
+
+  // 計測を止めて活動記録フォームへ遷移する。finish() / giveUp() の共通処理。
+  completeSession(lastEndedAt) {
+    // ✅ 2 つの入口の合流点なので、ここで未スタートを弾いておく。表示制御によって
+    //    UI からは到達しないが、外すと差分計算が NaN になり total_duration が壊れる。
+    if (!this.firstStartedAt) {
+      alert("スタートボタンを押してください")
+      return
+    }
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval)
@@ -319,15 +364,10 @@ export default class extends Controller {
     // ✅ タイマー終了時に離脱警告を無効化
     this.removeBeforeUnloadListener()
 
-
-    if (this.firstStartedAt) {
-      // ✅ 最初のスタート時刻からの差分を計算
-      const params = this.saveActivityRecord(lastEndedAt)
-      // ✅ 確認フォーム画面に遷移
-      location.replace(`/activity_records/new?${params.toString()}`)
-    } else {
-      alert("スタートボタンを押してください")
-    }
+    // ✅ 最初のスタート時刻からの差分を計算
+    const params = this.saveActivityRecord(lastEndedAt)
+    // ✅ 確認フォーム画面に遷移
+    location.replace(`/activity_records/new?${params.toString()}`)
   }
 
   // ✅ 光の時間の活動リースを取得し、以後 heartbeat で更新し続ける。

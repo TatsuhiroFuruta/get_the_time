@@ -22,6 +22,30 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
     end
 
+    it "スタート後にブラウザバック・フォワードで戻ってきても、未スタートの出口に揃うこと" do
+      visit mypage_path
+      click_on "スタート"
+      expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+
+      click_on "スタート", visible: true
+      # 計測が始まって出口が入れ替わるのを待つ
+      expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+
+      # Turbo Drive は離脱時の（＝入れ替え済みの）DOM をキャッシュするので、
+      # 復元では hidden が入れ替わったまま戻ってくる。connect() が未スタートの
+      # 表示状態へ揃え直さないと、キャンセルの無い行き止まりが復活する。
+      page.go_back
+      expect(page).to have_current_path(mypage_path, ignore_query: true)
+      page.go_forward
+      expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+
+      aggregate_failures do
+        expect(page).to have_link("キャンセル", visible: true)
+        expect(page).to have_no_button("終了する", visible: true)
+        expect(page).to have_no_button("集中できない、やる気が出ないときは", visible: true)
+      end
+    end
+
     it "「やること」未入力でスタートしてもポモドーロタイマー画面に遷移できること" do
       visit mypage_path
       # やることを入力せずにスタート
@@ -51,37 +75,57 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
     end
 
-    it "スタートボタンと終了するボタンが表示されること" do
+    it "スタート前はキャンセルだけが出口で、終了するとモチベーションボタンは表示されないこと" do
       aggregate_failures do
-        expect(page).to have_button("スタート")
-        expect(page).to have_button("終了する")
+        expect(page).to have_button("スタート", visible: true)
+        expect(page).to have_link("キャンセル", href: mypage_path, visible: true)
+        # Capybara.ignore_hidden_elements = false なので visible: true の明示が要る
+        expect(page).to have_no_button("終了する", visible: true)
+        expect(page).to have_no_button("集中できない、やる気が出ないときは", visible: true)
       end
     end
 
-    it "スタートせずに「終了する」をクリックするとアラートが表示されること" do
-      accept_alert("スタートボタンを押してください") do
-        click_on "終了する", visible: true
+    it "キャンセルをクリックするとマイページへ戻ること" do
+      click_on "キャンセル", visible: true
+
+      aggregate_failures do
+        expect(page).to have_current_path(mypage_path, ignore_query: true)
+        expect(user.activity_records.count).to eq(0)
       end
     end
 
-    it "「集中できない、やる気が出ないときは」をクリックするとモチベーション画面が表示されること" do
-      click_on "集中できない、やる気が出ないときは", visible: true
-      aggregate_failures do
-        expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
-        expect(page).to have_selector('[data-pomodoro-target="workScreen"].hidden')
-        expect(page).to have_content("夜更かししてしまう")
-        expect(page).to have_content("健康を損なう")
+    context "スタートボタンをクリックした後" do
+      before do
+        click_on "スタート", visible: true
+        # 出口の入れ替えが済むのを待つ
+        expect(page).to have_button("集中できない、やる気が出ないときは", visible: true)
       end
-    end
 
-    it "モチベーション画面で「いいえ、もう少し頑張ります！」をクリックすると作業画面に戻ること" do
-      click_on "集中できない、やる気が出ないときは", visible: true
-      click_on "いいえ、もう少し頑張ります！"
-      aggregate_failures do
-        expect(page).to have_selector('[data-pomodoro-target="workScreen"]:not(.hidden)')
-        expect(page).to have_selector('[data-pomodoro-target="motivationScreen"].hidden')
-        expect(page).to have_content("25:00")
-        expect(page).to have_button("スタート")
+      it "キャンセルが消えて終了するとモチベーションボタンが表示されること" do
+        aggregate_failures do
+          expect(page).to have_button("終了する", visible: true)
+          expect(page).to have_no_link("キャンセル", visible: true)
+        end
+      end
+
+      it "「集中できない、やる気が出ないときは」をクリックするとモチベーション画面が表示されること" do
+        click_on "集中できない、やる気が出ないときは", visible: true
+        aggregate_failures do
+          expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
+          expect(page).to have_selector('[data-pomodoro-target="workScreen"].hidden')
+          expect(page).to have_content("夜更かししてしまう")
+          expect(page).to have_content("健康を損なう")
+        end
+      end
+
+      it "モチベーション画面で「いいえ、もう少し頑張ります！」をクリックすると作業画面に戻ること" do
+        click_on "集中できない、やる気が出ないときは", visible: true
+        click_on "いいえ、もう少し頑張ります！"
+        aggregate_failures do
+          expect(page).to have_selector('[data-pomodoro-target="workScreen"]:not(.hidden)')
+          expect(page).to have_selector('[data-pomodoro-target="motivationScreen"].hidden')
+          expect(page).to have_content("朝のランニング")
+        end
       end
     end
 
@@ -146,10 +190,30 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
     context "休憩時間が終了したとき" do
       it "作業画面に戻りスタートボタンが表示されること" do
         click_on "スタート", visible: true
+        # start() は fetch を await した後に隠すので、先に「隠れたこと」を待たないと
+        # まだ見えている元のボタンにマッチし、休憩サイクルを回さずに通ってしまう
+        expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+
         aggregate_failures do
           # 作業3秒 + 休憩2秒 終了後にスタートボタンが再表示される
-          expect(page).to have_button("スタート", wait: 15)
+          expect(page).to have_button("スタート", visible: true, wait: 15)
           expect(page).to have_content("ポモドーロ数：1", wait: 15)
+        end
+      end
+
+      it "休憩明けの作業画面では「スタート」「終了する」「集中できない…」が並び、「キャンセル」は戻らないこと" do
+        click_on "スタート", visible: true
+        # 同上。ここを飛ばすと休憩明けを経ずに assertion が満たされてしまう
+        expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+        expect(page).to have_button("スタート", visible: true, wait: 15)
+
+        # 初回スタートで入れ替えた出口は、休憩明けの作業画面でも元に戻さない
+        within('[data-pomodoro-target="workScreen"]') do
+          aggregate_failures do
+            expect(page).to have_button("終了する", visible: true)
+            expect(page).to have_button("集中できない、やる気が出ないときは", visible: true)
+            expect(page).to have_no_link("キャンセル", visible: true)
+          end
         end
       end
     end
@@ -173,7 +237,9 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         # 作業時間（3秒）終了を待つ → 休憩画面へ切り替わる
         expect(page).to have_selector('[data-pomodoro-target="breakScreen"]:not(.hidden)', wait: 10)
         # 休憩時間（2秒）終了を待つ → 作業画面に戻りスタートボタンが表示される
-        expect(page).to have_button("スタート", wait: 10)
+        # visible: true が無いと、ignore_hidden_elements = false のせいで hidden の
+        # ままのボタンに即マッチし、休憩明けを待たずに次へ進んでしまう
+        expect(page).to have_button("スタート", visible: true, wait: 10)
         # この時点で inactivityCheck が開始されている
       end
 
@@ -200,31 +266,89 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         JS
       end
 
+      # 作業画面の「終了する」を押す系のテストでは、作業3秒のままだと
+      # 「スタート → startButton の hidden 待ち → 終了するのクリック」が
+      # 3秒を超えた瞬間に作業画面が隠れ、クリック対象を見失う（CI 高負荷時）。
+      # 尺を伸ばしてこのレースを外す。
+      def relax_timer_durations
+        page.execute_script(<<~JS)
+          const el = document.querySelector('[data-controller="pomodoro"]')
+          el.dataset.pomodoroWorkDurationValue = 60
+          el.dataset.pomodoroBreakDurationValue = 30
+        JS
+      end
+
+      # 作業タイマーの締切を直近に動かす。setInterval が生きていれば 1 秒以内に
+      # onTimerComplete が走って休憩画面へ切り替わり、死んでいれば何も起きない。
+      # 「実時間が経ったか」ではなく「タイマーが生きているか」だけを見るための細工。
+      def expire_work_timer_soon
+        page.execute_script(<<~JS)
+          const el = document.querySelector('[data-controller="pomodoro"]')
+          const controller = window.Stimulus.getControllerForElementAndIdentifier(el, 'pomodoro')
+          controller.endedAt = new Date(Date.now() + 500)
+        JS
+      end
+
       context "作業画面から終了したとき" do
-        it "スタート後に終了すると新規作成画面へ遷移すること" do
+        it "スタート後に終了すると確認ダイアログを経て新規作成画面へ遷移すること" do
+          relax_timer_durations
           click_on "スタート", visible: true
           # スタート直後はタイマーが動いているので startButton が hidden になることを確認
           expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
 
-          # 作業画面の終了ボタンを直接クリック（アラートは出ない）
-          within('[data-pomodoro-target="workScreen"]') do
-            click_on "終了する", visible: true
+          accept_confirm("終了してよろしいでしょうか？") do
+            within('[data-pomodoro-target="workScreen"]') do
+              click_on "終了する", visible: true
+            end
           end
 
           expect(page).to have_current_path(new_activity_record_path, ignore_query: true, wait: 10)
+        end
+
+        it "確認ダイアログをキャンセルするとタイマーが継続すること" do
+          relax_timer_durations
+          click_on "スタート", visible: true
+          expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+
+          dismiss_confirm("終了してよろしいでしょうか？") do
+            within('[data-pomodoro-target="workScreen"]') do
+              click_on "終了する", visible: true
+            end
+          end
+
+          # 確認を clearInterval より前に通していれば、キャンセル後もタイマーは生きている
+          expire_work_timer_soon
+
+          aggregate_failures do
+            # 遷移していないこと
+            expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
+            # タイマーが生きていれば締切の到来で休憩画面へ切り替わる。
+            # clearInterval されていればここで止まったままになる。
+            expect(page).to have_selector('[data-pomodoro-target="breakScreen"]:not(.hidden)', wait: 10)
+            expect(page).to have_content("ポモドーロ数：1", wait: 10)
+          end
         end
       end
 
       context "休憩画面から終了したとき" do
         before do
+          # 休憩2秒のままだと、休憩画面の検出 → 終了するのクリックが2秒を超えた瞬間に
+          # switchToWorkMode() が走り、breakScreen が hidden のまま二度と戻らない。
+          # 作業は3秒のままにして休憩画面へ速く入り、休憩尺だけ伸ばす。
+          page.execute_script(<<~JS)
+            document.querySelector('[data-controller="pomodoro"]').dataset.pomodoroBreakDurationValue = 30
+          JS
+
           click_on "スタート", visible: true
           # 作業時間終了を待つ → 休憩画面へ
           expect(page).to have_selector('[data-pomodoro-target="breakScreen"]:not(.hidden)', wait: 10)
         end
 
         it "新規作成画面へ遷移すること" do
-          within('[data-pomodoro-target="breakScreen"]') do
-            click_on "終了する", visible: true
+          accept_confirm("終了してよろしいでしょうか？") do
+            within('[data-pomodoro-target="breakScreen"]') do
+              click_on "終了する", visible: true
+            end
           end
 
           expect(page).to have_current_path(new_activity_record_path, ignore_query: true, wait: 10)
@@ -233,6 +357,10 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
 
       context "モチベーション画面の「それでいいもん」をクリックしたとき" do
         before do
+          # 作業3秒のままだと、モチベーションボタンのクリックが3秒を超えた瞬間に
+          # 休憩画面へ切り替わり、workScreen が hidden になってクリック対象を見失う
+          relax_timer_durations
+
           click_on "スタート", visible: true
           within('[data-pomodoro-target="workScreen"]') do
             click_on "集中できない、やる気が出ないときは", visible: true
