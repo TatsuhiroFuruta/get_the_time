@@ -25,40 +25,49 @@
 | ファイル | 役割 | 変更内容 |
 |---|---|---|
 | `app/views/activity_records/pomodoro/_timer_buttons.html.erb` | 作業画面のボタン群 | 「キャンセル」を追加、「終了する」を初期非表示に |
+| `app/views/activity_records/pomodoro/_motivation_button.html.erb` | 「集中できない…」ボタン（作業・休憩の両画面で描画） | 初期非表示にしてターゲットを付ける |
 | `app/views/activity_records/pomodoro/_motivation_screen.html.erb` | モチベーション画面 | 「それでいいもん」の action を `giveUp` に |
 | `app/javascript/controllers/pomodoro_controller.js` | タイマーの全状態管理 | targets 追加、`start()` で出口を入れ替え、`finish()` を 3 メソッドに分割 |
 | `app/views/static_pages/how_to_use/_step3.html.erb` | 使い方ページ | 「ブラウザの戻るボタンで戻りましょう」をキャンセルボタン案内に |
-| `spec/system/activity_records_spec.rb` | ポモドーロ画面のシステムテスト | 既存 4 件を修正、2 件を新規追加 |
+| `spec/system/activity_records_spec.rb` | ポモドーロ画面のシステムテスト | 既存 5 件を修正、1 件を削除、2 件を新規追加 |
 | `spec/system/timer_exclusion_spec.rb` | 排他制御のシステムテスト | 作業画面「終了する」のクリックに `accept_confirm` |
 
-`_break_screen.html.erb` は**変更しない**。休憩画面の「終了する」は休憩に入る時点で必ずスタート済みなので表示制御が不要で、確認ダイアログは `finish()` 側に入るため自動的に効く。
+`_break_screen.html.erb` は**変更しない**。休憩画面の「終了する」は休憩に入る時点で必ずスタート済みなので表示制御が不要で、確認ダイアログは `finish()` 側に入るため自動的に効く。休憩画面のモチベーションボタンも、`_motivation_button.html.erb` の変更が両画面に効くうえ、初回スタート時にまとめて表示されるので個別の対応は要らない。
 
 ---
 
-### Task 1: 未スタート時の出口を「キャンセル」にする
+### Task 1: 未スタート時の出口を「キャンセル」1 つに絞る
 
 **Files:**
 - Modify: `app/views/activity_records/pomodoro/_timer_buttons.html.erb`（全体を置き換え）
+- Modify: `app/views/activity_records/pomodoro/_motivation_button.html.erb`（全体を置き換え）
 - Modify: `app/javascript/controllers/pomodoro_controller.js:6`（targets）, `:84-98`（`start()` の初回ブロック）
 - Modify: `app/views/static_pages/how_to_use/_step3.html.erb:37-39`
-- Test: `spec/system/activity_records_spec.rb:54-65`
+- Test: `spec/system/activity_records_spec.rb:54-86`
 
 **Interfaces:**
 - Consumes: 既存の `this.firstStartedAt`（初回スタート時刻。`null` なら未スタート）、既存の i18n キー `shared.buttons.cancel`（= 「キャンセル」、`config/locales/views/ja.yml:4`）、既存の `mypage_path`
-- Produces: DOM ターゲット `data-pomodoro-target="cancelButton"` / `data-pomodoro-target="finishButton"`。`finishButton` は初期状態で `hidden` クラスを持ち、初回スタート後に外れる。Task 2 はこの `finishButton` に紐づく `pomodoro#finish` を変更する。
+- Produces: DOM ターゲット `cancelButton`（単数）/ `finishButton`（単数）/ `motivationButton`（**複数**。作業画面と休憩画面の 2 箇所に出る）。`finishButton` と `motivationButton` は初期状態で `hidden` クラスを持ち、初回スタート後に外れる。Task 2 はこの `finishButton` に紐づく `pomodoro#finish` を変更する。
 
 - [ ] **Step 1: 失敗するテストを書く**
 
-`spec/system/activity_records_spec.rb` の 54〜65 行目（`it "スタートボタンと終了するボタンが表示されること"` と `it "スタートせずに「終了する」をクリックするとアラートが表示されること"` の 2 つ）を、以下の 3 つの `it` で丸ごと置き換える。
+`spec/system/activity_records_spec.rb` の 54〜86 行目、以下の 4 つの `it` を丸ごと置き換える。
+
+- `it "スタートボタンと終了するボタンが表示されること"`
+- `it "スタートせずに「終了する」をクリックするとアラートが表示されること"`
+- `it "「集中できない、やる気が出ないときは」をクリックするとモチベーション画面が表示されること"`
+- `it "モチベーション画面で「いいえ、もう少し頑張ります！」をクリックすると作業画面に戻ること"`
+
+置き換え後:
 
 ```ruby
-    it "スタートボタンとキャンセルボタンが表示され、終了するボタンは表示されないこと" do
+    it "スタート前はキャンセルだけが出口で、終了するとモチベーションボタンは表示されないこと" do
       aggregate_failures do
         expect(page).to have_button("スタート", visible: true)
         expect(page).to have_link("キャンセル", visible: true)
         # Capybara.ignore_hidden_elements = false なので visible: true の明示が要る
         expect(page).to have_no_button("終了する", visible: true)
-        expect(page).to have_selector('[data-pomodoro-target="finishButton"].hidden', visible: :all)
+        expect(page).to have_no_button("集中できない、やる気が出ないときは", visible: true)
       end
     end
 
@@ -71,23 +80,53 @@
       end
     end
 
-    it "スタートせずにモチベーション画面の「それでいいもん」をクリックするとアラートが表示されること" do
-      click_on "集中できない、やる気が出ないときは", visible: true
-      expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
+    context "スタートボタンをクリックした後" do
+      before do
+        click_on "スタート", visible: true
+        # 出口の入れ替えが済むのを待つ
+        expect(page).to have_button("集中できない、やる気が出ないときは", visible: true)
+      end
 
-      accept_alert("スタートボタンを押してください") do
-        click_on "それでいいもん", visible: true
+      it "キャンセルが消えて終了するとモチベーションボタンが表示されること" do
+        aggregate_failures do
+          expect(page).to have_button("終了する", visible: true)
+          expect(page).to have_no_link("キャンセル", visible: true)
+        end
+      end
+
+      it "「集中できない、やる気が出ないときは」をクリックするとモチベーション画面が表示されること" do
+        click_on "集中できない、やる気が出ないときは", visible: true
+        aggregate_failures do
+          expect(page).to have_selector('[data-pomodoro-target="motivationScreen"]:not(.hidden)')
+          expect(page).to have_selector('[data-pomodoro-target="workScreen"].hidden')
+          expect(page).to have_content("夜更かししてしまう")
+          expect(page).to have_content("健康を損なう")
+        end
+      end
+
+      it "モチベーション画面で「いいえ、もう少し頑張ります！」をクリックすると作業画面に戻ること" do
+        click_on "集中できない、やる気が出ないときは", visible: true
+        click_on "いいえ、もう少し頑張ります！"
+        aggregate_failures do
+          expect(page).to have_selector('[data-pomodoro-target="workScreen"]:not(.hidden)')
+          expect(page).to have_selector('[data-pomodoro-target="motivationScreen"].hidden')
+          expect(page).to have_content("朝のランニング")
+        end
       end
     end
 ```
 
-3 つ目は元の :61 のテストを**経路だけ付け替えた**もの。「終了する」は未スタート時に存在しなくなるが、モチベーション画面はスタート前でも開けるためアラート自体は残る（`_motivation_button.html.erb` は作業画面に常時レンダリングされている）。
+変更の要点:
+
+- 元の :61（未スタートで「終了する」→ アラート）は**削除**する。「終了する」もモチベーションボタンも未スタート時は存在しなくなり、UI から到達できないため。`completeSession()` のガード自体は防御として残すが、テストは持たない（設計書の該当節を参照）。
+- 元の :67 / :77 の 2 件は `context "スタートボタンをクリックした後"` へ移す。モチベーション画面はスタート後にしか開けなくなるため。
+- 移設にあたり :83 の `have_content("25:00")` と :84 の `have_button("スタート")` は落とす。スタート後はタイマーが減っていくので `25:00` は成立せず、`スタート` は hidden になる。作業画面へ戻ったことは `workScreen:not(.hidden)` と光の時間の表示（`朝のランニング`）で検証する。
 
 - [ ] **Step 2: テストを実行して失敗を確認**
 
 Run: `docker compose exec web bundle exec rspec spec/system/activity_records_spec.rb -e "ポモドーロタイマー画面"`
 
-Expected: FAIL 2 件。1 つ目は `have_link("キャンセル", visible: true)` が見つからず失敗、2 つ目は `click_on "キャンセル"` が `Capybara::ElementNotFound` で失敗。3 つ目は現状の実装でもパスする（既存の `finish()` のガードがそのまま効くため）。
+Expected: FAIL 3 件。「スタート前は…」は `have_link("キャンセル", visible: true)` が見つからず失敗、「キャンセルをクリックすると…」は `Capybara::ElementNotFound` で失敗、「キャンセルが消えて…」は `have_no_link("キャンセル", visible: true)` で失敗する。`context` 内の残り 2 件は現状の実装でもパスする（モチベーションボタンが最初から表示されているため）。
 
 - [ ] **Step 3: ビューに「キャンセル」を追加し「終了する」を初期非表示にする**
 
@@ -113,17 +152,32 @@ Expected: FAIL 2 件。1 つ目は `have_link("キャンセル", visible: true)`
 </div>
 ```
 
-- [ ] **Step 4: Stimulus コントローラに targets を追加する**
+- [ ] **Step 4: モチベーションボタンを初期非表示にする**
 
-`app/javascript/controllers/pomodoro_controller.js:6` の `static targets` に `cancelButton` と `finishButton` を足す。
+`app/views/activity_records/pomodoro/_motivation_button.html.erb` の全体を以下に置き換える。
 
-```js
-  static targets = ["workScreen", "breakScreen", "motivationScreen", "display", "savedTask", "taskInput", "startButton", "cancelButton", "finishButton", "pomodoroCount"]
+```erb
+<div class="flex justify-center mb-6">
+  <%# スタート前は出口を「キャンセル」に一本化するため隠しておく。この partial は
+      作業画面と休憩画面の両方から描画されるので、ターゲットは複数形で受ける。
+      休憩画面が現れるのは必ず初回スタート後なので、両方まとめて外して差し支えない。 %>
+  <button type="button" data-pomodoro-target="motivationButton" data-action="click->pomodoro#toggleMotivation" class="hidden bg-linear-to-r from-violet-600 from-0% via-indigo-400 via-80% to-indigo-100 to-100% hover:from-violet-700 hover:via-indigo-500 hover:to-indigo-200 text-white/90 px-8 py-2 rounded-full font-semibold transition duration-200">
+    集中できない、やる気が出ないときは
+  </button>
+</div>
 ```
 
-- [ ] **Step 5: 初回スタート時に出口を入れ替える**
+- [ ] **Step 5: Stimulus コントローラに targets を追加する**
 
-`start()` の中の「初回のみ」ブロック（`if (this.firstStartedAt === null) { ... }`）の末尾、`this.startActivityLock()` の直後に 3 行足す。**ブロックの外に出さないこと** — `isPurificationCounting()` のガードに引っかかった場合はその手前で `location.replace` するため、ブロック外に置くと「計測を開始していないのにキャンセルだけ消える」状態になる。
+`app/javascript/controllers/pomodoro_controller.js:6` の `static targets` に `cancelButton` / `finishButton` / `motivationButton` を足す。
+
+```js
+  static targets = ["workScreen", "breakScreen", "motivationScreen", "display", "savedTask", "taskInput", "startButton", "cancelButton", "finishButton", "motivationButton", "pomodoroCount"]
+```
+
+- [ ] **Step 6: 初回スタート時に出口を入れ替える**
+
+`start()` の中の「初回のみ」ブロック（`if (this.firstStartedAt === null) { ... }`）の末尾、`this.startActivityLock()` の直後に足す。**ブロックの外に出さないこと** — `isPurificationCounting()` のガードに引っかかった場合はその手前で `location.replace` するため、ブロック外に置くと「計測を開始していないのにキャンセルだけ消える」状態になる。
 
 ```js
       this.firstStartedAt = new Date()
@@ -132,26 +186,35 @@ Expected: FAIL 2 件。1 つ目は `have_link("キャンセル", visible: true)`
       // ✅ ここから活動記録の登録完了までを「光の時間の活動中」とし、浄化タイマーを排他する
       this.startActivityLock()
 
-      // ✅ 計測データが生まれたので出口を入れ替える。以降キャンセルは戻さない
+      // ✅ 計測データが生まれたので出口を入れ替える。一度切り替えたら元に戻さない
       //（休憩明けの作業画面ではスタートと終了するが並ぶ）。
       this.cancelButtonTarget.classList.add("hidden")
       this.finishButtonTarget.classList.remove("hidden")
+      // 作業画面と休憩画面の 2 つ（同じ partial）をまとめて表示する
+      this.motivationButtonTargets.forEach(el => el.classList.remove("hidden"))
     }
 ```
 
-- [ ] **Step 6: JS をビルドしてテストを実行し、パスを確認**
+`switchToWorkMode()` には触らない。あれは「スタート」を戻すだけでよく、この 3 つは表示されたままにする。
+
+- [ ] **Step 7: JS をビルドしてテストを実行し、パスを確認**
 
 Run: `docker compose exec web yarn build && docker compose exec web bundle exec rspec spec/system/activity_records_spec.rb -e "ポモドーロタイマー画面"`
 
 Expected: PASS（`docker compose up` で起動中なら esbuild watcher がリビルド済みなので `yarn build` は省略可）
 
-- [ ] **Step 7: 「終了する」の表示が既存テストで壊れていないことを確認**
+- [ ] **Step 8: スタート後の表示が既存テストで壊れていないことを確認**
 
 Run: `docker compose exec web bundle exec rspec spec/system/activity_records_spec.rb spec/system/timer_exclusion_spec.rb`
 
-Expected: PASS。スタート後に `finishButton` の `hidden` が外れるので、`:140`（休憩画面）`:204` `:227`（終了フロー）`timer_exclusion_spec.rb:144` の `click_on "終了する", visible: true` はいずれもそのまま通る。落ちる場合は Step 5 の位置（初回ブロックの内側か）を疑うこと。
+Expected: PASS。スタート後に `finishButton` と `motivationButton` の `hidden` が外れるので、休憩画面のボタン確認（`:139` `:140`）、終了フロー（`:204` `:227`）、`timer_exclusion_spec.rb:144` はいずれもそのまま通る。
 
-- [ ] **Step 8: 「使い方」ページの文言を差し替える**
+落ちたときの切り分け:
+
+- 「終了する」や「集中できない…」が見つからない → Step 6 の位置を疑う（初回ブロックの**内側**か）
+- 想定外にマイページへリダイレクトされる → 前の example が残した活動ロック（`app/javascript/lib/activity_lock.js`）を疑う。`heldByOther()` は `sessionStorage` の `tabId` で判定するので、ブラウザセッションの持ち回り方に依存する
+
+- [ ] **Step 9: 「使い方」ページの文言を差し替える**
 
 `app/views/static_pages/how_to_use/_step3.html.erb:37-39` を置き換える。この導線をキャンセルボタンが担うようになったため。
 
@@ -171,20 +234,31 @@ Expected: PASS。スタート後に `finishButton` の `hidden` が外れるの�
     </p>
 ```
 
-- [ ] **Step 9: RuboCop を実行**
+あわせて step3 の 3 番目（`3. タイマーが起動。活動を行います`）の直前に、モチベーションボタンがスタート後に現れることが分かる一文を足す。既存の説明はスタート前から表示されている前提で書かれているため。
+
+`※ デモ画像です。計測時間は設定により異なります（初期値25分）。` の直後（`app/views/static_pages/how_to_use/_step3.html.erb:36` の次の行）に挿入する:
+
+```erb
+    <p class="mb-2 text-md">
+      ※ 「終了する」「集中できない、やる気が出ないときは」はスタート後に表示されます。
+    </p>
+```
+
+- [ ] **Step 10: RuboCop を実行**
 
 Run: `docker compose exec web bin/rubocop`
 
 Expected: no offenses
 
-- [ ] **Step 10: コミット**
+- [ ] **Step 11: コミット**
 
 ```bash
 git add app/views/activity_records/pomodoro/_timer_buttons.html.erb \
+        app/views/activity_records/pomodoro/_motivation_button.html.erb \
         app/javascript/controllers/pomodoro_controller.js \
         app/views/static_pages/how_to_use/_step3.html.erb \
         spec/system/activity_records_spec.rb
-git commit -m "feat: ポモドーロ画面の未スタート時の出口をキャンセルボタンにする #263"
+git commit -m "feat: ポモドーロ画面の未スタート時の出口をキャンセルボタン1つに絞る #263"
 ```
 
 ---
@@ -291,8 +365,8 @@ Expected: FAIL 3 件。`accept_confirm` / `dismiss_confirm` はダイアログ�
 
   // 計測を止めて活動記録フォームへ遷移する。finish() / giveUp() の共通処理。
   completeSession(lastEndedAt) {
-    // ✅ モチベーション画面はスタート前でも開けるため、giveUp() 経由で
-    //    未スタートのままここへ来ることがある。外すと差分計算が NaN になる。
+    // ✅ 2 つの入口の合流点なので、ここで未スタートを弾いておく。表示制御によって
+    //    UI からは到達しないが、外すと差分計算が NaN になり total_duration が壊れる。
     if (!this.firstStartedAt) {
       alert("スタートボタンを押してください")
       return
@@ -341,7 +415,7 @@ Expected: FAIL 3 件。`accept_confirm` / `dismiss_confirm` はダイアログ�
 
 Run: `docker compose exec web yarn build && docker compose exec web bundle exec rspec spec/system/activity_records_spec.rb`
 
-Expected: PASS（Task 1 で書き換えた「スタートせずに…それでいいもん…アラート」も、ガードが `completeSession()` に移っただけなので通り続ける）
+Expected: PASS
 
 - [ ] **Step 6: 排他制御のテストに `accept_confirm` を足す**
 
@@ -420,14 +494,15 @@ Expected: どちらも警告なし
 
 `docker compose up` した状態で `/activity_records/pomodoro_timer` を開き、issue #263 の完了条件を上から順に確認する。
 
-1. 画面を開いた直後は「スタート」＋「キャンセル」が表示され、「終了する」は表示されない
+1. 画面を開いた直後は「スタート」＋「キャンセル」だけが表示され、「終了する」も「集中できない、やる気が出ないときは」も表示されない
 2. 「キャンセル」でマイページへ戻る（確認なし）
-3. 「スタート」押下後は「終了する」が表示され、「キャンセル」は消える
-4. 休憩明けの作業画面で「スタート」と「終了する」が並ぶ（`work_duration` / `break_duration` を短くして確認すると速い）
-5. 作業画面・休憩画面のどちらの「終了する」でも確認ダイアログが出る
-6. モチベーション画面の「それでいいもん」では確認ダイアログが出ない
-7. 確認をキャンセルするとタイマーがそのまま継続する
-8. `/how_to_use` の step3 の文言が「キャンセルボタンでマイページに戻りましょう」になっている
+3. 「スタート」押下後は「終了する」と「集中できない、やる気が出ないときは」が表示され、「キャンセル」は消える
+4. 休憩明けの作業画面で「スタート」「終了する」「集中できない、やる気が出ないときは」が並ぶ（`work_duration` / `break_duration` を短くして確認すると速い）
+5. 休憩画面でも「集中できない、やる気が出ないときは」と「終了する」が表示される
+6. 作業画面・休憩画面のどちらの「終了する」でも確認ダイアログが出る
+7. モチベーション画面の「それでいいもん」では確認ダイアログが出ない
+8. 確認をキャンセルするとタイマーがそのまま継続する
+9. `/how_to_use` の step3 の文言が更新されている（キャンセルボタンの案内 ＋ スタート後に表示されるボタンの注記）
 
 - [ ] **Step 5: コードレビューを通す**
 
