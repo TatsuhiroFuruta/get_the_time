@@ -168,8 +168,22 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         click_on "スタート", visible: true
         aggregate_failures do
           # 作業3秒 + 休憩2秒 終了後にスタートボタンが再表示される
-          expect(page).to have_button("スタート", wait: 15)
+          expect(page).to have_button("スタート", visible: true, wait: 15)
           expect(page).to have_content("ポモドーロ数：1", wait: 15)
+        end
+      end
+
+      it "スタートと一緒に終了するとモチベーションボタンが並び、キャンセルは戻らないこと" do
+        click_on "スタート", visible: true
+        expect(page).to have_button("スタート", visible: true, wait: 15)
+
+        # 初回スタートで入れ替えた出口は、休憩明けの作業画面でも元に戻さない
+        within('[data-pomodoro-target="workScreen"]') do
+          aggregate_failures do
+            expect(page).to have_button("終了する", visible: true)
+            expect(page).to have_button("集中できない、やる気が出ないときは", visible: true)
+            expect(page).to have_no_link("キャンセル", visible: true)
+          end
         end
       end
     end
