@@ -349,8 +349,12 @@ export default class extends Controller {
 
   // 計測を止めて活動記録フォームへ遷移する。finish() / giveUp() の共通処理。
   completeSession(lastEndedAt) {
-    // ✅ 2 つの入口の合流点なので、ここで未スタートを弾いておく。表示制御によって
-    //    UI からは到達しないが、外すと差分計算が NaN になり total_duration が壊れる。
+    // ✅ 2 つの入口（finish / giveUp）の合流点なので、ここで未スタートを弾く。
+    //    hidden（display: none）により通常の操作では到達しないが、Tailwind の
+    //    CSS が読み込まれない等でクラスが効かなくなれば到達しうる。
+    //    外した場合は saveActivityRecord() の toISOString() が TypeError を投げ、
+    //    クリックが無反応になる（total_duration が壊れたレコードが飛ぶわけではない）。
+    //    表示制御という離れた場所の正しさに依存せず、ここで日本語のメッセージを返す。
     if (!this.firstStartedAt) {
       alert("スタートボタンを押してください")
       return
