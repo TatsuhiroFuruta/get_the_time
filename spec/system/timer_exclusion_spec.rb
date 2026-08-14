@@ -34,8 +34,10 @@ RSpec.describe "タイマーの排他制御", type: :system do
       visit pomodoro_timer_activity_records_path
       click_button "スタート"
 
-      # リースが書き込まれるのを待つ
-      expect(page).to have_css("[data-pomodoro-target='startButton'].hidden", visible: :all)
+      # リースが書き込まれるのを待つ。startButton の hidden は「押した」だけを表し、
+      # リース取得は fetch の往復後なので同期ポイントにならない。
+      # 「終了する」の表示は startActivityLock() の直後なので、これを待つ。
+      expect(page).to have_button("終了する", visible: true)
 
       new_window = open_new_window
       within_window new_window do
@@ -51,7 +53,8 @@ RSpec.describe "タイマーの排他制御", type: :system do
     it "別タブでポモドーロ画面を開こうとしてもマイページへ追い返されること（光の時間の活動は 1 つだけ）" do
       visit pomodoro_timer_activity_records_path
       click_button "スタート"
-      expect(page).to have_css("[data-pomodoro-target='startButton'].hidden", visible: :all)
+      # リースが書き込まれるのを待つ（同期ポイントの理由は上記コメント参照）
+      expect(page).to have_button("終了する", visible: true)
 
       new_window = open_new_window
       within_window new_window do
@@ -96,8 +99,8 @@ RSpec.describe "タイマーの排他制御", type: :system do
       within_window new_window do
         visit pomodoro_timer_activity_records_path
         click_button "スタート"
-        # リースが書き込まれるのを待つ
-        expect(page).to have_css("[data-pomodoro-target='startButton'].hidden", visible: :all)
+        # リースが書き込まれるのを待つ（同期ポイントの理由は上記コメント参照）
+        expect(page).to have_button("終了する", visible: true)
       end
 
       aggregate_failures do
@@ -130,6 +133,47 @@ RSpec.describe "タイマーの排他制御", type: :system do
   end
 
   # =========================================================
+  # スタート押下から fetch が返るまでの間に離脱したとき
+  # =========================================================
+  describe "浄化タイマーへの問い合わせ中にキャンセルで離脱したとき" do
+    let!(:purification_time) { create(:purification_time, :idle_with_time, user: user) }
+
+    # 「キャンセル」は Turbo Drive のリンク遷移なので document は作り直されず、
+    # disconnect() が済んだ後もスタート処理の Promise だけが再開する。そこで
+    # リースを張ってしまうと、片付ける者がいないまま heartbeat が回り続け、
+    # ユーザーは浄化タイマーへ二度と入れなくなる。
+    it "往復が明けてもリースが張られないこと" do
+      visit pomodoro_timer_activity_records_path
+
+      # 問い合わせを、テストから明示的に解決できる Promise に差し替える
+      page.execute_script(<<~JS)
+        const el = document.querySelector('[data-controller="pomodoro"]')
+        const controller = window.Stimulus.getControllerForElementAndIdentifier(el, 'pomodoro')
+        controller.isPurificationCounting = () => new Promise(r => { window.__resolvePurification = () => r(false) })
+        controller.startButtonTarget.click()
+      JS
+
+      # 往復が終わる前に離脱する（この時点ではまだ「キャンセル」が出ている）
+      click_on "キャンセル", visible: true
+      expect(page).to have_current_path(mypage_path, ignore_query: true)
+
+      # 遷移後に往復が明ける。window は Turbo 遷移でも作り直されないので Promise は生きている
+      page.execute_script("window.__resolvePurification()")
+
+      aggregate_failures do
+        expect(page.evaluate_script("localStorage.getItem('gtt:activity_lock')")).to be_nil
+
+        # 別タブから浄化タイマーへ入れること（リースが無いことの利用者から見た確認）
+        new_window = open_new_window
+        within_window new_window do
+          visit purification_time_path
+          expect(page).to have_current_path(purification_time_path)
+        end
+      end
+    end
+  end
+
+  # =========================================================
   # Turbo Drive 下での離脱（pagehide が発火しないケース）
   # =========================================================
   describe "活動記録フォームから Turbo 遷移で離脱したとき" do
@@ -138,7 +182,8 @@ RSpec.describe "タイマーの排他制御", type: :system do
     it "「記録しない」で離脱すると、猶予（5秒）経過後には別タブから浄化タイマーへ入れること" do
       visit pomodoro_timer_activity_records_path
       click_button "スタート", visible: true
-      expect(page).to have_css("[data-pomodoro-target='startButton'].hidden", visible: :all)
+      # リースが書き込まれるのを待つ（startButton の hidden では早すぎる）
+      expect(page).to have_button("終了する", visible: true)
 
       accept_confirm("終了してよろしいでしょうか？") do
         within('[data-pomodoro-target="workScreen"]') do

@@ -16,6 +16,8 @@ export default class extends Controller {
     this.pomodoroCount = 0
     this.remainingTime = this.workDurationValue
     this.timerInterval = null
+    // start() の再入ガード。await 中だけ true になる（#265）
+    this.starting = false
     this.endedAt = null
     this.task = this.taskValue
     // 追記して修正できるように、マイページで入力した内容をやることの入力フォームに残しておく。
@@ -85,14 +87,48 @@ export default class extends Controller {
   }
 
   async start() {
-    if (this.timerInterval) return
+    // ✅ 二度押しで setInterval が二重に走るのを防ぐ（#265）。
+    //    this.timerInterval は startTimer() まで、this.firstStartedAt は await の
+    //    後まで設定されないため、この 2 つだけでは isPurificationCounting() の
+    //    往復中に入ってきた 2 回目を弾けない。1 本目は this.timerInterval の
+    //    上書きで参照を失い、二度と clearInterval できなくなる。
+    //    表示ではなくフラグで閉じるのは、CSS が効かない状況でも守るためである。
+    if (this.timerInterval || this.starting) return
+    this.starting = true
 
+    try {
+      // ✅ 押した瞬間に消す。await の後まで画面が何も変わらないと「反応がない」と
+      //    感じて押し直す動機になる。フラグとは別に、動機そのものを断つ。
+      this.startButtonTarget.classList.add("hidden")
+
+      await this.startSession()
+    } catch (error) {
+      // ✅ 想定外の失敗で「ボタンも無い・タイマーも動いていない」行き止まりにしない。
+      //    押す前の状態へ戻し、もう一度試せるようにする。
+      this.startButtonTarget.classList.remove("hidden")
+      throw error
+    } finally {
+      this.starting = false
+    }
+  }
+
+  // start() の本体。再入ガードは呼び出し元が持つ。
+  async startSession() {
     // ✅ 最初のスタート時のみ記録
     if (this.firstStartedAt === null) {
       // ✅ 浄化タイマーが別タブで計測中なら、スタート押下の瞬間にサーバへ問い合わせて
       // 弾く。画面を開いた時点のガードだけでは、両タブを開いた後で浄化タイマーが
       // 後から開始されたケースを検知できない。
-      if (await this.isPurificationCounting()) {
+      const purificationCounting = await this.isPurificationCounting()
+
+      // ✅ 往復の間に離脱していたら、この先の副作用を一切起こさない。
+      //    「キャンセル」は Turbo Drive のリンク遷移なので document は作り直されず、
+      //    disconnect() が済んだ後もこの Promise だけが再開する。そこで
+      //    beforeunload やリースを張ると、片付ける者がいないまま残ってしまう
+      //    （離脱警告が出続け、リースの heartbeat が回り続けて浄化タイマーに入れなくなる）。
+      if (!this.element.isConnected) return
+
+      if (purificationCounting) {
         location.replace("/mypage?locked=purification")
         return
       }
@@ -116,7 +152,6 @@ export default class extends Controller {
     }
 
     this.startTimer()
-    this.startButtonTarget.classList.add("hidden")
   }
 
   // 浄化タイマーはサーバに状態を持つので、判定はサーバに問い合わせる
