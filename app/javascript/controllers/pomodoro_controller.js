@@ -102,6 +102,11 @@ export default class extends Controller {
       this.startButtonTarget.classList.add("hidden")
 
       await this.startSession()
+    } catch (error) {
+      // ✅ 想定外の失敗で「ボタンも無い・タイマーも動いていない」行き止まりにしない。
+      //    押す前の状態へ戻し、もう一度試せるようにする。
+      this.startButtonTarget.classList.remove("hidden")
+      throw error
     } finally {
       this.starting = false
     }
@@ -114,7 +119,16 @@ export default class extends Controller {
       // ✅ 浄化タイマーが別タブで計測中なら、スタート押下の瞬間にサーバへ問い合わせて
       // 弾く。画面を開いた時点のガードだけでは、両タブを開いた後で浄化タイマーが
       // 後から開始されたケースを検知できない。
-      if (await this.isPurificationCounting()) {
+      const purificationCounting = await this.isPurificationCounting()
+
+      // ✅ 往復の間に離脱していたら、この先の副作用を一切起こさない。
+      //    「キャンセル」は Turbo Drive のリンク遷移なので document は作り直されず、
+      //    disconnect() が済んだ後もこの Promise だけが再開する。そこで
+      //    beforeunload やリースを張ると、片付ける者がいないまま残ってしまう
+      //    （離脱警告が出続け、リースの heartbeat が回り続けて浄化タイマーに入れなくなる）。
+      if (!this.element.isConnected) return
+
+      if (purificationCounting) {
         location.replace("/mypage?locked=purification")
         return
       }

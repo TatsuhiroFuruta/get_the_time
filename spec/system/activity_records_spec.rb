@@ -28,8 +28,9 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       expect(page).to have_current_path(pomodoro_timer_activity_records_path, ignore_query: true)
 
       click_on "スタート", visible: true
-      # 計測が始まって出口が入れ替わるのを待つ
-      expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+      # 出口が入れ替わるのを待つ。startButton の hidden は押した直後に付くので、
+      # fetch の往復が終わったことを表さない
+      expect(page).to have_button("終了する", visible: true, wait: 5)
 
       # Turbo Drive は離脱時の（＝入れ替え済みの）DOM をキャッシュするので、
       # 復元では hidden が入れ替わったまま戻ってくる。connect() が未スタートの
@@ -223,9 +224,9 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
     context "休憩時間が終了したとき" do
       it "作業画面に戻りスタートボタンが表示されること" do
         click_on "スタート", visible: true
-        # start() は fetch を await した後に隠すので、先に「隠れたこと」を待たないと
-        # まだ見えている元のボタンにマッチし、休憩サイクルを回さずに通ってしまう
-        expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+        # スタートが完了した（＝出口が入れ替わった）ことを待つ。ここを飛ばすと
+        # まだ見えている元のスタートボタンにマッチし、休憩サイクルを回さずに通る
+        expect(page).to have_button("終了する", visible: true, wait: 5)
 
         aggregate_failures do
           # 作業3秒 + 休憩2秒 終了後にスタートボタンが再表示される
@@ -237,7 +238,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       it "休憩明けの作業画面では「スタート」「終了する」「集中できない…」が並び、「キャンセル」は戻らないこと" do
         click_on "スタート", visible: true
         # 同上。ここを飛ばすと休憩明けを経ずに assertion が満たされてしまう
-        expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+        expect(page).to have_button("終了する", visible: true, wait: 5)
         expect(page).to have_button("スタート", visible: true, wait: 15)
 
         # 初回スタートで入れ替えた出口は、休憩明けの作業画面でも元に戻さない
@@ -326,8 +327,8 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         it "スタート後に終了すると確認ダイアログを経て新規作成画面へ遷移すること" do
           relax_timer_durations
           click_on "スタート", visible: true
-          # スタート直後はタイマーが動いているので startButton が hidden になることを確認
-          expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+          # スタートが完了してタイマーが動き出すのを待つ
+          expect(page).to have_button("終了する", visible: true, wait: 5)
 
           accept_confirm("終了してよろしいでしょうか？") do
             within('[data-pomodoro-target="workScreen"]') do
@@ -341,7 +342,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
         it "確認ダイアログをキャンセルするとタイマーが継続すること" do
           relax_timer_durations
           click_on "スタート", visible: true
-          expect(page).to have_selector('[data-pomodoro-target="startButton"].hidden', wait: 5)
+          expect(page).to have_button("終了する", visible: true, wait: 5)
 
           dismiss_confirm("終了してよろしいでしょうか？") do
             within('[data-pomodoro-target="workScreen"]') do
