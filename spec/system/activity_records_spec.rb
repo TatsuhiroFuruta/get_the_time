@@ -161,6 +161,39 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
           expect(page).to have_content("00:02", wait: 3)
         end
       end
+
+      it "浄化タイマーの問い合わせ中に二度押ししても作業タイマーが二重に走らないこと" do
+        page.execute_script(<<~JS)
+          const el = document.querySelector('[data-controller="pomodoro"]')
+          const controller = window.Stimulus.getControllerForElementAndIdentifier(el, 'pomodoro')
+
+          // 作業を60秒に戻す。3秒のままだとテスト中に満了して、休憩用の
+          // setInterval が 2 本目として数えられてしまう
+          el.dataset.pomodoroWorkDurationValue = 60
+
+          // fetch の往復を 1 秒に引き伸ばして、二度押しが入る窓を作る
+          controller.isPurificationCounting = () => new Promise(r => setTimeout(() => r(false), 1000))
+
+          // 作られた setInterval の間隔を記録する（startTimer は 1000ms）
+          window.__intervalMs = []
+          const orig = window.setInterval
+          window.setInterval = function (fn, ms, ...rest) {
+            window.__intervalMs.push(ms)
+            return orig.call(window, fn, ms, ...rest)
+          }
+
+          controller.startButtonTarget.click()
+          setTimeout(() => controller.startButtonTarget.click(), 200)
+        JS
+
+        # 遅延が明けてタイマーが動き出したことを、残り時間が減ることで確認する
+        expect(page).to have_content("00:59", wait: 10)
+
+        # startTimer() 由来（1 秒間隔）の interval が 1 本だけであること。
+        # 2 本作られると片方が this.timerInterval の上書きで参照を失い、
+        # 二度と clearInterval できなくなる（#265）
+        expect(page.evaluate_script("window.__intervalMs.filter(ms => ms === 1000).length")).to eq(1)
+      end
     end
 
     context "作業時間が終了したとき" do
