@@ -220,6 +220,77 @@ RSpec.describe ActivityRecord, type: :model do
   end
 
   # =========================================================
+  # .total_light_time_on
+  # =========================================================
+  describe ".total_light_time_on" do
+    subject { described_class.total_light_time_on(user, Date.new(2026, 9, 9)) }
+
+    around { |example| travel_to(Time.zone.local(2026, 9, 9, 12, 0, 0)) { example.run } }
+
+    context "指定日に終わった記録があるとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, total_duration: 30,
+                                 started_at: Time.zone.local(2026, 9, 9, 10, 0, 0),
+                                 ended_at:   Time.zone.local(2026, 9, 9, 10, 30, 0))
+      end
+
+      it { is_expected.to eq 30 }
+    end
+
+    context "活動は前日に終わり、記録の送信だけが指定日になったとき" do
+      before do
+        record = create(:activity_record, user: user, light_time: light_time, total_duration: 50,
+                                          started_at: Time.zone.local(2026, 9, 8, 23, 0, 0),
+                                          ended_at:   Time.zone.local(2026, 9, 8, 23, 50, 0))
+        # 日付が変わってから活動記録を送信したケース
+        record.update_column(:created_at, Time.zone.local(2026, 9, 9, 0, 5, 0))
+      end
+
+      it "指定日の累計に含まれないこと" do
+        is_expected.to eq 0
+      end
+    end
+
+    context "0 時をまたいで指定日に終わったセッションがあるとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, total_duration: 30,
+                                 started_at: Time.zone.local(2026, 9, 8, 23, 45, 0),
+                                 ended_at:   Time.zone.local(2026, 9, 9, 0, 15, 0))
+      end
+
+      it "終了した日の累計に含まれること" do
+        is_expected.to eq 30
+      end
+    end
+
+    context "ended_at が NULL のとき" do
+      before do
+        record = create(:activity_record, user: user, light_time: light_time, total_duration: 45)
+        record.update_columns(ended_at: nil, created_at: Time.zone.local(2026, 9, 9, 10, 0, 0))
+      end
+
+      it "created_at にフォールバックして集計されること" do
+        is_expected.to eq 45
+      end
+    end
+
+    context "別ユーザーの記録があるとき" do
+      let(:other_user)  { create(:user) }
+      let(:other_light) { create(:light_time, :current, user: other_user) }
+
+      before do
+        create(:activity_record, user: other_user, light_time: other_light, total_duration: 999,
+                                 started_at: Time.zone.local(2026, 9, 9, 10, 0, 0),
+                                 ended_at:   Time.zone.local(2026, 9, 9, 10, 30, 0))
+      end
+
+      it "集計に含まれないこと" do
+        is_expected.to eq 0
+      end
+    end
+  end
+
+  # =========================================================
   # before_save: calculate_desired_self_percentage
   # =========================================================
   describe "desired_self_percentage の計算" do
@@ -277,7 +348,7 @@ RSpec.describe ActivityRecord, type: :model do
         create(:activity_record, :high_rating, user: user, light_time: light_time)
         old_record = build(:activity_record, :low_rating, user: user, light_time: light_time)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it "期間内（high_rating）のみが平均値に反映されること" do
@@ -325,7 +396,7 @@ RSpec.describe ActivityRecord, type: :model do
         create(:activity_record, user: user, light_time: light_time, fatigue: 2)
         old_record = build(:activity_record, user: user, light_time: light_time, fatigue: 5)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it "期間内の値のみが平均に反映されること" do
@@ -366,7 +437,7 @@ RSpec.describe ActivityRecord, type: :model do
         old_record = build(:activity_record, user: user, light_time: light_time,
                                              total_duration: 100, idle_duration: 80)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it "期間内の値のみが平均に反映されること" do
@@ -420,7 +491,8 @@ RSpec.describe ActivityRecord, type: :model do
         # JST 2026-05-28 0:30 = UTC 2026-05-27 15:30
         record = create(:activity_record, user: user, light_time: light_time,
                                           total_duration: 60, idle_duration: 0)
-        record.update_column(:created_at, Time.zone.local(2026, 5, 28, 0, 30, 0))
+        record.update_columns(created_at: Time.zone.local(2026, 5, 28, 0, 30, 0),
+                              ended_at:   Time.zone.local(2026, 5, 28, 0, 30, 0))
       end
 
       it "JST の日付（5/28）でグルーピングされること" do
@@ -433,9 +505,11 @@ RSpec.describe ActivityRecord, type: :model do
 
       before do
         r1 = create(:activity_record, user: user, light_time: light_time, total_duration: 60)
-        r1.update_column(:created_at, Time.zone.local(2026, 5, 26, 10, 0, 0))
+        r1.update_columns(created_at: Time.zone.local(2026, 5, 26, 10, 0, 0),
+                          ended_at:   Time.zone.local(2026, 5, 26, 10, 0, 0))
         r2 = create(:activity_record, user: user, light_time: light_time, total_duration: 120)
-        r2.update_column(:created_at, Time.zone.local(2026, 5, 27, 10, 0, 0))
+        r2.update_columns(created_at: Time.zone.local(2026, 5, 27, 10, 0, 0),
+                          ended_at:   Time.zone.local(2026, 5, 27, 10, 0, 0))
       end
 
       it "日付昇順で返ること" do
@@ -447,7 +521,7 @@ RSpec.describe ActivityRecord, type: :model do
       before do
         old_record = build(:activity_record, user: user, light_time: light_time, total_duration: 60)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it { is_expected.to eq [] }
