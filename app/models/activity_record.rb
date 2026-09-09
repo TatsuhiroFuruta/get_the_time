@@ -82,6 +82,9 @@ class ActivityRecord < ApplicationRecord
         end
   end
 
+  # 浄化タイマー付与の 1 ブロック（分）。この分数がたまるごとに抽選を 1 回引く。
+  PURIFICATION_BLOCK_MINUTES = 30
+
   # 付与分数の重み付きテーブル（合計 100）
   PURIFICATION_TIME_TABLE = [
     { minutes: 8,  weight: 60 },
@@ -99,6 +102,24 @@ class ActivityRecord < ApplicationRecord
       return entry[:minutes] if threshold < cumulative
     end
     PURIFICATION_TIME_TABLE.last[:minutes]
+  end
+
+  # 累計分数から、消化済みのブロック数を求める。
+  # 余りを翌日へ繰り越さない設計のため、付与済みブロック数は累計だけから導出できる。
+  def self.purification_blocks(minutes)
+    [ minutes.to_i, 0 ].max / PURIFICATION_BLOCK_MINUTES
+  end
+
+  # blocks 回の抽選を引いた合計分数。乱数を含むため呼ぶたびに結果が変わる。
+  def self.sample_purification_minutes_for(blocks)
+    return 0 if blocks <= 0
+
+    blocks.times.sum { sample_purification_minutes }
+  end
+
+  # 次の付与までの残り分数（マイページ表示用）。累計 0 分でも 30 を返す。
+  def self.minutes_until_next_purification(total_minutes)
+    PURIFICATION_BLOCK_MINUTES - [ total_minutes.to_i, 0 ].max % PURIFICATION_BLOCK_MINUTES
   end
 
   # 浄化タイマーの時間計算メソッド（30分ブロックごとにランダム付与）
