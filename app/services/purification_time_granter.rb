@@ -37,14 +37,10 @@ class PurificationTimeGranter
   # 保存後の当日累計と保存前の当日累計の差分ブロック数。
   # total_after は create! の後に取るため activity_record 自身を含んでいる。
   def newly_earned_blocks(activity_record)
-    total_after  = ActivityRecord.total_light_time_on(@user, activity_day(activity_record))
+    day = ActivityRecord.activity_date(activity_record)
+    total_after  = ActivityRecord.total_light_time_on(@user, day)
     total_before = total_after - activity_record.total_duration.to_i
 
     ActivityRecord.purification_blocks(total_after) - ActivityRecord.purification_blocks(total_before)
-  end
-
-  # 活動がどの日のものかは終了時刻で決める（ActivityRecord::ACTIVITY_AT と同じ規則）
-  def activity_day(activity_record)
-    (activity_record.ended_at || activity_record.created_at).in_time_zone.to_date
   end
 end

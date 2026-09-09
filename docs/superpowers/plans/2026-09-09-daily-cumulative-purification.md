@@ -64,7 +64,7 @@
   - `ActivityRecord.total_light_time_today(user)` → `Integer`（分）。シグネチャ据え置き
   - Task 3 の `PurificationTimeGranter` は `total_light_time_on` を使う
 
-- [ ] **Step 1: 失敗するテストを書く**
+- [x] **Step 1: 失敗するテストを書く**
 
 `spec/models/activity_record_spec.rb` の `.total_light_time_today` の `describe` ブロック（`context "別ユーザーの記録は集計に含まないこと"` の `end` の直後、`# before_save: calculate_desired_self_percentage` のコメント行の手前）に、以下の `describe` を丸ごと挿入する。
 
@@ -141,13 +141,13 @@
   end
 ```
 
-- [ ] **Step 2: テストが失敗することを確認する**
+- [x] **Step 2: テストが失敗することを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/models/activity_record_spec.rb -e ".total_light_time_on"`
 
 Expected: FAIL。`NoMethodError: undefined method 'total_light_time_on'`。
 
-- [ ] **Step 3: モデルに日付基準を実装する**
+- [x] **Step 3: モデルに日付基準を実装する**
 
 `app/models/activity_record.rb` の 16〜29 行目（`scope :today` から `total_light_time_today` の `end` まで）を、以下で丸ごと置き換える。
 
@@ -197,13 +197,13 @@ Expected: FAIL。`NoMethodError: undefined method 'total_light_time_on'`。
     bucket = Arel.sql("DATE((#{ACTIVITY_AT} AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Tokyo')")
 ```
 
-- [ ] **Step 4: 新しいテストが通ることを確認する**
+- [x] **Step 4: 新しいテストが通ることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/models/activity_record_spec.rb -e ".total_light_time_on"`
 
 Expected: PASS（5 examples）。
 
-- [ ] **Step 5: 基準日の変更で落ちる既存テストを確認する**
+- [x] **Step 5: 基準日の変更で落ちる既存テストを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/models/activity_record_spec.rb`
 
@@ -211,7 +211,7 @@ Expected: FAIL が 7 件前後。`evaluation_averages` / `fatigue_average` / `de
 
 原因は**テストの書き方が古いだけ**である。ファクトリが `ended_at { Time.current }` を設定しているため、`created_at` だけを過去に倒しても `COALESCE` は `ended_at`（今日）を拾う。プロダクションコードの不具合ではない。
 
-- [ ] **Step 6: 既存テストを新しい基準に合わせる**
+- [x] **Step 6: 既存テストを新しい基準に合わせる**
 
 `spec/models/activity_record_spec.rb` の以下 7 箇所を修正する。いずれも `created_at` だけを動かしていたものを、`ended_at` も同じ時刻に揃える。
 
@@ -326,25 +326,25 @@ Expected: FAIL が 7 件前後。`evaluation_averages` / `fatigue_average` / `de
         old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
 ```
 
-- [ ] **Step 7: モデルの全テストが通ることを確認する**
+- [x] **Step 7: モデルの全テストが通ることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/models/activity_record_spec.rb`
 
 Expected: PASS（0 failures）。
 
-- [ ] **Step 8: 他の spec に波及していないことを確認する**
+- [x] **Step 8: 他の spec に波及していないことを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/models spec/requests spec/helpers`
 
 Expected: PASS（0 failures）。`total_light_time_today` のシグネチャは変えていないので、マイページ側は影響を受けない。
 
-- [ ] **Step 9: RuboCop を通す**
+- [x] **Step 9: RuboCop を通す**
 
 Run: `docker compose exec web bin/rubocop app/models/activity_record.rb spec/models/activity_record_spec.rb`
 
 Expected: no offenses。
 
-- [ ] **Step 10: Brakeman を通す**
+- [x] **Step 10: Brakeman を通す**
 
 Run: `docker compose exec web bin/brakeman --no-pager`
 
@@ -352,7 +352,7 @@ Expected: `No warnings found`。
 
 **もし SQL injection の警告が出た場合**、`ACTIVITY_AT` の文字列補間が原因である。定数化をやめ、3 箇所（`activity_on` / `within_last_days` / `daily_series` の bucket）に SQL リテラルを直書きする形へ切り替える。DRY より CI が通ることを優先する。その場合 `ACTIVITY_AT` の定義と、それを参照するコメントも削除すること。
 
-- [ ] **Step 11: コミット**
+- [x] **Step 11: コミット**
 
 ```bash
 git add app/models/activity_record.rb spec/models/activity_record_spec.rb
@@ -383,7 +383,7 @@ EOF
 
 **既存の `calculate_purification_time` はこのタスクでは削除しない。** まだ `PurificationTimeGranter` が使っており、消すとテストが落ちる。削除は Task 3 で行う。
 
-- [ ] **Step 1: 失敗するテストを書く**
+- [x] **Step 1: 失敗するテストを書く**
 
 `spec/models/activity_record_spec.rb` の `.sample_purification_minutes` の `describe` ブロックの直後（`# .calculate_purification_time` のコメント行の手前）に、以下を挿入する。
 
@@ -530,13 +530,13 @@ EOF
   end
 ```
 
-- [ ] **Step 2: テストが失敗することを確認する**
+- [x] **Step 2: テストが失敗することを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/models/activity_record_spec.rb -e ".purification_blocks" -e ".sample_purification_minutes_for" -e ".minutes_until_next_purification"`
 
 Expected: FAIL。`NoMethodError: undefined method 'purification_blocks'`。
 
-- [ ] **Step 3: 純粋関数を実装する**
+- [x] **Step 3: 純粋関数を実装する**
 
 `app/models/activity_record.rb` の `PURIFICATION_TIME_TABLE` の定義の直前に、ブロックの粒度を定数として置く。
 
@@ -579,19 +579,19 @@ Expected: FAIL。`NoMethodError: undefined method 'purification_blocks'`。
   end
 ```
 
-- [ ] **Step 4: テストが通ることを確認する**
+- [x] **Step 4: テストが通ることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/models/activity_record_spec.rb`
 
 Expected: PASS（0 failures）。既存の `.calculate_purification_time` の describe もまだ通る。
 
-- [ ] **Step 5: RuboCop を通す**
+- [x] **Step 5: RuboCop を通す**
 
 Run: `docker compose exec web bin/rubocop app/models/activity_record.rb spec/models/activity_record_spec.rb`
 
 Expected: no offenses。
 
-- [ ] **Step 6: コミット**
+- [x] **Step 6: コミット**
 
 ```bash
 git add app/models/activity_record.rb spec/models/activity_record_spec.rb
@@ -617,7 +617,7 @@ EOF
 - Consumes: Task 1 の `ActivityRecord.total_light_time_on(user, date)`、Task 2 の `ActivityRecord.purification_blocks(minutes)` と `ActivityRecord.sample_purification_minutes_for(blocks)`
 - Produces: `PurificationTimeGranter#call(activity_record)` → `Integer`（付与した実分数。付与なしは 0）。**引数が分数から保存済みの `ActivityRecord` に変わる。** 戻り値の意味は据え置きで、`ActivityRecordForm#granted_purification_minutes` 経由でフラッシュに使われる
 
-- [ ] **Step 1: 失敗するテストを書く**
+- [x] **Step 1: 失敗するテストを書く**
 
 `spec/services/purification_time_granter_spec.rb` の**全体**を以下で置き換える。
 
@@ -763,13 +763,13 @@ RSpec.describe PurificationTimeGranter, type: :service do
 end
 ```
 
-- [ ] **Step 2: テストが失敗することを確認する**
+- [x] **Step 2: テストが失敗することを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/services/purification_time_granter_spec.rb`
 
 Expected: FAIL。現行の `call(total_duration)` に `ActivityRecord` が渡るため、`ActivityRecord.calculate_purification_time` の中で `total_duration < 1` の比較が `ArgumentError` / `NoMethodError` になる。
 
-- [ ] **Step 3: Granter を累計ベースに書き換える**
+- [x] **Step 3: Granter を累計ベースに書き換える**
 
 `app/services/purification_time_granter.rb` の**全体**を以下で置き換える。
 
@@ -826,13 +826,13 @@ class PurificationTimeGranter
 end
 ```
 
-- [ ] **Step 4: Granter のテストが通ることを確認する**
+- [x] **Step 4: Granter のテストが通ることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/services/purification_time_granter_spec.rb`
 
 Expected: PASS（0 failures）。
 
-- [ ] **Step 5: フォームの呼び出しを変える**
+- [x] **Step 5: フォームの呼び出しを変える**
 
 `app/forms/activity_record_form.rb` の `create!` の戻り値を変数に受ける。
 
@@ -866,7 +866,7 @@ Expected: PASS（0 failures）。
       @granted_purification_minutes = PurificationTimeGranter.new(user).call(activity_record)
 ```
 
-- [ ] **Step 6: フォームのテストを追加する**
+- [x] **Step 6: フォームのテストを追加する**
 
 `spec/forms/activity_record_form_spec.rb` の `describe "#save"` ブロックの末尾（`context "light_time_id が nil のとき"` の `end` の直後、`describe "#save"` を閉じる `end` の手前）に、以下を挿入する。
 
@@ -899,13 +899,13 @@ Expected: PASS（0 failures）。
     end
 ```
 
-- [ ] **Step 7: フォームのテストが通ることを確認する**
+- [x] **Step 7: フォームのテストが通ることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/forms/activity_record_form_spec.rb`
 
 Expected: PASS（0 failures）。
 
-- [ ] **Step 8: 使われなくなった `calculate_purification_time` を削除する**
+- [x] **Step 8: 使われなくなった `calculate_purification_time` を削除する**
 
 呼び出し元が消えたので、`app/models/activity_record.rb` から以下のメソッドを丸ごと削除する。
 
@@ -923,25 +923,25 @@ Expected: PASS（0 failures）。
 
 あわせて `spec/models/activity_record_spec.rb` の `describe ".calculate_purification_time" do ... end` を、その上の区切りコメント（`# =====` で挟まれた `# .calculate_purification_time` の 3 行）ごと丸ごと削除する。境界値の検証は Task 2 の `.purification_blocks` と `.sample_purification_minutes_for` が引き継いでいる。
 
-- [ ] **Step 9: 残っていないことを確認する**
+- [x] **Step 9: 残っていないことを確認する**
 
 Run: `docker compose exec web grep -rn "calculate_purification_time" app/ spec/ CLAUDE.md`
 
 Expected: `CLAUDE.md` の 1 件のみがヒットする（Task 5 で更新する）。`app/` と `spec/` からは消えていること。
 
-- [ ] **Step 10: 全テストを回す**
+- [x] **Step 10: 全テストを回す**
 
 Run: `docker compose exec web bundle exec rspec spec/models spec/services spec/forms spec/requests`
 
 Expected: PASS（0 failures）。
 
-- [ ] **Step 11: RuboCop を通す**
+- [x] **Step 11: RuboCop を通す**
 
 Run: `docker compose exec web bin/rubocop app/models/activity_record.rb app/services/purification_time_granter.rb app/forms/activity_record_form.rb spec/models/activity_record_spec.rb spec/services/purification_time_granter_spec.rb spec/forms/activity_record_form_spec.rb`
 
 Expected: no offenses。
 
-- [ ] **Step 12: コミット**
+- [x] **Step 12: コミット**
 
 ```bash
 git add app/models/activity_record.rb app/services/purification_time_granter.rb app/forms/activity_record_form.rb spec/
@@ -969,7 +969,7 @@ EOF
 
 **注意:** `_pomodoro_start.html.erb` は `light_and_dark_times_present` が真のときだけ描画される（`app/views/mypages/show.html.erb:70-73`）。System Spec では `let!(:light_time)` と `let!(:dark_time)` が既にあるので条件を満たす。
 
-- [ ] **Step 1: 失敗するテストを書く**
+- [x] **Step 1: 失敗するテストを書く**
 
 `spec/system/purification_times_spec.rb` の `describe "マイページの浄化タイマー表示"` ブロックの直後（その `end` の次）に、以下の `describe` を挿入する。
 
@@ -1011,13 +1011,13 @@ EOF
   end
 ```
 
-- [ ] **Step 2: テストが失敗することを確認する**
+- [x] **Step 2: テストが失敗することを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/system/purification_times_spec.rb -e "マイページの次の付与までの表示"`
 
 Expected: FAIL（3 examples）。文言がまだ存在しない。
 
-- [ ] **Step 3: コントローラに残り分数を渡す**
+- [x] **Step 3: コントローラに残り分数を渡す**
 
 `app/controllers/mypages_controller.rb` を編集する。
 
@@ -1034,7 +1034,7 @@ Expected: FAIL（3 examples）。文言がまだ存在しない。
     @minutes_to_next_purification = ActivityRecord.minutes_until_next_purification(@today_light_time)
 ```
 
-- [ ] **Step 4: ビューと使い方ページに表示を足す**
+- [x] **Step 4: ビューと使い方ページに表示を足す**
 
 まず `app/views/mypages/_pomodoro_start.html.erb` の 7〜9 行目を置き換える。「今日の光の時間」の下マージンを `mb-8` から `mb-2` に詰め、新しい行が `mb-8` を引き継ぐ。
 
@@ -1068,13 +1068,13 @@ Expected: FAIL（3 examples）。文言がまだ存在しない。
 
 この文言を検証する spec は無い（`spec/system/static_pages_spec.rb` は使い方ページの本文を assert していない）ので、テストの追加・修正は不要。
 
-- [ ] **Step 5: 新しいテストが通ることを確認する**
+- [x] **Step 5: 新しいテストが通ることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/system/purification_times_spec.rb -e "マイページの次の付与までの表示"`
 
 Expected: PASS（3 examples）。
 
-- [ ] **Step 6: 既存の System Spec が落ちることを確認する**
+- [x] **Step 6: 既存の System Spec が落ちることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/system/purification_times_spec.rb`
 
@@ -1082,7 +1082,7 @@ Expected: FAIL が 1 件。`context "PurificationTime が存在しないとき(A
 
 新しく足した文言「次の浄化タイマーまで あと 30 分」に**「浄化タイマー」という語が含まれる**ため、`expect(page).not_to have_content("浄化タイマー")` が引っかかる。このテストが本当に守りたいのは「**浄化タイマーのカードが描画されないこと**」（`app/views/mypages/show.html.erb:20` の `<% if @purification_time %>`）であり、文字列一致はその代理でしかなかった。カードを直接見る形に精密化する。
 
-- [ ] **Step 7: 既存テストの assertion を精密化する**
+- [x] **Step 7: 既存テストの assertion を精密化する**
 
 `spec/system/purification_times_spec.rb` の当該 `context` を置き換える。
 
@@ -1114,25 +1114,25 @@ Expected: FAIL が 1 件。`context "PurificationTime が存在しないとき(A
     end
 ```
 
-- [ ] **Step 8: System Spec 全体が通ることを確認する**
+- [x] **Step 8: System Spec 全体が通ることを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/system/purification_times_spec.rb`
 
 Expected: PASS（0 failures）。
 
-- [ ] **Step 9: 他の System Spec に波及していないことを確認する**
+- [x] **Step 9: 他の System Spec に波及していないことを確認する**
 
 Run: `docker compose exec web bundle exec rspec spec/system`
 
 Expected: PASS（0 failures）。マイページを訪れる `activity_records_spec.rb` / `timer_exclusion_spec.rb` は「浄化タイマー」の文字列一致に依存していないが、念のため確認する。
 
-- [ ] **Step 10: RuboCop を通す**
+- [x] **Step 10: RuboCop を通す**
 
 Run: `docker compose exec web bin/rubocop app/controllers/mypages_controller.rb spec/system/purification_times_spec.rb`
 
 Expected: no offenses。
 
-- [ ] **Step 11: コミット**
+- [x] **Step 11: コミット**
 
 ```bash
 git add app/controllers/mypages_controller.rb app/views/mypages/_pomodoro_start.html.erb app/views/static_pages/how_to_use/_step3.html.erb spec/system/purification_times_spec.rb
@@ -1157,7 +1157,7 @@ EOF
 - Consumes: Task 1〜4 で確定した仕様と API（`ACTIVITY_AT`、`purification_blocks`、`sample_purification_minutes_for`、`call(activity_record)`）
 - Produces: なし（ドキュメントのみ）
 
-- [ ] **Step 1: README と使い方ページの付与ルールを更新する**
+- [x] **Step 1: README と使い方ページの付与ルールを更新する**
 
 どちらもユーザーに付与ルールを説明している箇所なので、まとめて直す。
 
@@ -1192,7 +1192,7 @@ EOF
 
 同ファイル 18 行目の「この値は登録後に付与される浄化タイマーには影響しません」（`idle_duration` の説明）は**変更しない**。付与は従来どおり `total_duration` ベースで、`idle_duration` は影響しないままである。
 
-- [ ] **Step 2: CLAUDE.md の「活動記録のフロー」節を更新する**
+- [x] **Step 2: CLAUDE.md の「活動記録のフロー」節を更新する**
 
 `CLAUDE.md` の該当箇所を置き換える。
 
@@ -1213,25 +1213,25 @@ EOF
 浄化タイマーへの「加算（副作用）」は `PurificationTimeGranter`（`app/services/`）に切り出してあります。`PurificationTimeGranter.new(user).call(activity_record)` が **保存済みの `ActivityRecord` を受け取り**、`user.with_lock` 内でその日の累計を読んで差分ブロック分を `PurificationTime` に加算し、**付与した実分数を返します**。累計の読み取りをロックの外に出すと同時保存で二重付与が起きるため、読み取りから加算までをロック内に閉じています。
 ```
 
-- [ ] **Step 3: 古い記述が残っていないことを確認する**
+- [x] **Step 3: 古い記述が残っていないことを確認する**
 
 Run: `docker compose exec web grep -rn "calculate_purification_time\|call(total_duration)\|30分につき10分\|30分毎にランダム" app/ spec/ README.md CLAUDE.md`
 
 Expected: ヒット 0 件。
 
-- [ ] **Step 4: 全テストを回す**
+- [x] **Step 4: 全テストを回す**
 
 Run: `docker compose exec web bundle exec rspec`
 
 Expected: PASS（0 failures）。
 
-- [ ] **Step 5: RuboCop を全体にかける**
+- [x] **Step 5: RuboCop を全体にかける**
 
 Run: `docker compose exec web bin/rubocop`
 
 Expected: no offenses。
 
-- [ ] **Step 6: セキュリティスキャンを通す**
+- [x] **Step 6: セキュリティスキャンを通す**
 
 Run: `docker compose exec web bin/brakeman --no-pager && docker compose exec web bin/bundler-audit check`
 
@@ -1239,7 +1239,7 @@ Expected: `No warnings found` / `No vulnerabilities found`。
 
 Brakeman が `ACTIVITY_AT` の文字列補間で SQL injection を報告した場合は、Task 1 Step 10 の代替方針（定数化をやめて 3 箇所に SQL リテラルを直書き）に切り替え、Task 1〜3 のテストを回し直してから進む。
 
-- [ ] **Step 7: コミット**
+- [x] **Step 7: コミット**
 
 ```bash
 git add README.md CLAUDE.md app/views/static_pages/how_to_use/_step4.html.erb
@@ -1251,13 +1251,13 @@ EOF
 )"
 ```
 
-- [ ] **Step 8: コードレビューを受ける**
+- [x] **Step 8: コードレビューを受ける**
 
 PR を作る前にコードレビューを通す。`superpowers:requesting-code-review` スキル、または `/code-review` を使う。
 
 指摘があれば `superpowers:receiving-code-review` に従って対応し、修正後に Step 4〜6 を回し直す。
 
-- [ ] **Step 9: PR を作成する**
+- [x] **Step 9: PR を作成する**
 
 ```bash
 git push -u origin feat/daily-cumulative-purification-251

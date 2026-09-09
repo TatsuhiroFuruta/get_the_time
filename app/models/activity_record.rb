@@ -19,6 +19,13 @@ class ActivityRecord < ApplicationRecord
   # NOT NULL なので、この式が NULL を返して集計から黙って漏れることはない。
   ACTIVITY_AT = "COALESCE(activity_records.ended_at, activity_records.created_at)".freeze
 
+  # ACTIVITY_AT の Ruby 版。SQL で絞り込むのではなく、1 件のレコードから
+  # 「どの日のものか」を得たいとき（浄化タイマーの付与など）に使う。
+  # 両者は同じルールなので、ずれないよう定数の隣に置く。
+  def self.activity_date(activity_record)
+    (activity_record.ended_at || activity_record.created_at).in_time_zone.to_date
+  end
+
   scope :activity_on, ->(date) {
     range = date.all_day
     where("#{ACTIVITY_AT} BETWEEN ? AND ?", range.begin, range.end)

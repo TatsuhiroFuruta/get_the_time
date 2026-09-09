@@ -102,6 +102,33 @@ RSpec.describe PurificationTimeGranter, type: :service do
         end
       end
 
+      # created_at（送信時刻）と ended_at（活動の終了時刻）が別の日に割れるケース。
+      # ここが割れないと created_at 基準の実装でも同じ結果になってしまい、
+      # ACTIVITY_AT を導入した意味を検証できない。
+      context "活動が終わった翌日に記録を送信したとき" do
+        it "送信日ではなく終了日の累計に合算されて付与されること" do
+          # 前日（9/8）の 22:00 までに 25 分の記録がある
+          travel_to(Time.zone.local(2026, 9, 8, 22, 0, 0)) do
+            granter.call(create_record(25))
+          end
+
+          # 9/8 23:50 に終わった 25 分の活動を、日付をまたいだ 9/9 00:05 に送信する
+          granted = travel_to(Time.zone.local(2026, 9, 9, 0, 5, 0)) do
+            record = create_record(25, ended_at: Time.zone.local(2026, 9, 8, 23, 50, 0))
+            record.update_column(:created_at, Time.zone.local(2026, 9, 9, 0, 5, 0))
+            granter.call(record.reload)
+          end
+
+          # 9/8 の累計 50 分となり 1 ブロック付与される。
+          # created_at 基準だと 9/9 の累計 25 分となり付与 0 になる。
+          aggregate_failures do
+            expect(granted).to eq 10
+            expect(ActivityRecord.total_light_time_on(user, Date.new(2026, 9, 8))).to eq 50
+            expect(ActivityRecord.total_light_time_on(user, Date.new(2026, 9, 9))).to eq 0
+          end
+        end
+      end
+
       context "ended_at が NULL のとき" do
         it "created_at の日で累計されて付与されること" do
           record = create_record(30)
