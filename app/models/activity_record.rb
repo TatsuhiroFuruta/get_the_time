@@ -24,8 +24,6 @@ class ActivityRecord < ApplicationRecord
     where("#{ACTIVITY_AT} BETWEEN ? AND ?", range.begin, range.end)
   }
 
-  scope :today, -> { activity_on(Date.current) }
-
   scope :within_last_days, ->(days) {
     where("#{ACTIVITY_AT} >= ?", days.days.ago.beginning_of_day)
   }

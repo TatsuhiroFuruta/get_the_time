@@ -358,6 +358,36 @@ RSpec.describe "ActivityRecords", type: :request do
       end
     end
 
+    # 浄化タイマーの付与済みブロック数は当日累計（SUM(total_duration)）から導出しているため、
+    # 計測結果を後から書き換えられると、同じ活動時間で再度ブロックを獲得できてしまう。
+    # 編集フォームはこれらを表示のみで送信しないので、許可リストからも外している。
+    context "計測結果を書き換えるパラメータを送ったとき" do
+      let(:tampered_params) do
+        {
+          activity_record: {
+            comment:        "更新後のコメント",
+            total_duration: 0,
+            started_at:     10.days.ago,
+            ended_at:       10.days.ago
+          }
+        }
+      end
+
+      it "total_duration・started_at・ended_at は更新されないこと" do
+        original = activity_record.slice(:total_duration, :started_at, :ended_at)
+        patch activity_record_path(activity_record), params: tampered_params
+        activity_record.reload
+
+        aggregate_failures do
+          expect(activity_record.total_duration).to eq original["total_duration"]
+          expect(activity_record.started_at).to     eq original["started_at"]
+          expect(activity_record.ended_at).to       eq original["ended_at"]
+          # 許可されている項目は従来どおり更新される
+          expect(activity_record.comment).to eq "更新後のコメント"
+        end
+      end
+    end
+
     context "不正なパラメータのとき（idle_duration > total_duration）" do
       let(:bad_params) do
         {
