@@ -38,6 +38,8 @@
 | `spec/services/purification_time_granter_spec.rb` | 付与サービスのテスト | 全面改訂 |
 | `spec/forms/activity_record_form_spec.rb` | フォームのテスト | 累計ベースの付与を検証する describe を追加 |
 | `spec/system/purification_times_spec.rb` | 浄化タイマーの System Spec | 進捗表示のテストを追加、既存 1 件の assertion を精密化 |
+| `app/views/static_pages/how_to_use/_step3.html.erb` | 使い方ページ（活動時間の計測） | マイページの新しい表示の説明を追加 |
+| `app/views/static_pages/how_to_use/_step4.html.erb` | 使い方ページ（活動記録の登録） | 55 行目の「30分毎にランダムで付与」を累計ベースの説明に更新 |
 | `README.md` | ドメイン仕様 | 117 行目の付与ルールを更新 |
 | `CLAUDE.md` | 開発ガイド | 「活動記録のフロー」節を更新 |
 
@@ -958,6 +960,7 @@ EOF
 **Files:**
 - Modify: `app/controllers/mypages_controller.rb:6`（`@today_light_time` の直後）
 - Modify: `app/views/mypages/_pomodoro_start.html.erb:7-9`
+- Modify: `app/views/static_pages/how_to_use/_step3.html.erb:18-20`（新しい表示の説明）
 - Test: `spec/system/purification_times_spec.rb`
 
 **Interfaces:**
@@ -1031,9 +1034,9 @@ Expected: FAIL（3 examples）。文言がまだ存在しない。
     @minutes_to_next_purification = ActivityRecord.minutes_until_next_purification(@today_light_time)
 ```
 
-- [ ] **Step 4: ビューに表示を足す**
+- [ ] **Step 4: ビューと使い方ページに表示を足す**
 
-`app/views/mypages/_pomodoro_start.html.erb` の 7〜9 行目を置き換える。「今日の光の時間」の下マージンを `mb-8` から `mb-2` に詰め、新しい行が `mb-8` を引き継ぐ。
+まず `app/views/mypages/_pomodoro_start.html.erb` の 7〜9 行目を置き換える。「今日の光の時間」の下マージンを `mb-8` から `mb-2` に詰め、新しい行が `mb-8` を引き継ぐ。
 
 置き換え前:
 
@@ -1054,6 +1057,16 @@ Expected: FAIL（3 examples）。文言がまだ存在しない。
     次の浄化タイマーまで あと <%= @minutes_to_next_purification %> 分
   </p>
 ```
+
+次に使い方ページで新しい表示に触れる。`app/views/static_pages/how_to_use/_step3.html.erb` の「※ 活動時間・休憩時間は…」の `<p>`（18〜20 行目）の直後に、以下の `<p>` を挿入する。
+
+```erb
+    <p class="mb-2 text-md">
+      ※ スタートボタンの上に「今日の光の時間」と、次に浄化タイマーが付与されるまでの残り時間が表示されます。
+    </p>
+```
+
+この文言を検証する spec は無い（`spec/system/static_pages_spec.rb` は使い方ページの本文を assert していない）ので、テストの追加・修正は不要。
 
 - [ ] **Step 5: 新しいテストが通ることを確認する**
 
@@ -1122,7 +1135,7 @@ Expected: no offenses。
 - [ ] **Step 11: コミット**
 
 ```bash
-git add app/controllers/mypages_controller.rb app/views/mypages/_pomodoro_start.html.erb spec/system/purification_times_spec.rb
+git add app/controllers/mypages_controller.rb app/views/mypages/_pomodoro_start.html.erb app/views/static_pages/how_to_use/_step3.html.erb spec/system/purification_times_spec.rb
 git commit -m "$(cat <<'EOF'
 feat: マイページに次の浄化タイマー付与までの残り分数を表示 #251
 
@@ -1137,15 +1150,18 @@ EOF
 
 **Files:**
 - Modify: `README.md:117`
+- Modify: `app/views/static_pages/how_to_use/_step4.html.erb:55`
 - Modify: `CLAUDE.md`（「活動記録のフロー」節）
 
 **Interfaces:**
 - Consumes: Task 1〜4 で確定した仕様と API（`ACTIVITY_AT`、`purification_blocks`、`sample_purification_minutes_for`、`call(activity_record)`）
 - Produces: なし（ドキュメントのみ）
 
-- [ ] **Step 1: README の付与ルールを更新する**
+- [ ] **Step 1: README と使い方ページの付与ルールを更新する**
 
-`README.md` の 117 行目を置き換える。
+どちらもユーザーに付与ルールを説明している箇所なので、まとめて直す。
+
+まず `README.md` の 117 行目を置き換える。
 
 置き換え前:
 
@@ -1158,6 +1174,23 @@ EOF
 ```markdown
 4. 活動記録を提出すると、その日の光の時間の累計30分ごとに「浄化タイマー」が付与される（付与分数は8〜15分のランダム）。累計は0時にリセットされ、30分に満たない余りは翌日へ繰り越されない。マイページで次の付与までの残り時間を確認できる。浄化タイマーを用いることで、罪悪感なく娯楽を楽しめる。
 ```
+
+次に `app/views/static_pages/how_to_use/_step4.html.erb` の 55 行目を置き換える。現在の「30分毎に」は**何の 30 分かを書いていない**（暗黙に「そのセッションの」を指していた）ため、累計であることを明示する。
+
+置き換え前:
+
+```erb
+    <p class="mb-2 text-md">※ デモ画像です。実際の付与時間は30分毎にランダムで付与されます（8分・10分・13分・15分のいずれか）。</p>
+```
+
+置き換え後:
+
+```erb
+    <p class="mb-2 text-md">※ デモ画像です。実際は、その日の光の時間の累計が30分たまるごとに、ランダムな時間（8分・10分・13分・15分のいずれか）が付与されます。</p>
+    <p class="mb-2 text-md">※ 累計は0時にリセットされ、30分に満たない分は翌日へ繰り越されません。</p>
+```
+
+同ファイル 18 行目の「この値は登録後に付与される浄化タイマーには影響しません」（`idle_duration` の説明）は**変更しない**。付与は従来どおり `total_duration` ベースで、`idle_duration` は影響しないままである。
 
 - [ ] **Step 2: CLAUDE.md の「活動記録のフロー」節を更新する**
 
@@ -1182,7 +1215,7 @@ EOF
 
 - [ ] **Step 3: 古い記述が残っていないことを確認する**
 
-Run: `docker compose exec web grep -rn "calculate_purification_time\|call(total_duration)\|30分につき10分" app/ spec/ README.md CLAUDE.md`
+Run: `docker compose exec web grep -rn "calculate_purification_time\|call(total_duration)\|30分につき10分\|30分毎にランダム" app/ spec/ README.md CLAUDE.md`
 
 Expected: ヒット 0 件。
 
@@ -1209,9 +1242,9 @@ Brakeman が `ACTIVITY_AT` の文字列補間で SQL injection を報告した�
 - [ ] **Step 7: コミット**
 
 ```bash
-git add README.md CLAUDE.md
+git add README.md CLAUDE.md app/views/static_pages/how_to_use/_step4.html.erb
 git commit -m "$(cat <<'EOF'
-docs: 浄化タイマーの累計付与に合わせて README と CLAUDE.md を更新 #251
+docs: 浄化タイマーの累計付与に合わせて README・使い方ページ・CLAUDE.md を更新 #251
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 EOF
@@ -1262,6 +1295,14 @@ EOF
 
 ---
 
+## スコープ外
+
+- **使い方ページのスクリーンショット差し替え** — `how_to_use/mypage_light_time_create_multiple.png`（Step3）と `how_to_use/mypage_confirm_purification_time.png`（Step5）は、マイページに追加する「次の浄化タイマーまで あと○分」を含まない状態のまま残る。差し替えには手動キャプチャが必要なので本計画では対応しない。文章側で新しい表示に触れておく（Task 4 Step 4）。
+  - `how_to_use/activity_record_granted_purification_time.png`（Step4 の付与フラッシュ）は**差し替え不要**。フラッシュの文言と見た目は変更しないため。
+- **抽選テーブル `PURIFICATION_TIME_TABLE` の調整** — 累計制で付与機会が増えるぶん体感の獲得量は上がるが、まずは現行テーブルのまま様子を見る。
+- **付与ロジックの `ActivityRecord` からの切り出し** — `PURIFICATION_TIME_TABLE` / `sample_purification_minutes` を含む浄化タイマー関連のクラスメソッド群は、本計画の完了時点で `ActivityRecord` に 6 つ並ぶ。専用の純粋オブジェクトへ移す価値はあるが、振る舞いの変更と構造の移動を同じ PR に混ぜると差分から「移動中に挙動が変わっていないか」を読み取れなくなるため、別 issue とする。
+- **活動記録の削除による二度取りの防止** — 設計書の「既知の制約」のとおり対策しない。
+
 ## Self-Review
 
 **1. Spec coverage**
@@ -1279,6 +1320,7 @@ EOF
 | 実装: `ActivityRecordForm` | Task 3 Step 5 |
 | 実装: マイページの進捗表示 | Task 4 |
 | ドキュメント（README / CLAUDE.md） | Task 5 |
+| 使い方ページの付与ルールの記述 | Task 5 Step 1（`_step4.html.erb`）, Task 4 Step 4（`_step3.html.erb`） |
 | テスト（4 ファイル） | Task 1, 2, 3, 4 に分散 |
 | 移行（データ移行不要） | 実装不要。PR 本文に記載 |
 | 既知の制約（削除による二度取り） | 対策しない方針。PR 本文に記載 |

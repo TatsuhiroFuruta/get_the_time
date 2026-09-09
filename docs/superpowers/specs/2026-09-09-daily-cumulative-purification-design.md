@@ -319,6 +319,8 @@ activity_record = user.activity_records.create!(...)
 - **抽選テーブルの調整** — 累計制で付与機会が増えるため体感の獲得量は上がるが、まずは現行テーブルのまま様子を見る
 - **活動記録保存後のフラッシュへの進捗表示** — マイページの常時表示で足りるか確認してから判断する
 - **活動記録の削除による二度取りの防止** — 上記「既知の制約」のとおり
+- **使い方ページのスクリーンショット差し替え** — マイページの画像は「次の浄化タイマーまで あと○分」を含まない状態のまま残る。手動キャプチャが必要なため対応せず、文章側で新しい表示に触れるにとどめる
+- **付与ロジックの `ActivityRecord` からの切り出し** — 本設計の完了時点で、浄化タイマー関連のクラスメソッドと定数が `ActivityRecord` に 6 つ並ぶ（`PURIFICATION_BLOCK_MINUTES` / `PURIFICATION_TIME_TABLE` / `sample_purification_minutes` / `sample_purification_minutes_for` / `purification_blocks` / `minutes_until_next_purification`）。活動記録そのものとは別の関心事なので専用の純粋オブジェクトへ移す価値はあるが、振る舞いの変更と構造の移動を同じ PR に混ぜると差分から「移動中に挙動が変わっていないか」を読み取れなくなる。別 issue とする
 
 ## 実装時に判断する点
 
