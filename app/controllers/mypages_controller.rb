@@ -4,6 +4,7 @@ class MypagesController < ApplicationController
     @light_time = current_user.light_times.find_by(is_current: true) || current_user.light_times.first
     @purification_time = current_user.purification_time
     @today_light_time = ActivityRecord.total_light_time_today(current_user)
+    @minutes_to_next_purification = ActivityRecord.minutes_until_next_purification(@today_light_time)
     @pomodoro_setting = current_user.pomodoro_setting
 
     # 別タブで光の時間の活動中だったため、クライアント側のガードに追い返された場合。

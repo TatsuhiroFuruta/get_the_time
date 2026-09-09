@@ -4,8 +4,12 @@
     今日の光の時間
   </p>
 
-  <p class="text-white/90 text-3xl font-bold mb-8">
+  <p class="text-white/90 text-3xl font-bold mb-2">
     <%= format_minutes_to_hm(@today_light_time) %>
+  </p>
+
+  <p class="text-white/90 md:text-zinc-800 text-sm mb-8">
+    次の浄化タイマーまで あと <%= @minutes_to_next_purification %> 分
   </p>
 
   <p class="mb-2 text-white/90 md:text-zinc-800">
