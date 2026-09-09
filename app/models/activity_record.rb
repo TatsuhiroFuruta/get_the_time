@@ -122,16 +122,6 @@ class ActivityRecord < ApplicationRecord
     PURIFICATION_BLOCK_MINUTES - [ total_minutes.to_i, 0 ].max % PURIFICATION_BLOCK_MINUTES
   end
 
-  # 浄化タイマーの時間計算メソッド（30分ブロックごとにランダム付与）
-  def self.calculate_purification_time(total_duration)
-    return 0 if total_duration.blank? || total_duration < 1
-
-    blocks = (total_duration / 30).floor
-    return 0 if blocks == 0
-
-    blocks.times.sum { sample_purification_minutes }
-  end
-
   # 検索可能カラムの登録
   def self.ransackable_attributes(auth_object = nil)
     [ "comment", "favorited" ]  # 検索可能なカラム

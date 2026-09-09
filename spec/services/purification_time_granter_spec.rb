@@ -1,51 +1,136 @@
 require "rails_helper"
 
 RSpec.describe PurificationTimeGranter, type: :service do
-  let(:user) { create(:user) }
+  let(:user)        { create(:user) }
+  let!(:light_time) { create(:light_time, :current, user: user) }
 
   subject(:granter) { described_class.new(user) }
 
   # 付与分数は乱数（重み付き抽選）なので、テストでは 1 ブロック 10 分に固定する
   before { allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10) }
 
+  # Granter は保存済みのレコードを受け取る。started_at は ended_at から逆算する。
+  def create_record(total_duration, ended_at: Time.current, started_at: nil)
+    create(:activity_record,
+           user:           user,
+           light_time:     light_time,
+           total_duration: total_duration,
+           started_at:     started_at || (ended_at - total_duration.minutes),
+           ended_at:       ended_at)
+  end
+
   describe "#call" do
     context "PurificationTime が既に存在するとき" do
       let!(:purification_time) { create(:purification_time, user: user, remaining_time: 0) }
 
-      context "90 分（3 ブロック）のとき" do
-        it "remaining_time に 1800 秒 (3 ブロック × 10 分) 加算され、付与分数 30 を返すこと" do
+      context "当日累計が 30 分に満たないとき" do
+        it "付与されず 0 を返すこと" do
           aggregate_failures do
-            expect(granter.call(90)).to eq 30
-            expect(purification_time.reload.remaining_time).to eq 1800
+            expect(granter.call(create_record(25))).to eq 0
+            expect(purification_time.reload.remaining_time).to eq 0
           end
         end
       end
 
-      context "20 分（30 未満）のとき" do
-        it "remaining_time が変化せず、0 を返すこと" do
+      context "25 分を 2 回記録したとき" do
+        it "2 回目で 1 ブロック付与されること" do
+          first  = granter.call(create_record(25))
+          second = granter.call(create_record(25))
+
           aggregate_failures do
-            expect(granter.call(20)).to eq 0
+            expect(first).to eq 0
+            expect(second).to eq 10
+            expect(purification_time.reload.remaining_time).to eq 600
+          end
+        end
+      end
+
+      context "累計 50 分の状態で 90 分を記録したとき" do
+        before do
+          granter.call(create_record(25))
+          granter.call(create_record(25))
+        end
+
+        it "累計 140 分となり 3 ブロック付与されること" do
+          # floor(140/30) - floor(50/30) = 4 - 1 = 3 ブロック
+          aggregate_failures do
+            expect(granter.call(create_record(90))).to eq 30
+            expect(purification_time.reload.remaining_time).to eq 600 + 1800
+          end
+        end
+      end
+
+      context "1 件で複数ブロックをまたぐとき" do
+        it "またいだ数だけ抽選が引かれること" do
+          granter.call(create_record(90))
+          expect(ActivityRecord).to have_received(:sample_purification_minutes).exactly(3).times
+        end
+      end
+
+      context "日付が変わったとき" do
+        it "累計がリセットされ、前日の 25 分が持ち越されないこと" do
+          travel_to(Time.zone.local(2026, 9, 8, 22, 0, 0)) do
+            granter.call(create_record(25))
+          end
+
+          granted = travel_to(Time.zone.local(2026, 9, 9, 10, 0, 0)) do
+            granter.call(create_record(25))
+          end
+
+          aggregate_failures do
+            expect(granted).to eq 0
             expect(purification_time.reload.remaining_time).to eq 0
           end
+        end
+      end
+
+      context "0 時をまたぐセッションのとき" do
+        it "前日に余りがあってもセッション単体で 30 分ごとに付与されること" do
+          travel_to(Time.zone.local(2026, 9, 8, 22, 0, 0)) do
+            granter.call(create_record(25))  # 前日累計 25 分・付与 0
+          end
+
+          granted = travel_to(Time.zone.local(2026, 9, 9, 0, 20, 0)) do
+            granter.call(
+              create_record(30,
+                            started_at: Time.zone.local(2026, 9, 8, 23, 45, 0),
+                            ended_at:   Time.zone.local(2026, 9, 9, 0, 15, 0))
+            )
+          end
+
+          expect(granted).to eq 10
+        end
+      end
+
+      context "ended_at が NULL のとき" do
+        it "created_at の日で累計されて付与されること" do
+          record = create_record(30)
+          record.update_column(:ended_at, nil)
+
+          expect(granter.call(record.reload)).to eq 10
         end
       end
     end
 
     context "PurificationTime がまだ存在しないとき" do
-      context "90 分（3 ブロック）のとき" do
-        it "PurificationTime が新規作成されて 1800 秒セットされること" do
+      context "1 ブロック分たまったとき" do
+        it "PurificationTime が新規作成されて 600 秒セットされること" do
+          record = create_record(30)
+
           aggregate_failures do
-            expect { granter.call(90) }.to change(PurificationTime, :count).by(1)
-            expect(user.reload.purification_time.remaining_time).to eq 1800
+            expect { granter.call(record) }.to change(PurificationTime, :count).by(1)
+            expect(user.reload.purification_time.remaining_time).to eq 600
           end
         end
       end
 
-      context "20 分（30 未満）のとき" do
-        it "PurificationTime は作成されず、0 を返すこと" do
+      context "当日累計が 30 分に満たないとき" do
+        it "PurificationTime は作成されず 0 を返すこと" do
+          record = create_record(20)
+
           aggregate_failures do
-            expect { granter.call(20) }.not_to change(PurificationTime, :count)
-            expect(granter.call(20)).to eq 0
+            expect { granter.call(record) }.not_to change(PurificationTime, :count)
+            expect(granter.call(record)).to eq 0
           end
         end
       end

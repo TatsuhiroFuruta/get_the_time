@@ -39,7 +39,7 @@ class ActivityRecordForm
       light_time = user.light_times.find_by(id: light_time_id)
 
       # ActivityRecord 作成
-      user.activity_records.create!(
+      activity_record = user.activity_records.create!(
         started_at: started_at,
         ended_at: ended_at,
         task: task,
@@ -64,8 +64,8 @@ class ActivityRecordForm
         characteristic: dark_time_characteristic
       )
 
-      # 浄化タイマーの付与（計算は乱数を含むためここで 1 回だけ実行し、実値を保持）
-      @granted_purification_minutes = PurificationTimeGranter.new(user).call(total_duration)
+      # 浄化タイマーの付与（当日累計から算出。乱数を含むためここで 1 回だけ実行し、実値を保持）
+      @granted_purification_minutes = PurificationTimeGranter.new(user).call(activity_record)
     end
 
     true
