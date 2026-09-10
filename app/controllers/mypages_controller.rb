@@ -4,7 +4,12 @@ class MypagesController < ApplicationController
     @light_time = current_user.light_times.find_by(is_current: true) || current_user.light_times.first
     @purification_time = current_user.purification_time
     @today_light_time = ActivityRecord.total_light_time_today(current_user)
-    @minutes_to_next_purification = ActivityRecord.minutes_until_next_purification(@today_light_time)
+    # 累計だけでなく払い出し済みブロック数も渡す。活動記録を削除すると累計だけが下がり、
+    # 累計の余りから求めると実際より短い分数を表示してしまうため。
+    @minutes_to_next_purification = ActivityRecord.minutes_until_next_purification(
+      @today_light_time,
+      @purification_time&.granted_blocks_for(Date.current).to_i
+    )
     @pomodoro_setting = current_user.pomodoro_setting
 
     # 別タブで光の時間の活動中だったため、クライアント側のガードに追い返された場合。

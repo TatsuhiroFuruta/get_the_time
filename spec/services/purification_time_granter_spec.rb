@@ -137,6 +137,56 @@ RSpec.describe PurificationTimeGranter, type: :service do
           expect(granter.call(record.reload)).to eq 10
         end
       end
+
+      # 当日累計はレコードから導出するため削除で減る。付与済みブロック数まで
+      # 導出に頼ると、29 分ためた状態で 1 分の記録を作っては消す操作で
+      # 1 分ごとに 1 ブロック稼げてしまう。
+      context "記録を削除して作り直したとき" do
+        before do
+          granter.call(create_record(29))  # 累計 29 分・付与 0
+        end
+
+        it "同じ 1 分の記録を作り直しても 2 回目以降は付与されないこと" do
+          first_record = create_record(1)
+          first_granted = granter.call(first_record)
+          first_record.destroy!  # 累計 29 分に戻る
+
+          second_record = create_record(1)
+          second_granted = granter.call(second_record)
+          second_record.destroy!
+
+          third_granted = granter.call(create_record(1))
+
+          aggregate_failures do
+            expect(first_granted).to  eq 10  # 29 + 1 = 30 分ぶんの正当な付与
+            expect(second_granted).to eq 0
+            expect(third_granted).to  eq 0
+            expect(purification_time.reload.remaining_time).to eq 600
+          end
+        end
+
+        it "削除後は付与済みの分を取り戻すまで付与されないこと" do
+          granter.call(create_record(1))  # 累計 30 分 → 1 ブロック付与
+
+          user.activity_records.destroy_all  # 累計 0 分。付与済み 1 ブロックは残る
+
+          aggregate_failures do
+            # 30 分ぶんはすでに払い出しているので、次の 1 ブロックには 60 分必要
+            expect(granter.call(create_record(30))).to eq 0
+            expect(granter.call(create_record(30))).to eq 10
+          end
+        end
+      end
+
+      context "浄化タイマーをリセットしたとき" do
+        it "払い出し済みの分は再付与されないこと" do
+          granter.call(create_record(30))  # 1 ブロック付与
+          purification_time.reload.reset!  # 残り時間を 0 に戻す
+
+          # 累計 30 分・付与済み 1 ブロックのままなので、次は 60 分必要
+          expect(granter.call(create_record(25))).to eq 0
+        end
+      end
     end
 
     context "PurificationTime がまだ存在しないとき" do

@@ -123,8 +123,13 @@ class ActivityRecord < ApplicationRecord
   end
 
   # 次の付与までの残り分数（マイページ表示用）。累計 0 分でも 30 を返す。
-  def self.minutes_until_next_purification(total_minutes)
-    PURIFICATION_BLOCK_MINUTES - [ total_minutes.to_i, 0 ].max % PURIFICATION_BLOCK_MINUTES
+  #
+  # 累計の余りではなく「払い出し済みブロック数の次の閾値」から逆算する。活動記録を
+  # 削除すると累計だけが下がるため、余りだけを見ると実際より短い分数を表示してしまう。
+  def self.minutes_until_next_purification(total_minutes, granted_blocks = 0)
+    next_threshold = (granted_blocks.to_i + 1) * PURIFICATION_BLOCK_MINUTES
+
+    [ next_threshold - [ total_minutes.to_i, 0 ].max, 0 ].max
   end
 
   # 検索可能カラムの登録

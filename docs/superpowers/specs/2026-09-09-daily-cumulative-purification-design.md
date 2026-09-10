@@ -22,32 +22,69 @@
 
 その日の光の時間の累計が 30 分たまるごとに 1 ブロック付与する。1 ブロックにつき既存の重み付き抽選（8 分 60% / 10 分 30% / 13 分 9% / 15 分 1%）を 1 回引き、合計を浄化タイマーに加算する。
 
-活動記録を保存した時点で、**その保存によって新たに越えたブロック数**だけを付与する。
+活動記録を保存した時点で、**まだ払い出していないブロック数**だけを付与する。
 
 ```
-新規ブロック数 = floor(保存後の当日累計 / 30) − floor(保存前の当日累計 / 30)
+今回の付与 = floor(当日累計 / 30) − その日に払い出し済みのブロック数
 ```
 
-| 保存する活動 | 保存前の累計 | 保存後の累計 | 付与済みブロック | 今回の付与 | 余り |
+| 保存する活動 | 保存後の累計 | 獲得できる<br>ブロック数 | 払い出し済み<br>（保存前 → 保存後） | 今回の付与 | 余り |
 | --- | --- | --- | --- | --- | --- |
-| 25 分 | 0 | 25 | 0 → 0 | 0 ブロック | 25 分 |
-| 25 分 | 25 | 50 | 0 → 1 | **1 ブロック** | 20 分 |
-| 90 分 | 50 | 140 | 1 → 4 | **3 ブロック** | 20 分 |
-| 125 分 | 140 | 265 | 4 → 8 | **4 ブロック** | 25 分 |
+| 25 分 | 25 | 0 | 0 → 0 | 0 ブロック | 25 分 |
+| 25 分 | 50 | 1 | 0 → 1 | **1 ブロック** | 20 分 |
+| 90 分 | 140 | 4 | 1 → 4 | **3 ブロック** | 20 分 |
+| 125 分 | 265 | 8 | 4 → 8 | **4 ブロック** | 25 分 |
 
 累計・余りともに 0 時（JST）にリセットする。余りは翌日へ繰り越さない。
 
-## なぜカラムを追加しないのか
+## 累計は導出し、払い出しは保存する
 
-「余りを繰り越さない」と決めたことで、**その日の状態は累計 1 つで完全に決まる**。付与済みブロック数も余りも、累計から割り算と剰余で導出できる。
+「余りを繰り越さない」と決めたことで、その日の**累計から求まるブロック数**は割り算だけで出せる。
 
 ```
 累計 265 分（4 時間 25 分）
-  付与済みブロック = 265 / 30 = 8 ブロック（= 240 分ぶんを消化済み）
-  余り            = 265 % 30 = 25 分
+  獲得できるブロック数 = 265 / 30 = 8 ブロック
+  余り                 = 265 % 30 = 25 分
 ```
 
-付与履歴を保存する必要がないので、マイグレーションもカラム追加も不要である。`before` を「前回までに何ブロック付与したかの記録」ではなく**累計からの再計算**として求めるのがこの設計の要点で、状態を持たないぶん日付リセットの同期漏れも起こりえない。
+当初はこれで十分だと考え、付与済みブロック数も `floor(累計 / 30)` として導出する設計にしていた。**これは誤りだった。**
+
+累計は活動記録から導出するので、**記録が削除されると減る**。付与済み数まで累計から導出すると、累計を 29 分に保った状態で 1 分の記録を作っては消す操作で、1 分ごとに 1 ブロック稼げてしまう。
+
+```
+累計 29 分（付与済み 0）
+1 分の記録を保存 → 累計 30 → floor(30/30) - 0 = 1 ブロック付与
+その記録を削除   → 累計 29
+1 分の記録を保存 → 累計 30 → また 1 ブロック付与  ← 何度でも
+```
+
+`total_duration` に下限バリデーションはなく、ポモドーロは「終了する」をいつ押しても計測できるため、1 ブロックあたり実働 1 分で回せる。正規の 30 分に対して 15〜30 倍である。
+
+**この抜け穴は本変更で新しく生まれるものである。** 旧仕様（1 セッション単位）では `floor(1 / 30) = 0` なので、1 回の記録が 30 分に満たなければ何度繰り返しても付与はゼロだった。「累計で判定する」に変えたことで、29 分の土台の上に 1 分を積む操作に意味が生まれる。
+
+なお素朴な削除は付与を増やさない。`floor(a/30) + floor(b/30) ≤ floor((a+b)/30)` が成り立つので、削除で 1 日を分断すると獲得ブロックはむしろ減る。悪用が成立するのは上記の「余りを 29 分に保つ」形だけである。
+
+### 台帳を 1 つだけ持つ
+
+そこで `purification_times` に**払い出し済みブロック数の台帳**を持たせる。累計そのものは今までどおりレコードから導出する。
+
+| 値 | どこから来るか | 記録が削除されたとき |
+| --- | --- | --- |
+| その日の累計分数 | 活動記録から `SUM(total_duration)` | **減る** |
+| 払い出し済みブロック数 | `purification_times` に保存 | **減らない** |
+
+```ruby
+blocks = [ floor(累計 / 30) - 払い出し済みブロック数, 0 ].max
+```
+
+保存するのは「時間」ではなく「払い出した実績」である。時間の調整はしない。
+
+- `granted_blocks_date`（date）— 台帳の対象日。今日と違えば払い出し済みを 0 とみなす
+- `granted_blocks_count`（integer, default 0, NOT NULL）— その日に払い出したブロック数
+
+累計は 0 時にリセットされるので、日付リセットは `granted_blocks_date` の比較 1 行で済む。専用のリセット処理もバッチも要らない。
+
+`PurificationTime#reset!` / `finish!` は台帳に触れない。ここを消すと、タイマーをリセットするだけで同じ 30 分を再度付与できる新しい抜け穴になるためである（`spec/models/purification_time_spec.rb` で固定している）。
 
 導出できるのはブロック数であって、実際に付与した分数（乱数で決まる 8/10/13/15 分）ではない。ただし付与済み分数は `purification_times.remaining_time` に加算済みで後から再現する必要がなく、付与判定にはブロック数しか使わないため問題にならない。
 
@@ -137,11 +174,17 @@ scope :activity_on, ->(date) {
   where("#{ACTIVITY_AT} BETWEEN ? AND ?", range.begin, range.end)
 }
 
-scope :today, -> { activity_on(Date.current) }
-
 scope :within_last_days, ->(days) {
   where("#{ACTIVITY_AT} >= ?", days.days.ago.beginning_of_day)
 }
+```
+
+1 件のレコードから日付を得る Ruby 側も同じルールなので、定数の隣に置く。SQL 側とずれると付与の対象日と集計の対象日が食い違う。
+
+```ruby
+def self.activity_date(activity_record)
+  (activity_record.ended_at || activity_record.created_at).in_time_zone.to_date
+end
 ```
 
 `total_light_time_today(user)` は `total_light_time_on(user, date)` に一般化する。付与ロジックが「そのレコードの日」の累計を必要とし、必ずしも今日とは限らない（`travel_to` を使うテスト、日をまたいだ直後の保存）ためである。`total_light_time_today` は `Date.current` を渡す薄いラッパとして残す。
@@ -169,29 +212,37 @@ def self.sample_purification_minutes_for(blocks)
   blocks.times.sum { sample_purification_minutes }
 end
 
-# 次の付与までの残り分数（マイページ表示用）
-def self.minutes_until_next_purification(total_minutes)
-  PURIFICATION_BLOCK_MINUTES - [ total_minutes.to_i, 0 ].max % PURIFICATION_BLOCK_MINUTES
+# 次の付与までの残り分数（マイページ表示用）。
+# 累計の余りではなく、払い出し済みブロック数の次の閾値から逆算する。
+def self.minutes_until_next_purification(total_minutes, granted_blocks = 0)
+  next_threshold = (granted_blocks.to_i + 1) * PURIFICATION_BLOCK_MINUTES
+
+  [ next_threshold - [ total_minutes.to_i, 0 ].max, 0 ].max
 end
 ```
 
-`purification_blocks` の `[minutes, 0].max` は負値ガードである。Ruby の整数除算は負の無限大方向に丸めるため（`-5 / 30 == -1`）、万一 `保存前の累計` が負になると `before` が `-1` になってブロック数が水増しされる。
+`purification_blocks` の `[minutes, 0].max` は負値ガードである。Ruby の整数除算は負の無限大方向に丸めるため（`-5 / 30 == -1`）、万一 `累計` が負になるとブロック数が水増しされる。
 
 既存の `self.calculate_purification_time(total_duration)` は呼び出し元がなくなるため削除する。
 
 ### `app/services/purification_time_granter.rb`
 
-セッションの分数だけでは当日累計を引けないため、`call(total_duration)` を `call(activity_record)` に変える。
+セッションの分数だけでは当日累計を引けないため、`call(total_duration)` を `call(activity_record)` に変える。渡されたレコードは対象日を決めるためだけに使う。
 
 ```ruby
 def call(activity_record)
   @user.with_lock do
-    blocks = newly_earned_blocks(activity_record)
+    day = ActivityRecord.activity_date(activity_record)
+    purification_time = @user.purification_time || @user.build_purification_time
+    granted = purification_time.granted_blocks_for(day)
+
+    blocks = unpaid_blocks(day, granted)
     next 0 if blocks <= 0
 
     minutes = ActivityRecord.sample_purification_minutes_for(blocks)
-    purification_time = @user.purification_time || @user.build_purification_time
-    purification_time.remaining_time += minutes * 60
+    purification_time.remaining_time      += minutes * 60
+    purification_time.granted_blocks_date  = day
+    purification_time.granted_blocks_count = granted + blocks
     purification_time.save!
     minutes
   end
@@ -199,22 +250,16 @@ end
 
 private
 
-# 保存後の当日累計と保存前の当日累計の差分ブロック数
-def newly_earned_blocks(activity_record)
-  total_after  = ActivityRecord.total_light_time_on(@user, activity_day(activity_record))
-  total_before = total_after - activity_record.total_duration.to_i
+# その日の累計から求めたブロック数のうち、まだ払い出していない分。
+# 削除で累計が下がっても払い出し済み数は減らないため、負にならないよう 0 で止める。
+def unpaid_blocks(day, granted)
+  total = ActivityRecord.total_light_time_on(@user, day)
 
-  ActivityRecord.purification_blocks(total_after) - ActivityRecord.purification_blocks(total_before)
-end
-
-def activity_day(activity_record)
-  (activity_record.ended_at || activity_record.created_at).in_time_zone.to_date
+  [ ActivityRecord.purification_blocks(total) - granted, 0 ].max
 end
 ```
 
-`total_after` は `create!` の後に取るため今回のレコードを含む。「保存前の累計」は自分の分を引いて求める。
-
-**当日累計の読み取りからタイマー加算までを `with_lock` の中に入れる。** 現状は付与分数の計算がロックの外にあるが、セッション単位の計算では他レコードを参照しないため問題にならなかった。累計ベースにすると、2 つの記録が同時に保存されたときに**両方が同じ累計を読んで同じブロックを二重付与しうる**。読み取りをロック内に移すことで直列化する。
+**累計と台帳の読み取りからタイマー加算までを `with_lock` の中に入れる。** 現状は付与分数の計算がロックの外にあるが、セッション単位の計算では他レコードを参照しないため問題にならなかった。累計ベースにすると、2 つの記録が同時に保存されたときに**両方が同じ値を読んで同じブロックを二重付与しうる**。読み取りをロック内に移すことで直列化する。
 
 `with_lock` は `transaction` 経由でブロックの戻り値を返すので、`next 0` / `minutes` がそのまま `call` の戻り値になる。付与した実分数を返す既存の契約（`ActivityRecordForm#granted_purification_minutes` 経由でフラッシュに表示）は維持する。
 
@@ -236,7 +281,10 @@ activity_record = user.activity_records.create!(...)
 
 ```ruby
 @today_light_time = ActivityRecord.total_light_time_today(current_user)
-@minutes_to_next_purification = ActivityRecord.minutes_until_next_purification(@today_light_time)
+@minutes_to_next_purification = ActivityRecord.minutes_until_next_purification(
+  @today_light_time,
+  @purification_time&.granted_blocks_for(Date.current).to_i
+)
 ```
 
 `app/views/mypages/_pomodoro_start.html.erb` の「今日の光の時間」の直下に追加する。
@@ -247,7 +295,9 @@ activity_record = user.activity_records.create!(...)
 次の浄化タイマーまで あと 10 分
 ```
 
-累計 0 分のときも 30 分と表示される（`30 - 0 % 30 = 30`）。0 と表示するより「これから 30 分で 1 つ目がもらえる」と読める方が目的に合う。
+累計 0 分・払い出し 0 のときは 30 分と表示される。0 と表示するより「これから 30 分で 1 つ目がもらえる」と読める方が目的に合う。
+
+**払い出し済みブロック数も渡す。** 累計の余りだけから求めると、活動記録を削除したあとに嘘をつく。累計 0 分・払い出し 1 ブロックの状態で「あと 30 分」と出てしまうが、30 分ぶんはすでに受け取っているので実際には次の 1 ブロックまで 60 分必要になる。
 
 **0 時をまたぐと、表示していた残り分数どおりには付与されない。** カウントダウンは `Date.current` の累計から出すのに対し、付与はそのレコードの `ended_at` の日で決まるためである。
 
@@ -307,59 +357,50 @@ activity_record = user.activity_records.create!(...)
 
 ## 移行
 
-**データ移行は不要。** 旧仕様の付与済み合計は `Σ floor(セッション / 30)`、新仕様は `floor(Σ / 30)` で、常に `旧 ≤ 新` が成り立つ。
+**スキーマは変わるが、データ移行は不要。** 追加する 2 カラムはどちらも既存行に安全な既定値を持つ（`granted_blocks_date` は NULL、`granted_blocks_count` は 0）。日付が今日と一致しなければ払い出し済みを 0 とみなすので、既存行はそのまま「今日はまだ払い出していない」状態として正しく振る舞う。
 
-リリース当日にすでに記録があるユーザーは、旧仕様で取りこぼしていた端数が回収されて少し多めに付与されることがあるが、二重付与にはならない。翌日以降は完全に新仕様で動く。
+リリース当日にすでに記録があるユーザーは、その日の累計から求まるブロック数がまとめて払い出される。旧仕様の付与済み合計は `Σ floor(セッション / 30)`、新仕様は `floor(Σ / 30)` で常に `旧 ≤ 新` が成り立つため、旧仕様で取りこぼしていた端数が回収されて少し多めに付与されることがあるが、二重付与にはならない。翌日以降は完全に新仕様で動く。
 
-## 既知の制約
+## 累計を後から変えられる経路
 
-当日累計をレコードから導出するため、**活動記録を削除すると付与済みブロック数の導出値が下がり、同じ活動時間で再度ブロックを獲得できる**。
+当日累計は活動記録から導出するため、記録が増減すると累計が動く。台帳（払い出し済みブロック数）はそれに追随しないので、**削除で累計が下がっても再付与は起きない**。ここでは各経路が塞がっていることを確認する。
 
-```
-30 分の記録を保存 → 累計 30 → 1 ブロック付与（浄化タイマー +10 分）
-その記録を削除     → 累計 0（付与済みブロックの導出値も 0 に戻る）
-30 分の記録を保存 → 累計 30 → もう 1 ブロック付与（+10 分）
-```
+### 活動記録の削除
 
-付与した事実（`remaining_time`）は残るのに、付与済みの記録（累計）だけが消えることによる食い違いである。
-
-同じ理屈は**活動記録の編集**にも当てはまる。こちらは累計を下げるだけでなく上げることもでき、過大付与にも過少付与にも振れる。
+累計だけが下がり、台帳は残る。次の 1 ブロックには、払い出し済みの分を取り戻したうえで 30 分が必要になる。
 
 ```
-30 分の記録を保存 → 累計 30 → 1 ブロック付与
-total_duration を 0 に書き換え → 累計 0
-30 分の記録を保存 → 累計 30 → もう 1 ブロック付与（実働 30 分で 2 ブロック）
+30 分の記録を保存 → 累計 30 / 台帳 1 → 1 ブロック付与
+その記録を削除     → 累計 0  / 台帳 1
+30 分の記録を保存 → 累計 30 → floor(30/30) - 1 = 0 → 付与なし
+さらに 30 分       → 累計 60 → floor(60/30) - 1 = 1 → 1 ブロック付与
 ```
-
-削除と違い、こちらは**入口を塞ぐ**。`activity_record_params`（`app/controllers/activity_records_controller.rb`）の許可リストから `started_at` / `ended_at` / `total_duration` を外す。編集フォームはこの 3 つを表示のみで送信しない（`app/views/activity_records/edit.html.erb:21,39`）ため、UI の機能は変わらない。
 
 ### 光の時間の削除によるカスケード
 
-`LightTime` は `has_many :activity_records, dependent: :destroy`（`app/models/light_time.rb:5`）を持ち、削除は `LightTimesController#destroy` からユーザーが行える。**光の時間を 1 つ消すと、それに紐づく活動記録がすべて消える**ため、影響した日の累計が丸ごと下がり、同じ分数で再びブロックを獲得できる状態になる。
+`LightTime` は `has_many :activity_records, dependent: :destroy`（`app/models/light_time.rb:5`）を持ち、`LightTimesController#destroy` からユーザーが実行できる。光の時間を 1 つ消すと紐づく活動記録がすべて消えるため、影響した日の累計が丸ごと下がる。
 
-この経路は上の「活動記録を個別に削除する」ケースより性質が悪い。
+これは活動記録の削除が一度に多数起きるだけで、仕組みは上と同じである。台帳が残るので再付与は起きない。**目標を畳むという通常の操作で意図せず起きる**経路なので、ここが塞がっている意味は大きい。
 
-| | 活動記録の個別削除 | 光の時間の削除 |
-|---|---|---|
-| 操作の性質 | タイマーを稼ぐための意図的な操作 | 取り組まなくなった目標を畳む、通常の操作 |
-| ユーザーの認識 | 記録が減ることを分かっている | 活動記録まで消えることに気づきにくい |
-| 影響範囲 | 1 件 | その光の時間の全履歴（複数日にまたがる） |
+### 活動記録の編集
 
-つまり「タイマーを稼ぐ動機が薄い」という上記の論拠は、この経路には効かない。**意図せず起きる副作用**だからである。
+累計を下げるだけでなく上げることもでき、過大付与にも過少付与にも振れる。台帳があれば過大付与は起きないが、そもそも計測結果を書き換えられること自体が正しくないため、**入口も塞ぐ**。`activity_record_params`（`app/controllers/activity_records_controller.rb`）の許可リストから `started_at` / `ended_at` / `total_duration` を外す。編集フォームはこの 3 つを表示のみで送信しない（`app/views/activity_records/edit.html.erb:21,39`）ため、UI の機能は変わらない。
 
-それでも今回は対策しない。理由は、実害が「浄化タイマーが少し多めに付く」ことに限られ、しかも代償として光の時間の履歴（「本来の自分」の推移・レーダーチャート・日次グラフの元データ）を丸ごと失うためである。得より損が大きい操作であり、これを防ぐために状態カラムを導入すると、日付リセットの同期・ロック範囲・テストの組み合わせが増える。
+### 浄化タイマーのリセット
 
-ただしこの判断は「浄化タイマーが自分専用のご褒美で、競争要素がない」ことに依存している。ランキングや他ユーザーとの比較を入れる際は、削除・カスケードの両経路をまとめて塞ぐ設計に切り替える。
+`PurificationTime#reset!` は残り時間を 0 に戻すが、台帳には触れない。触れてしまうと、リセットするだけで同じ 30 分を再度付与できる新しい抜け穴になる。
 
-### 対策の方針（採らなかった案）
+## 残る制約
 
-塞ぐには `purification_times` に「当日の付与済みブロック数」と「その日付」を持たせる必要がある。導出をやめて状態を持つことになるので、日付が変わったときのリセット、`with_lock` の範囲、レコード由来の累計表示との情報源の二重化を扱う必要が出る。上記のとおり実害が小さいため今回は採らない。
+**マイページの「今日の光の時間」は削除で減るが、払い出し済みブロックは減らない。** 記録を削除したユーザーから見ると、累計 0 分なのに次の付与まで 60 分と表示される。表示としては正しい（すでに 30 分ぶんを受け取っている）が、直感には反する。累計と払い出しで情報源が分かれることの必然的な帰結であり、受容する。
+
+**付与を経ずに活動記録だけが作られた場合、台帳が追いつかない。** `ActivityRecord.create` を直接呼ぶ経路（seeds など）は付与を走らせないため、累計だけが進む。次に `ActivityRecordForm` 経由で保存した時点でまとめて払い出されるので、損はしない。
 
 ## スコープ外
 
 - **抽選テーブルの調整** — 累計制で付与機会が増えるため体感の獲得量は上がるが、まずは現行テーブルのまま様子を見る
 - **活動記録保存後のフラッシュへの進捗表示** — マイページの常時表示で足りるか確認してから判断する
-- **活動記録の削除による二度取りの防止** — 上記「既知の制約」のとおり
+- **実行中の浄化タイマーへの付与が `stop!` で消える件** — `PurificationTime#stop!` は `total_time - elapsed` で残り時間を再計算するため、`running` 中に加算された分は失われる。期限切れのまま `running` で残ったタイマー（タブを閉じた等）は `counting?` が false なのでポモドーロを開始でき、そこに付与が着弾して消える。本変更で持ち込んだ不具合ではないが、付与の頻度が上がるぶん遭遇確率は上がる。別 issue とする
 - **使い方ページのスクリーンショット差し替え** — マイページの画像は「次の浄化タイマーまで あと○分」を含まない状態のまま残る。手動キャプチャが必要なため対応せず、文章側で新しい表示に触れるにとどめる
 - **付与ロジックの `ActivityRecord` からの切り出し** — 本設計の完了時点で、浄化タイマー関連のクラスメソッドと定数が `ActivityRecord` に 6 つ並ぶ（`PURIFICATION_BLOCK_MINUTES` / `PURIFICATION_TIME_TABLE` / `sample_purification_minutes` / `sample_purification_minutes_for` / `purification_blocks` / `minutes_until_next_purification`）。活動記録そのものとは別の関心事なので専用の純粋オブジェクトへ移す価値はあるが、振る舞いの変更と構造の移動を同じ PR に混ぜると差分から「移動中に挙動が変わっていないか」を読み取れなくなる。別 issue とする
 

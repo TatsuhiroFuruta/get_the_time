@@ -225,34 +225,69 @@ RSpec.describe ActivityRecord, type: :model do
   # .minutes_until_next_purification
   # =========================================================
   describe ".minutes_until_next_purification" do
-    subject { described_class.minutes_until_next_purification(total_minutes) }
+    subject { described_class.minutes_until_next_purification(total_minutes, granted_blocks) }
 
     context "nil のとき" do
-      let(:total_minutes) { nil }
+      let(:total_minutes)  { nil }
+      let(:granted_blocks) { 0 }
       it { is_expected.to eq 30 }
     end
 
-    context "累計 0 分のとき" do
-      let(:total_minutes) { 0 }
+    context "累計 0 分・付与済み 0 ブロックのとき" do
+      let(:total_minutes)  { 0 }
+      let(:granted_blocks) { 0 }
       it { is_expected.to eq 30 }
     end
 
-    context "累計 25 分のとき" do
-      let(:total_minutes) { 25 }
+    context "累計 25 分・付与済み 0 ブロックのとき" do
+      let(:total_minutes)  { 25 }
+      let(:granted_blocks) { 0 }
       it { is_expected.to eq 5 }
     end
 
-    context "累計 30 分（ちょうど付与された直後）のとき" do
-      let(:total_minutes) { 30 }
+    context "累計 30 分・付与済み 1 ブロック（ちょうど付与された直後）のとき" do
+      let(:total_minutes)  { 30 }
+      let(:granted_blocks) { 1 }
 
       it "次のブロックまでの 30 分を返すこと" do
         is_expected.to eq 30
       end
     end
 
-    context "累計 265 分のとき" do
-      let(:total_minutes) { 265 }
+    context "累計 265 分・付与済み 8 ブロックのとき" do
+      let(:total_minutes)  { 265 }
+      let(:granted_blocks) { 8 }
       it { is_expected.to eq 5 }
+    end
+
+    # 活動記録を削除すると累計だけが下がる。累計しか見ないと「あと 30 分」と出るが、
+    # 30 分ぶんはすでに払い出しているので、実際に次の 1 ブロックまでは 60 分必要になる。
+    context "削除で累計が 0 に戻り、付与済みが 1 ブロック残っているとき" do
+      let(:total_minutes)  { 0 }
+      let(:granted_blocks) { 1 }
+
+      it "払い出し済みの分を含めた残り 60 分を返すこと" do
+        is_expected.to eq 60
+      end
+    end
+
+    # 付与を経ずに活動記録だけが積まれた状態（seeds など）。すでに閾値を越えているので
+    # 次の保存で払い出される。負の分数は表示しない。
+    context "累計が次の閾値を越えているのに付与済みが 0 のとき" do
+      let(:total_minutes)  { 70 }
+      let(:granted_blocks) { 0 }
+
+      it "0 で止まること" do
+        is_expected.to eq 0
+      end
+    end
+
+    context "付与済みブロック数を省略したとき" do
+      subject { described_class.minutes_until_next_purification(25) }
+
+      it "0 ブロック扱いになること" do
+        is_expected.to eq 5
+      end
     end
   end
 

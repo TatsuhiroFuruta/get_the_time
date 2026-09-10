@@ -7,6 +7,17 @@ class PurificationTime < ApplicationRecord
     remaining_time.to_i <= 0
   end
 
+  # 指定日にすでに払い出した浄化タイマーのブロック数。
+  #
+  # 当日の光の時間の累計は活動記録から導出できるが、記録が削除されると減る。
+  # 累計だけで「何ブロック付与済みか」を判断すると、29 分ためた状態で 1 分の記録を
+  # 作っては消す操作で何度でも付与できてしまうため、払い出した実績はここに残す。
+  #
+  # 累計は 0 時にリセットされるので、台帳の日付が違えば 0 とみなす。
+  def granted_blocks_for(date)
+    granted_blocks_date == date ? granted_blocks_count.to_i : 0
+  end
+
   # 実時間ベースで「いま計測中か」を導出する。status だけを見ると、時間切れ後に
   # stop! が呼ばれないまま（タブを閉じた等）running が残り、ポモドーロを永久に
   # ブロックしてしまうため、排他制御の判定にはこちらを使う。

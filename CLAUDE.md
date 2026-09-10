@@ -90,7 +90,8 @@ System Spec が失敗した場合は `tmp/screenshots` のスクリーンショ�
 `ActivityRecord` 作成は単純な INSERT ではありません:
 - `before_save :calculate_desired_self_percentage`（コールバック）— `(total_duration - idle_duration) / total_duration` を算出。
 - 浄化タイマーの付与は**1 セッション単位ではなく、その日の光の時間の累計 30 分ごと**です。計算は `ActivityRecord` のクラスメソッド（純粋関数）に分かれています。`purification_blocks(minutes)` が累計分数から消化済みブロック数（`floor(累計 / 30)`）を求め、`sample_purification_minutes_for(blocks)` がブロック数だけ `sample_purification_minutes`（`PURIFICATION_TIME_TABLE` の重み付き抽選）を引いて合計します。**後者は乱数を含むため、同じ入力でも呼ぶたびに結果が変わります。表示・保存で複数回呼ばないこと。**
-- 余りを翌日へ繰り越さないため、**付与済みブロック数は当日累計から導出できます**。専用のカラムは持ちません。「その活動がどの日のものか」は `ActivityRecord::ACTIVITY_AT`（= `COALESCE(ended_at, created_at)`）に集約されており、`activity_on` / `within_last_days` / `daily_series` がすべてこの式を使います。1 件のレコードから日付を得る Ruby 側は `ActivityRecord.activity_date` で、同じルールなので定数の隣に置いてあります。`created_at` は記録の送信時刻なので日付の判定には使いません。
+- **当日累計は活動記録から導出し、払い出し済みブロック数は `purification_times` に保存します**（`granted_blocks_date` / `granted_blocks_count`）。付与数は `floor(累計 / 30) - 払い出し済み` です。累計は記録が削除されると減るため、払い出し済み数まで導出に頼ると、29 分ためた状態で 1 分の記録を作っては消す操作で 1 分ごとに 1 ブロック稼げてしまいます。**`PurificationTime#reset!` / `finish!` はこの台帳に触れないこと。** 触れると、タイマーをリセットするだけで再付与できる抜け穴になります。
+- 「その活動がどの日のものか」は `ActivityRecord::ACTIVITY_AT`（= `COALESCE(ended_at, created_at)`）に集約されており、`activity_on` / `within_last_days` / `daily_series` がすべてこの式を使います。1 件のレコードから日付を得る Ruby 側は `ActivityRecord.activity_date` で、同じルールなので定数の隣に置いてあります。`created_at` は記録の送信時刻なので日付の判定には使いません。
 
 浄化タイマーへの「加算（副作用）」は `PurificationTimeGranter`（`app/services/`）に切り出してあります。`PurificationTimeGranter.new(user).call(activity_record)` が**保存済みの `ActivityRecord` を受け取り**、`user.with_lock` 内でその日の累計を読んで差分ブロック分を `PurificationTime` に加算し、**付与した実分数を返します**。累計の読み取りをロックの外に出すと同時保存で二重付与が起きるため、読み取りから加算までをロック内に閉じています。以前は `after_create :grant_purification_time` コールバックで付与していましたが、付与値を呼び出し側へ返せず、コントローラが表示用に再計算して乱数がズレる不具合があったため、サービスへ移しました（付与は 1 回だけ計算し、その戻り値を表示にも使う）。**`ActivityRecord` を直接 `create` しても付与は走りません。**
 
