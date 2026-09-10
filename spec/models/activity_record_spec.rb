@@ -116,66 +116,177 @@ RSpec.describe ActivityRecord, type: :model do
   end
 
   # =========================================================
-  # .calculate_purification_time
+  # .purification_blocks
   # =========================================================
-  describe ".calculate_purification_time" do
-    subject { described_class.calculate_purification_time(total_duration) }
-
-    before { allow(described_class).to receive(:sample_purification_minutes).and_return(10) }
+  describe ".purification_blocks" do
+    subject { described_class.purification_blocks(minutes) }
 
     context "nil のとき" do
-      let(:total_duration) { nil }
+      let(:minutes) { nil }
       it { is_expected.to eq 0 }
     end
 
     context "0 分のとき" do
-      let(:total_duration) { 0 }
+      let(:minutes) { 0 }
       it { is_expected.to eq 0 }
     end
 
-    context "29 分（30 未満）のとき" do
-      let(:total_duration) { 29 }
+    context "29 分のとき" do
+      let(:minutes) { 29 }
       it { is_expected.to eq 0 }
     end
 
     context "30 分のとき" do
-      let(:total_duration) { 30 }
-
-      it "sample_purification_minutes を 1 回呼ぶこと" do
-        subject
-        expect(described_class).to have_received(:sample_purification_minutes).once
-      end
-
-      it { is_expected.to eq 10 }
+      let(:minutes) { 30 }
+      it { is_expected.to eq 1 }
     end
 
     context "59 分のとき" do
-      let(:total_duration) { 59 }
-      it { is_expected.to eq 10 }
+      let(:minutes) { 59 }
+      it { is_expected.to eq 1 }
     end
 
     context "60 分のとき" do
-      let(:total_duration) { 60 }
+      let(:minutes) { 60 }
+      it { is_expected.to eq 2 }
+    end
 
-      it "sample_purification_minutes を 2 回呼ぶこと" do
+    context "265 分（4 時間 25 分）のとき" do
+      let(:minutes) { 265 }
+      it { is_expected.to eq 8 }
+    end
+
+    context "負の値のとき" do
+      let(:minutes) { -5 }
+
+      # Ruby の整数除算は負の無限大方向に丸まる（-5 / 30 == -1）ため、
+      # ガードがないとブロック数が水増しされる
+      it { is_expected.to eq 0 }
+    end
+  end
+
+  # =========================================================
+  # .sample_purification_minutes_for
+  # =========================================================
+  describe ".sample_purification_minutes_for" do
+    subject { described_class.sample_purification_minutes_for(blocks) }
+
+    before { allow(described_class).to receive(:sample_purification_minutes).and_return(10) }
+
+    context "0 ブロックのとき" do
+      let(:blocks) { 0 }
+
+      it { is_expected.to eq 0 }
+
+      it "抽選を引かないこと" do
         subject
-        expect(described_class).to have_received(:sample_purification_minutes).twice
+        expect(described_class).not_to have_received(:sample_purification_minutes)
       end
-
-      it { is_expected.to eq 20 }
     end
 
-    context "120 分のとき" do
-      let(:total_duration) { 120 }
-      it { is_expected.to eq 40 }
+    context "負のブロック数のとき" do
+      let(:blocks) { -1 }
+      it { is_expected.to eq 0 }
     end
 
-    context "スタブなしで 30 分のとき" do
+    context "1 ブロックのとき" do
+      let(:blocks) { 1 }
+
+      it { is_expected.to eq 10 }
+
+      it "抽選を 1 回引くこと" do
+        subject
+        expect(described_class).to have_received(:sample_purification_minutes).once
+      end
+    end
+
+    context "3 ブロックのとき" do
+      let(:blocks) { 3 }
+
+      it { is_expected.to eq 30 }
+
+      it "抽選を 3 回引くこと" do
+        subject
+        expect(described_class).to have_received(:sample_purification_minutes).exactly(3).times
+      end
+    end
+
+    context "スタブなしで 2 ブロックのとき" do
       before { allow(described_class).to receive(:sample_purification_minutes).and_call_original }
-      let(:total_duration) { 30 }
+      let(:blocks) { 2 }
 
-      it "有効な付与分数を返すこと" do
-        is_expected.to be_in([ 8, 10, 13, 15 ])
+      it "抽選 2 回分の合計になること" do
+        is_expected.to be_between(16, 30)
+      end
+    end
+  end
+
+  # =========================================================
+  # .minutes_until_next_purification
+  # =========================================================
+  describe ".minutes_until_next_purification" do
+    subject { described_class.minutes_until_next_purification(total_minutes, granted_blocks) }
+
+    context "nil のとき" do
+      let(:total_minutes)  { nil }
+      let(:granted_blocks) { 0 }
+      it { is_expected.to eq 30 }
+    end
+
+    context "累計 0 分・付与済み 0 ブロックのとき" do
+      let(:total_minutes)  { 0 }
+      let(:granted_blocks) { 0 }
+      it { is_expected.to eq 30 }
+    end
+
+    context "累計 25 分・付与済み 0 ブロックのとき" do
+      let(:total_minutes)  { 25 }
+      let(:granted_blocks) { 0 }
+      it { is_expected.to eq 5 }
+    end
+
+    context "累計 30 分・付与済み 1 ブロック（ちょうど付与された直後）のとき" do
+      let(:total_minutes)  { 30 }
+      let(:granted_blocks) { 1 }
+
+      it "次のブロックまでの 30 分を返すこと" do
+        is_expected.to eq 30
+      end
+    end
+
+    context "累計 265 分・付与済み 8 ブロックのとき" do
+      let(:total_minutes)  { 265 }
+      let(:granted_blocks) { 8 }
+      it { is_expected.to eq 5 }
+    end
+
+    # 活動記録を削除すると累計だけが下がる。累計しか見ないと「あと 30 分」と出るが、
+    # 30 分ぶんはすでに払い出しているので、実際に次の 1 ブロックまでは 60 分必要になる。
+    context "削除で累計が 0 に戻り、付与済みが 1 ブロック残っているとき" do
+      let(:total_minutes)  { 0 }
+      let(:granted_blocks) { 1 }
+
+      it "払い出し済みの分を含めた残り 60 分を返すこと" do
+        is_expected.to eq 60
+      end
+    end
+
+    # 付与を経ずに活動記録だけが積まれた状態（seeds など）。すでに閾値を越えているので
+    # 次の保存で払い出される。負の分数は表示しない。
+    context "累計が次の閾値を越えているのに付与済みが 0 のとき" do
+      let(:total_minutes)  { 70 }
+      let(:granted_blocks) { 0 }
+
+      it "0 で止まること" do
+        is_expected.to eq 0
+      end
+    end
+
+    context "付与済みブロック数を省略したとき" do
+      subject { described_class.minutes_until_next_purification(25) }
+
+      it "0 ブロック扱いになること" do
+        is_expected.to eq 5
       end
     end
   end
@@ -216,6 +327,77 @@ RSpec.describe ActivityRecord, type: :model do
       end
 
       it { is_expected.to eq 0 }
+    end
+  end
+
+  # =========================================================
+  # .total_light_time_on
+  # =========================================================
+  describe ".total_light_time_on" do
+    subject { described_class.total_light_time_on(user, Date.new(2026, 9, 9)) }
+
+    around { |example| travel_to(Time.zone.local(2026, 9, 9, 12, 0, 0)) { example.run } }
+
+    context "指定日に終わった記録があるとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, total_duration: 30,
+                                 started_at: Time.zone.local(2026, 9, 9, 10, 0, 0),
+                                 ended_at:   Time.zone.local(2026, 9, 9, 10, 30, 0))
+      end
+
+      it { is_expected.to eq 30 }
+    end
+
+    context "活動は前日に終わり、記録の送信だけが指定日になったとき" do
+      before do
+        record = create(:activity_record, user: user, light_time: light_time, total_duration: 50,
+                                          started_at: Time.zone.local(2026, 9, 8, 23, 0, 0),
+                                          ended_at:   Time.zone.local(2026, 9, 8, 23, 50, 0))
+        # 日付が変わってから活動記録を送信したケース
+        record.update_column(:created_at, Time.zone.local(2026, 9, 9, 0, 5, 0))
+      end
+
+      it "指定日の累計に含まれないこと" do
+        is_expected.to eq 0
+      end
+    end
+
+    context "0 時をまたいで指定日に終わったセッションがあるとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time, total_duration: 30,
+                                 started_at: Time.zone.local(2026, 9, 8, 23, 45, 0),
+                                 ended_at:   Time.zone.local(2026, 9, 9, 0, 15, 0))
+      end
+
+      it "終了した日の累計に含まれること" do
+        is_expected.to eq 30
+      end
+    end
+
+    context "ended_at が NULL のとき" do
+      before do
+        record = create(:activity_record, user: user, light_time: light_time, total_duration: 45)
+        record.update_columns(ended_at: nil, created_at: Time.zone.local(2026, 9, 9, 10, 0, 0))
+      end
+
+      it "created_at にフォールバックして集計されること" do
+        is_expected.to eq 45
+      end
+    end
+
+    context "別ユーザーの記録があるとき" do
+      let(:other_user)  { create(:user) }
+      let(:other_light) { create(:light_time, :current, user: other_user) }
+
+      before do
+        create(:activity_record, user: other_user, light_time: other_light, total_duration: 999,
+                                 started_at: Time.zone.local(2026, 9, 9, 10, 0, 0),
+                                 ended_at:   Time.zone.local(2026, 9, 9, 10, 30, 0))
+      end
+
+      it "集計に含まれないこと" do
+        is_expected.to eq 0
+      end
     end
   end
 
@@ -277,7 +459,7 @@ RSpec.describe ActivityRecord, type: :model do
         create(:activity_record, :high_rating, user: user, light_time: light_time)
         old_record = build(:activity_record, :low_rating, user: user, light_time: light_time)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it "期間内（high_rating）のみが平均値に反映されること" do
@@ -325,7 +507,7 @@ RSpec.describe ActivityRecord, type: :model do
         create(:activity_record, user: user, light_time: light_time, fatigue: 2)
         old_record = build(:activity_record, user: user, light_time: light_time, fatigue: 5)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it "期間内の値のみが平均に反映されること" do
@@ -366,7 +548,7 @@ RSpec.describe ActivityRecord, type: :model do
         old_record = build(:activity_record, user: user, light_time: light_time,
                                              total_duration: 100, idle_duration: 80)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it "期間内の値のみが平均に反映されること" do
@@ -420,7 +602,8 @@ RSpec.describe ActivityRecord, type: :model do
         # JST 2026-05-28 0:30 = UTC 2026-05-27 15:30
         record = create(:activity_record, user: user, light_time: light_time,
                                           total_duration: 60, idle_duration: 0)
-        record.update_column(:created_at, Time.zone.local(2026, 5, 28, 0, 30, 0))
+        record.update_columns(created_at: Time.zone.local(2026, 5, 28, 0, 30, 0),
+                              ended_at:   Time.zone.local(2026, 5, 28, 0, 30, 0))
       end
 
       it "JST の日付（5/28）でグルーピングされること" do
@@ -433,9 +616,11 @@ RSpec.describe ActivityRecord, type: :model do
 
       before do
         r1 = create(:activity_record, user: user, light_time: light_time, total_duration: 60)
-        r1.update_column(:created_at, Time.zone.local(2026, 5, 26, 10, 0, 0))
+        r1.update_columns(created_at: Time.zone.local(2026, 5, 26, 10, 0, 0),
+                          ended_at:   Time.zone.local(2026, 5, 26, 10, 0, 0))
         r2 = create(:activity_record, user: user, light_time: light_time, total_duration: 120)
-        r2.update_column(:created_at, Time.zone.local(2026, 5, 27, 10, 0, 0))
+        r2.update_columns(created_at: Time.zone.local(2026, 5, 27, 10, 0, 0),
+                          ended_at:   Time.zone.local(2026, 5, 27, 10, 0, 0))
       end
 
       it "日付昇順で返ること" do
@@ -447,7 +632,7 @@ RSpec.describe ActivityRecord, type: :model do
       before do
         old_record = build(:activity_record, user: user, light_time: light_time, total_duration: 60)
         old_record.save!
-        old_record.update_column(:created_at, 31.days.ago)
+        old_record.update_columns(created_at: 31.days.ago, ended_at: 31.days.ago)
       end
 
       it { is_expected.to eq [] }

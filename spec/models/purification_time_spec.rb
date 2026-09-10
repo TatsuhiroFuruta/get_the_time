@@ -245,4 +245,72 @@ RSpec.describe PurificationTime, type: :model do
       end
     end
   end
+
+  # =========================================================
+  # #granted_blocks_for
+  # =========================================================
+  describe "#granted_blocks_for" do
+    let(:today) { Date.new(2026, 9, 9) }
+
+    context "台帳の日付が問い合わせた日と一致するとき" do
+      let(:purification_time) do
+        build(:purification_time, granted_blocks_date: today, granted_blocks_count: 3)
+      end
+
+      it "保存されている払い出し数を返すこと" do
+        expect(purification_time.granted_blocks_for(today)).to eq 3
+      end
+    end
+
+    context "台帳の日付が前日のとき" do
+      let(:purification_time) do
+        build(:purification_time, granted_blocks_date: today - 1, granted_blocks_count: 3)
+      end
+
+      it "0 を返すこと（累計は 0 時にリセットされるため）" do
+        expect(purification_time.granted_blocks_for(today)).to eq 0
+      end
+    end
+
+    context "まだ一度も付与していないとき" do
+      let(:purification_time) { build(:purification_time) }
+
+      it "0 を返すこと" do
+        expect(purification_time.granted_blocks_for(today)).to eq 0
+      end
+    end
+  end
+
+  # =========================================================
+  # 台帳はタイマーの状態遷移で消えないこと
+  # =========================================================
+  describe "状態遷移と払い出し台帳" do
+    let!(:purification_time) do
+      create(:purification_time, :idle_with_time,
+                                 granted_blocks_date: Date.current, granted_blocks_count: 2)
+    end
+
+    # 台帳が消えると、タイマーをリセットするだけで同じ 30 分を再度付与できてしまう
+    it "reset! で払い出し台帳が消えないこと" do
+      purification_time.reset!
+
+      aggregate_failures do
+        expect(purification_time.reload.remaining_time).to eq 0
+        expect(purification_time.granted_blocks_for(Date.current)).to eq 2
+      end
+    end
+
+    it "時間切れで終了しても払い出し台帳が消えないこと" do
+      purification_time.start!
+
+      travel_to(11.minutes.from_now) do
+        purification_time.stop!
+      end
+
+      aggregate_failures do
+        expect(purification_time.reload.remaining_time).to eq 0
+        expect(purification_time.granted_blocks_for(Date.current)).to eq 2
+      end
+    end
+  end
 end

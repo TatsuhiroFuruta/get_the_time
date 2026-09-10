@@ -12,9 +12,15 @@ RSpec.describe "PurificationTimes", type: :system do
   # =========================================================
   describe "マイページの浄化タイマー表示" do
     context "PurificationTime が存在しないとき(ActivityRecord 未登録)" do
-      it "浄化タイマー UI が表示されないこと" do
+      # 「次の浄化タイマーまで あと○分」の進捗表示は常に出るため、文字列一致ではなく
+      # カード（data-controller="purification-timer"）の有無で判定する
+      it "浄化タイマーのカードが表示されないこと" do
         visit mypage_path
-        expect(page).not_to have_content("浄化タイマー")
+        aggregate_failures do
+          expect(page).not_to have_css("[data-controller='purification-timer']", visible: :all)
+          expect(page).not_to have_link("スタート", href: purification_time_path)
+          expect(page).not_to have_link("メッセージ", href: purification_time_path)
+        end
       end
     end
 
@@ -71,6 +77,58 @@ RSpec.describe "PurificationTimes", type: :system do
             expect(page).to have_button("リセット")
           end
         end
+      end
+    end
+  end
+
+  # =========================================================
+  # マイページの累計進捗表示
+  # =========================================================
+  describe "マイページの次の付与までの表示" do
+    context "今日の記録がないとき" do
+      it "あと 30 分と表示されること" do
+        visit mypage_path
+        expect(page).to have_content("次の浄化タイマーまで あと 30 分")
+      end
+    end
+
+    context "今日 25 分の記録があるとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time,
+                                 total_duration: 25, idle_duration: 0)
+      end
+
+      it "あと 5 分と表示されること" do
+        visit mypage_path
+        expect(page).to have_content("次の浄化タイマーまで あと 5 分")
+      end
+    end
+
+    context "今日 30 分記録して 1 ブロック付与済みのとき" do
+      before do
+        create(:activity_record, user: user, light_time: light_time,
+                                 total_duration: 30, idle_duration: 0)
+        create(:purification_time, user: user, remaining_time: 600,
+                                   granted_blocks_date: Date.current, granted_blocks_count: 1)
+      end
+
+      it "次のブロックまでの 30 分が表示されること" do
+        visit mypage_path
+        expect(page).to have_content("次の浄化タイマーまで あと 30 分")
+      end
+    end
+
+    # 累計だけを見ると「あと 30 分」と出てしまうが、30 分ぶんはすでに払い出しているので
+    # 次の 1 ブロックには 60 分必要になる
+    context "1 ブロック付与済みの記録を削除して累計が 0 に戻ったとき" do
+      before do
+        create(:purification_time, user: user, remaining_time: 600,
+                                   granted_blocks_date: Date.current, granted_blocks_count: 1)
+      end
+
+      it "払い出し済みの分を含めた 60 分が表示されること" do
+        visit mypage_path
+        expect(page).to have_content("次の浄化タイマーまで あと 60 分")
       end
     end
   end

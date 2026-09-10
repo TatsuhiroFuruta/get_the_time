@@ -13,19 +13,39 @@ class ActivityRecord < ApplicationRecord
   # レーダーチャート対象の5段階評価カラム（疲労感は逆指標のため別集計）
   RADAR_FIELDS = %i[satisfaction progress quality focus].freeze
 
-  scope :today, -> {
-    where(created_at: Time.current.all_day)
+  # 「その活動がどの日のものか」を表す式。活動の終了時刻（ended_at）を正とする。
+  # created_at は記録の送信時刻なので、0 時をまたぐ活動や後日の登録で実態とずれる。
+  # ended_at が未設定のレコードだけ created_at にフォールバックする。created_at は
+  # NOT NULL なので、この式が NULL を返して集計から黙って漏れることはない。
+  ACTIVITY_AT = "COALESCE(activity_records.ended_at, activity_records.created_at)".freeze
+
+  # ACTIVITY_AT の Ruby 版。SQL で絞り込むのではなく、1 件のレコードから
+  # 「どの日のものか」を得たいとき（浄化タイマーの付与など）に使う。
+  # 両者は同じルールなので、ずれないよう定数の隣に置く。
+  def self.activity_date(activity_record)
+    (activity_record.ended_at || activity_record.created_at).in_time_zone.to_date
+  end
+
+  scope :activity_on, ->(date) {
+    range = date.all_day
+    where("#{ACTIVITY_AT} BETWEEN ? AND ?", range.begin, range.end)
   }
 
   scope :within_last_days, ->(days) {
-    where(created_at: days.days.ago.beginning_of_day..)
+    where("#{ACTIVITY_AT} >= ?", days.days.ago.beginning_of_day)
   }
 
-  def self.total_light_time_today(user)
+  # 指定日（JST）の光の時間の合計分数。付与ロジックは「そのレコードの日」を必要とし、
+  # 必ずしも今日とは限らないため日付を引数に取る。
+  def self.total_light_time_on(user, date)
     where(user: user)
-      .today
+      .activity_on(date)
       .sum(:total_duration)
       .to_i
+  end
+
+  def self.total_light_time_today(user)
+    total_light_time_on(user, Date.current)
   end
 
   # レーダーチャート用: 直近N日の5段階評価4項目の平均
@@ -48,7 +68,7 @@ class ActivityRecord < ApplicationRecord
   # light_time_minutes は SUM(total_duration) の合計分数（total_duration は分単位で保存されている）
   # 該当レコードがない日は配列に含まれない
   def self.daily_series(user, days: 30)
-    bucket = Arel.sql("DATE((created_at AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Tokyo')")
+    bucket = Arel.sql("DATE((#{ACTIVITY_AT} AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Tokyo')")
     user.activity_records
         .within_last_days(days)
         .group(bucket)
@@ -66,6 +86,9 @@ class ActivityRecord < ApplicationRecord
           }
         end
   end
+
+  # 浄化タイマー付与の 1 ブロック（分）。この分数がたまるごとに抽選を 1 回引く。
+  PURIFICATION_BLOCK_MINUTES = 30
 
   # 付与分数の重み付きテーブル（合計 100）
   PURIFICATION_TIME_TABLE = [
@@ -86,14 +109,27 @@ class ActivityRecord < ApplicationRecord
     PURIFICATION_TIME_TABLE.last[:minutes]
   end
 
-  # 浄化タイマーの時間計算メソッド（30分ブロックごとにランダム付与）
-  def self.calculate_purification_time(total_duration)
-    return 0 if total_duration.blank? || total_duration < 1
+  # 累計分数から、消化済みのブロック数を求める。
+  # 余りを翌日へ繰り越さない設計のため、付与済みブロック数は累計だけから導出できる。
+  def self.purification_blocks(minutes)
+    [ minutes.to_i, 0 ].max / PURIFICATION_BLOCK_MINUTES
+  end
 
-    blocks = (total_duration / 30).floor
-    return 0 if blocks == 0
+  # blocks 回の抽選を引いた合計分数。乱数を含むため呼ぶたびに結果が変わる。
+  def self.sample_purification_minutes_for(blocks)
+    return 0 if blocks <= 0
 
     blocks.times.sum { sample_purification_minutes }
+  end
+
+  # 次の付与までの残り分数（マイページ表示用）。累計 0 分でも 30 を返す。
+  #
+  # 累計の余りではなく「払い出し済みブロック数の次の閾値」から逆算する。活動記録を
+  # 削除すると累計だけが下がるため、余りだけを見ると実際より短い分数を表示してしまう。
+  def self.minutes_until_next_purification(total_minutes, granted_blocks = 0)
+    next_threshold = (granted_blocks.to_i + 1) * PURIFICATION_BLOCK_MINUTES
+
+    [ next_threshold - [ total_minutes.to_i, 0 ].max, 0 ].max
   end
 
   # 検索可能カラムの登録

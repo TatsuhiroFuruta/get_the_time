@@ -162,5 +162,32 @@ RSpec.describe ActivityRecordForm, type: :model do
         expect { form.save(user) }.not_to change(ActivityRecord, :count)
       end
     end
+
+    context "浄化タイマーの付与" do
+      # 付与分数は乱数なので 1 ブロック 10 分に固定する
+      before { allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10) }
+
+      it "当日累計が 30 分に満たないときは付与されないこと" do
+        form = described_class.new(valid_attributes.merge(total_duration: 25, idle_duration: 0))
+
+        aggregate_failures do
+          expect(form.save(user)).to be true
+          expect(form.granted_purification_minutes).to eq 0
+        end
+      end
+
+      it "25 分を 2 回保存すると 2 回目で付与されること" do
+        first  = described_class.new(valid_attributes.merge(total_duration: 25, idle_duration: 0))
+        second = described_class.new(valid_attributes.merge(total_duration: 25, idle_duration: 0))
+        first.save(user)
+        second.save(user)
+
+        aggregate_failures do
+          expect(first.granted_purification_minutes).to eq 0
+          expect(second.granted_purification_minutes).to eq 10
+          expect(user.reload.purification_time.remaining_time).to eq 600
+        end
+      end
+    end
   end
 end
