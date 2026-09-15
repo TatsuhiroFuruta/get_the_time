@@ -62,4 +62,66 @@ RSpec.describe "Users::GuestSessions", type: :request do
       end
     end
   end
+
+  describe "DELETE /users/sign_out（ゲストのログアウト）" do
+    before { post guest_sign_in_path }
+
+    it "トップページへ戻すこと" do
+      delete destroy_user_session_path
+
+      expect(response).to redirect_to(root_path)
+    end
+  end
+
+  describe "DELETE /users/sign_out（実ユーザーのログアウト）" do
+    before { sign_in create(:user) }
+
+    it "ログイン画面へ戻すこと" do
+      delete destroy_user_session_path
+
+      expect(response).to redirect_to(new_user_session_path)
+    end
+  end
+
+  describe "利用時間切れの案内" do
+    # 時間切れ削除を再現する。セッションのクッキーは残したまま User だけが消える状態。
+    def expire_guest
+      User.guest.update_all(last_request_at: 2.hours.ago)
+      GuestUserPurger.call
+    end
+
+    it "削除されたゲストがログイン画面に来たら理由を説明すること" do
+      post guest_sign_in_path
+      expire_guest
+
+      get new_user_session_path
+
+      expect(response.body).to include I18n.t("users.sessions.flash_message.guest_expired")
+    end
+
+    it "一度表示したら消えること（印を削除するため）" do
+      post guest_sign_in_path
+      expire_guest
+
+      get new_user_session_path
+      get new_user_session_path
+
+      expect(response.body).not_to include I18n.t("users.sessions.flash_message.guest_expired")
+    end
+
+    it "通常のログアウト後には表示しないこと（セッションがリセットされるため）" do
+      post guest_sign_in_path
+      delete destroy_user_session_path
+
+      get new_user_session_path
+
+      expect(response.body).not_to include I18n.t("users.sessions.flash_message.guest_expired")
+    end
+
+    it "ゲストを経ていない訪問者には表示しないこと" do
+      get new_user_session_path
+
+      expect(response.body).not_to include I18n.t("users.sessions.flash_message.guest_expired")
+    end
+  end
 end

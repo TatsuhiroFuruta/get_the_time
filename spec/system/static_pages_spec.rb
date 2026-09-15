@@ -105,9 +105,10 @@ RSpec.describe "StaticPages", type: :system do
   # =========================================================
   describe "利用規約・プライバシーポリシー" do
     context "未ログインのとき" do
+      # ゲストログインボタンの下にも同じ文言のリンクがあるため、フッターに絞って検証する
       it "ホーム画面のフッターリンクから利用規約ページへ遷移できること" do
         visit root_path
-        click_link "利用規約"
+        within("#legal-links") { click_link "利用規約" }
 
         aggregate_failures do
           expect(page).to have_current_path(terms_path)
@@ -117,7 +118,7 @@ RSpec.describe "StaticPages", type: :system do
 
       it "ホーム画面のフッターリンクからプライバシーポリシーページへ遷移できること" do
         visit root_path
-        click_link "プライバシーポリシー"
+        within("#legal-links") { click_link "プライバシーポリシー" }
 
         aggregate_failures do
           expect(page).to have_current_path(privacy_path)

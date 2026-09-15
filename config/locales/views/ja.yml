@@ -96,6 +96,8 @@ ja:
         signed_in: ゲストとしてログインしました。デモ用のデータが登録されています
         rate_limited: 短時間にゲストログインを繰り返しています。しばらくしてから再度お試しください
     sessions:
+      flash_message:
+        guest_expired: ゲストの利用時間が終了したため、ログアウトしました。もう一度ゲストログインからお試しいただけます
       new:
         title: ログイン
     registrations:
