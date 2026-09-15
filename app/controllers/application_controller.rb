@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user! # 全体に適用
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :touch_guest_activity
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
@@ -23,6 +24,21 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  # ゲストの最終アクセス時刻を記録する。GuestUserPurger の削除判定にのみ使うため、
+  # 削除対象ではない実ユーザーでは更新しない（読まれない値のために毎リクエスト
+  # UPDATE を走らせないため）。
+  #
+  # 毎回書くと Neon への書き込みが増えるので 10 分に 1 回までに間引く。この間引き幅の
+  # ぶんだけ値が古くなりうるので、削除の猶予（1 時間）はそれを見込んで設定している。
+  #
+  # updated_at を動かさず、バリデーションもコールバックも走らせないため update_column を使う。
+  def touch_guest_activity
+    return unless current_user&.guest?
+    return if current_user.last_request_at&.after?(10.minutes.ago)
+
+    current_user.update_column(:last_request_at, Time.current)
+  end
 
   # DELETE / PATCH からの遷移で Turbo がリクエストメソッドを引き継がないよう 303 を返す
   def redirect_to_not_found
