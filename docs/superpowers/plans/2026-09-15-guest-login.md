@@ -1172,6 +1172,7 @@ git commit -m "feat: ゲストログインの入口を追加 #285"
 - Modify: `app/controllers/users/registrations_controller.rb`
 - Modify: `app/controllers/users/passwords_controller.rb`
 - Modify: `app/controllers/regret_summaries_controller.rb`
+- Modify: `app/views/users/registrations/show.html.erb`
 - Test: `spec/requests/guest_restrictions_spec.rb`
 
 **Interfaces:**
@@ -1256,6 +1257,12 @@ RSpec.describe "ゲストへの操作制限", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
+    it "ただしアカウント情報画面に編集ボタンは出さないこと" do
+      get user_account_path
+
+      expect(response.body).not_to include(edit_user_registration_path)
+    end
+
     it "闇の時間の特徴への追記はできること（OpenAI を呼ばないため）" do
       patch append_to_dark_time_regret_summary_path
 
@@ -1338,7 +1345,20 @@ Expected: FAIL。ガードが無いため、リダイレクト先やフラッシ
   before_action :reject_guest, only: :generate
 ```
 
-- [ ] **Step 5: テストが通ることを確認する**
+- [ ] **Step 5: アカウント情報画面から編集ボタンを隠す**
+
+`app/views/users/registrations/show.html.erb` の「編集ボタン」ブロックを次のように書き換える。アカウント情報画面自体は見せる（`guest_xxxx@example.com` が表示されることで使い捨てのデモアカウントだと伝わる）が、編集への導線だけを消す。
+
+```erb
+      <!-- 編集ボタン -->
+      <% unless @user.guest? %>
+        <div class="text-center">
+          <%= link_to "編集する", edit_user_registration_path, class: "inline-block bg-green-700 hover:bg-green-800 px-6 py-2 rounded-full text-white/90 font-semibold transition duration-200 shadow-md" %>
+        </div>
+      <% end %>
+```
+
+- [ ] **Step 6: テストが通ることを確認する**
 
 ```bash
 docker compose exec web bundle exec rspec spec/requests/guest_restrictions_spec.rb
@@ -1346,7 +1366,7 @@ docker compose exec web bundle exec rspec spec/requests/guest_restrictions_spec.
 
 Expected: PASS（全 example）。
 
-- [ ] **Step 6: 既存テストが壊れていないことを確認する**
+- [ ] **Step 7: 既存テストが壊れていないことを確認する**
 
 ```bash
 docker compose exec web bundle exec rspec spec/requests
@@ -1354,10 +1374,10 @@ docker compose exec web bundle exec rspec spec/requests
 
 Expected: PASS。Devise 系コントローラに `before_action` を足したため、ここで request spec 全体を回す。
 
-- [ ] **Step 7: コミット**
+- [ ] **Step 8: コミット**
 
 ```bash
-git add app/controllers spec/requests/guest_restrictions_spec.rb
+git add app/controllers app/views/users/registrations/show.html.erb spec/requests/guest_restrictions_spec.rb
 git commit -m "feat: ゲストにアカウント操作・パスワード再設定・AI要約生成を許可しない #285"
 ```
 
