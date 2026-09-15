@@ -40,6 +40,19 @@ class ApplicationController < ActionController::Base
     current_user.update_column(:last_request_at, Time.current)
   end
 
+  # ゲストに許可しない操作の共通ガード。UI 側でもリンクを出さないが、ルートは残るので
+  # サーバ側でも必ず塞ぐ。
+  #
+  # status: :see_other は redirect_to_not_found に合わせている（DELETE / PATCH からの
+  # 遷移で Turbo がリクエストメソッドを引き継がないようにするため）。
+  def reject_guest
+    return unless current_user&.guest?
+
+    redirect_to mypage_path,
+                alert: t("defaults.flash_message.guest_not_allowed"),
+                status: :see_other
+  end
+
   # DELETE / PATCH からの遷移で Turbo がリクエストメソッドを引き継がないよう 303 を返す
   def redirect_to_not_found
     redirect_to not_found_redirect_path,
