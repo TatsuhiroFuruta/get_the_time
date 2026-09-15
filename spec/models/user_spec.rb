@@ -310,4 +310,23 @@ RSpec.describe User, type: :model do
       end
     end
   end
+
+  describe "ゲスト" do
+    describe ".guest" do
+      it "guest: true のユーザーだけを返すこと" do
+        guest = create(:user, :guest)
+        create(:user)
+
+        expect(described_class.guest).to contain_exactly(guest)
+      end
+    end
+
+    it "通常のユーザーは guest が false であること" do
+      expect(create(:user).guest).to be false
+    end
+
+    it "ゲストは last_request_at を持つこと" do
+      expect(create(:user, :guest).last_request_at).to be_present
+    end
+  end
 end
