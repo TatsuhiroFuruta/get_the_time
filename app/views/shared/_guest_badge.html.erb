@@ -1,11 +1,26 @@
 <%# ゲスト利用中であることを全画面で示すバッジ。
     _hamburger_menu は4画面でしか描画されないためレイアウトに置く。
-    左上はハンバーガーボタン、右上はユーザーカードと浄化タイマーカードが占めているので下部中央に配置する。
-    登録への導線は置かない。リンクがあると「続きから使える」と期待させるが、データは引き継がれないため。 %>
+
+    外側の div は高さを持たない（中身が absolute のみ）。レイアウト上でフラッシュ
+    メッセージの直後に置いているため、フラッシュが出て本文が押し下げられたときも
+    ハンバーガーボタンと同じだけ下がり、常にその右隣に並ぶ。fixed にすると
+    フラッシュの上に重なってしまう。
+
+    left-56 なのは、左上を占める要素が画面によって違うため。ハンバーガーボタン
+    （left-6 + w-10 = 64px まで）だけでなく、dark_times/show など5画面にある
+    「← マイページに戻る」（約200px まで）も避ける必要がある。
+
+    z-30 はハンバーガーのオーバーレイ（z-40）より下。メニューを開いたときは
+    オーバーレイの下に隠れる。
+
+    登録への導線は置かない。リンクがあると「続きから使える」と期待させるが、
+    データは引き継がれないため。 %>
 <% if user_signed_in? && current_user.guest? %>
-  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-70 pointer-events-none">
-    <span class="inline-block rounded-full bg-zinc-900/80 text-white/90 text-xs px-4 py-2 shadow-lg">
-      ゲスト利用中
-    </span>
+  <div class="relative">
+    <div class="absolute top-7 left-56 z-30 pointer-events-none">
+      <span class="inline-block rounded-full bg-zinc-900/80 text-white/90 text-xs px-4 py-2 shadow-lg whitespace-nowrap">
+        ゲスト利用中
+      </span>
+    </div>
   </div>
 <% end %>
