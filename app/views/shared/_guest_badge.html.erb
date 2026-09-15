@@ -1,0 +1,11 @@
+<%# ゲスト利用中であることを全画面で示すバッジ。
+    _hamburger_menu は4画面でしか描画されないためレイアウトに置く。
+    左上はハンバーガーボタン、右上はユーザーカードと浄化タイマーカードが占めているので下部中央に配置する。
+    登録への導線は置かない。リンクがあると「続きから使える」と期待させるが、データは引き継がれないため。 %>
+<% if user_signed_in? && current_user.guest? %>
+  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-70 pointer-events-none">
+    <span class="inline-block rounded-full bg-zinc-900/80 text-white/90 text-xs px-4 py-2 shadow-lg">
+      ゲスト利用中
+    </span>
+  </div>
+<% end %>
