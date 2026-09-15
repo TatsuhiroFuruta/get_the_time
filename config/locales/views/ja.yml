@@ -21,6 +21,7 @@ ja:
       already_exists: "%{item}は既に作成済みです"
       not_found: "%{item}が見つかりません"
       record_not_found: 対象のデータは見つかりませんでした
+      guest_not_allowed: ゲストではこの操作はできません
   activity_records:
     flash_message:
       require_timer_access: ポモドーロタイマーからアクセスしてください
@@ -90,6 +91,10 @@ ja:
     privacy:
       title: プライバシーポリシー
   users:
+    guest_sessions:
+      flash_message:
+        signed_in: ゲストとしてログインしました。デモ用のデータが登録されています
+        rate_limited: 短時間にゲストログインを繰り返しています。しばらくしてから再度お試しください
     sessions:
       new:
         title: ログイン

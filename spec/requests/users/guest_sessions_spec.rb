@@ -1,0 +1,65 @@
+require "rails_helper"
+
+RSpec.describe "Users::GuestSessions", type: :request do
+  describe "POST /guest_sign_in" do
+    it "ゲストを作成してマイページへ遷移すること" do
+      expect { post guest_sign_in_path }.to change(User.guest, :count).by(1)
+
+      expect(response).to redirect_to(mypage_path)
+    end
+
+    it "ログイン状態になること" do
+      post guest_sign_in_path
+      follow_redirect!
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "デモデータが投入されていること" do
+      post guest_sign_in_path
+      guest = User.guest.last
+
+      aggregate_failures do
+        expect(guest.light_and_dark_times_present?).to be true
+        expect(guest.activity_records).not_to be_empty
+        expect(guest.regret_summary).to be_present
+      end
+    end
+
+    it "成功メッセージを出すこと" do
+      post guest_sign_in_path
+
+      expect(flash[:notice]).to eq I18n.t("users.guest_sessions.flash_message.signed_in")
+    end
+
+    it "無操作のゲストを掃除すること" do
+      stale = create(:user, :guest, last_request_at: 2.hours.ago)
+
+      post guest_sign_in_path
+
+      expect(User.exists?(stale.id)).to be false
+    end
+
+    it "掃除が失敗してもログインは通すこと" do
+      allow(GuestUserPurger).to receive(:call).and_raise(ActiveRecord::StatementInvalid, "boom")
+
+      expect { post guest_sign_in_path }.to change(User.guest, :count).by(1)
+
+      expect(response).to redirect_to(mypage_path)
+    end
+
+    it "レート制限を超えたらトップページへ戻すこと" do
+      # test 環境の cache_store は :null_store で increment が nil を返すため、
+      # 回数超過を再現するには increment の戻り値を差し替える。
+      # rate_limit は store をクラス定義時に束縛するので、その同じオブジェクトを差し替える。
+      allow(Users::GuestSessionsController.cache_store).to receive(:increment).and_return(6)
+
+      expect { post guest_sign_in_path }.not_to change(User.guest, :count)
+
+      aggregate_failures do
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eq I18n.t("users.guest_sessions.flash_message.rate_limited")
+      end
+    end
+  end
+end

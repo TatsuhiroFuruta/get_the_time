@@ -15,6 +15,9 @@ Rails.application.routes.draw do
   devise_scope :user do
     get "users/account", to: "users/registrations#show", as: :user_account
   end
+
+  # ゲストログイン（訪問者ごとに使い捨てのユーザーを発行する）
+  post "guest_sign_in", to: "users/guest_sessions#create", as: :guest_sign_in
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
