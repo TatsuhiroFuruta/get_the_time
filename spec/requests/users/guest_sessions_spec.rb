@@ -63,6 +63,38 @@ RSpec.describe "Users::GuestSessions", type: :request do
     end
   end
 
+  # sign_in は Warden のユーザーを無条件に差し替えるため、ログイン済みの人が
+  # 別タブやブラウザバックでこの経路を踏むと、黙って本アカウントから使い捨ての
+  # ゲストへ入れ替わってしまう。
+  describe "ログイン済みのとき" do
+    context "実ユーザー" do
+      let(:user) { create(:user) }
+
+      before { sign_in user }
+
+      it "ゲストを作らずマイページへ戻すこと" do
+        expect { post guest_sign_in_path }.not_to change(User.guest, :count)
+
+        expect(response).to redirect_to(mypage_path)
+      end
+
+      it "ログイン中のアカウントが入れ替わらないこと" do
+        post guest_sign_in_path
+        get mypage_path
+
+        expect(response.body).to include(user.name)
+      end
+    end
+
+    context "すでにゲスト" do
+      before { post guest_sign_in_path }
+
+      it "ゲストを増やさないこと（既存のデモをそのまま使わせる）" do
+        expect { post guest_sign_in_path }.not_to change(User.guest, :count)
+      end
+    end
+  end
+
   describe "DELETE /users/sign_out（ゲストのログアウト）" do
     before { post guest_sign_in_path }
 

@@ -8,6 +8,8 @@
 # 削除対象テーブルの一覧をここにも持つことになるが、7 テーブルすべてに
 # add_foreign_key が張られているため、User に関連を追加してここを更新し忘れれば
 # User の DELETE が外部キー違反で失敗する。静かに孤児が残ることはない。
+# ただし呼び出し側は例外を握ってログに落とすだけなので、失敗しても画面には出ない。
+# 気づく手段はログだけである点に注意（#call のトランザクションの説明も参照）。
 class GuestUserPurger
   # 無操作がこの時間を超えたゲストを削除対象にする。
   #
@@ -29,18 +31,26 @@ class GuestUserPurger
   end
 
   # 削除した件数を返す。
+  #
+  # 全体を1トランザクションに包む。包まないと、途中の DELETE で失敗したとき
+  # （関連の追加漏れによる外部キー違反や、Neon 側のタイムアウト）に、先に流れた
+  # DELETE だけがコミットされ、活動記録だけ消えて users 行が残る状態になる。
+  # 呼び出し側は例外を握ってログに落とすだけなので、この中途半端な状態は
+  # 画面上どこにも現れない。
   def call
     ids = target_ids
     return 0 if ids.empty?
 
-    ActivityRecord.where(user_id: ids).delete_all
-    RegretRecord.where(user_id: ids).delete_all
-    RegretSummary.where(user_id: ids).delete_all
-    PurificationTime.where(user_id: ids).delete_all
-    LightTime.where(user_id: ids).delete_all
-    DarkTime.where(user_id: ids).delete_all
-    PomodoroSetting.where(user_id: ids).delete_all
-    User.where(id: ids).delete_all
+    User.transaction do
+      ActivityRecord.where(user_id: ids).delete_all
+      RegretRecord.where(user_id: ids).delete_all
+      RegretSummary.where(user_id: ids).delete_all
+      PurificationTime.where(user_id: ids).delete_all
+      LightTime.where(user_id: ids).delete_all
+      DarkTime.where(user_id: ids).delete_all
+      PomodoroSetting.where(user_id: ids).delete_all
+      User.where(id: ids).delete_all
+    end
   end
 
   private

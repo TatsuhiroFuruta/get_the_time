@@ -8,6 +8,13 @@
 class Users::GuestSessionsController < ApplicationController
   skip_before_action :authenticate_user!
 
+  # ログイン済みの人にはゲストを発行しない。sign_in は Warden のユーザーを無条件に
+  # 差し替えるため、別タブでログインしたあとにこの画面へ戻って押す、bfcache から
+  # 復元された古いトップページで押す、といった経路で、本アカウントから使い捨ての
+  # ゲストへ黙って入れ替わってしまう。すでにゲストの場合も、既存のデモを捨てて
+  # 作り直す意味がない。
+  before_action :redirect_if_signed_in, only: :create
+
   # ボタン連打によるアカウント量産を防ぐ。RegretSummariesController で既に
   # rate_limit を使っているので、同じ流儀に揃える。
   rate_limit to: 5, within: 1.hour,
@@ -27,6 +34,10 @@ class Users::GuestSessionsController < ApplicationController
   end
 
   private
+
+  def redirect_if_signed_in
+    redirect_to mypage_path if user_signed_in?
+  end
 
   # 掃除が失敗してもログインは通す。閲覧者にとってはデモが見られることが主目的で、
   # 掃除は次の訪問者が来たときにやり直せる。ただし握りつぶさずログには残す。
