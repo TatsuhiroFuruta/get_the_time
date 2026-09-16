@@ -1287,8 +1287,6 @@ Closes #251
 - 既知の制約として、活動記録を削除すると同じ時間で再度ブロックを獲得できる。動機が薄いため対策していない（設計書に記載）
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-https://claude.ai/code/session_01Dhia1rY15f9QvUAus6Mpye
 EOF
 )"
 ```
