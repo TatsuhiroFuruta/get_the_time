@@ -18,7 +18,15 @@ class Users::GuestSessionsController < ApplicationController
 
   # ボタン連打によるアカウント量産を防ぐ。RegretSummariesController で既に
   # rate_limit を使っているので、同じ流儀に揃える。
-  rate_limit to: 5, within: 1.hour,
+  #
+  # 数える単位は IP なので、1人あたりの回数ではなく「同じ回線の向こうにいる人数」で
+  # 上限を決める必要がある。同じ会社や学校の NAT 配下からは全員で1枠を共有するため、
+  # 5 にすると6人目が一度も押していないのにデモを見られない。閲覧者が同じオフィスから
+  # 複数人で見る状況はポートフォリオでは普通に起きるので、20 にしている。
+  # 自動化された場合でも 1 IP あたり 20 件/時間（約 320KB）に収まる。
+  MAX_SIGN_INS_PER_HOUR = 20
+
+  rate_limit to: MAX_SIGN_INS_PER_HOUR, within: 1.hour,
              by: -> { request.remote_ip },
              with: -> { redirect_to root_path, alert: t("users.guest_sessions.flash_message.rate_limited") },
              only: :create

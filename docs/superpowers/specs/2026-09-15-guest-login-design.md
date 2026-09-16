@@ -73,7 +73,7 @@ Faker::Lorem.paragraph               → かちゅうがいようたらす。奉
 | 11 | ゲスト表示 | 左上（ハンバーガー横）のバッジ、`layouts/application.html.erb` に設置、リンクなし |
 | 12 | 入口 | ホーム画面の CTA + ログイン画面 |
 | 13 | ログアウト | ゲストはトップページへ。文言は「ゲストを終了」 |
-| 14 | レート制限 | ゲスト作成 5回/時間/IP |
+| 14 | レート制限 | ゲスト作成 20回/時間/IP |
 | 15 | 構成 | `GuestDemoData`（文言）/ `GuestUserBuilder`（生成）/ `GuestUserPurger`（削除） |
 | 16 | 時間切れの案内 | `session[:guest_sign_in]` を印に、ログイン画面で専用メッセージを表示 |
 
@@ -119,7 +119,10 @@ class Users::GuestSessionsController < ApplicationController
 
   # ボタン連打によるアカウント量産を防ぐ。RegretSummariesController で
   # 既に rate_limit を使っているので、同じ流儀に揃える。
-  rate_limit to: 5, within: 1.hour, by: -> { request.remote_ip },
+  # 数える単位は IP なので、上限は「1人あたりの回数」ではなく「同じ回線の向こうに
+  # いる人数」で決める。5 にすると同一 NAT 配下の6人目が一度も押していないのに
+  # デモを見られない。
+  rate_limit to: MAX_SIGN_INS_PER_HOUR, within: 1.hour, by: -> { request.remote_ip },
              with: -> { redirect_to root_path, alert: t(".rate_limited") }
 
   def create

@@ -52,7 +52,10 @@ RSpec.describe "Users::GuestSessions", type: :request do
       # test 環境の cache_store は :null_store で increment が nil を返すため、
       # 回数超過を再現するには increment の戻り値を差し替える。
       # rate_limit は store をクラス定義時に束縛するので、その同じオブジェクトを差し替える。
-      allow(Users::GuestSessionsController.cache_store).to receive(:increment).and_return(6)
+      # 上限そのものは定数から取る。数値を直書きすると、上限を上げたときに
+      # 「超えていない値」でテストが通り続け、検証になっていないことに気づけない。
+      over_limit = Users::GuestSessionsController::MAX_SIGN_INS_PER_HOUR + 1
+      allow(Users::GuestSessionsController.cache_store).to receive(:increment).and_return(over_limit)
 
       expect { post guest_sign_in_path }.not_to change(User.guest, :count)
 
@@ -83,6 +86,15 @@ RSpec.describe "Users::GuestSessions", type: :request do
         get mypage_path
 
         expect(response.body).to include(user.name)
+      end
+
+      # before_action は宣言順に走り、redirect_if_signed_in が rate_limit より先に
+      # 書かれているのでチェーンはそこで止まる。順番を入れ替えると、ゲストを作って
+      # いないのにレート制限だけ消費してしまうため、その依存をテストで固定する。
+      it "レート制限を消費しないこと" do
+        expect(Users::GuestSessionsController.cache_store).not_to receive(:increment)
+
+        post guest_sign_in_path
       end
     end
 
