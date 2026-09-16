@@ -1,5 +1,6 @@
 <% regret_summary = current_user.regret_summary %>
 <% has_favorites = current_user.regret_records.exists?(favorited: true) %>
+<% guest = current_user.guest? %>
 
 <%= turbo_frame_tag "regret_summary", class: "block w-80 md:w-full max-w-5xl mx-auto mb-8" do %>
   <div class="bg-violet-800 text-white/90 rounded-lg shadow px-6 py-5">
@@ -21,7 +22,13 @@
     <% end %>
 
     <div class="mt-4">
-      <% if has_favorites %>
+      <% if guest %>
+        <%# ゲストには生成させない（OpenAI のコストと悪用余地の排除）。事前投入した要約を %>
+        <%# 「いま生成された」と誤解させないよう、サンプルである旨を必ず明示する。 %>
+        <p class="text-xs text-white/60">
+          上の要約はデモ用のサンプルです。ゲストではAIによる要約の生成はご利用いただけません。
+        </p>
+      <% elsif has_favorites %>
         <%= button_to regret_summary.present? ? "再要約する" : "要約する",
                       generate_regret_summary_path,
                       method: :patch,

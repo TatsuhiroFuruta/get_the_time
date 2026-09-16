@@ -26,6 +26,9 @@ class User < ApplicationRecord
 
   after_create :create_pomodoro_setting
 
+  # ゲストユーザーの絞り込み。削除対象の特定に使う。
+  scope :guest, -> { where(guest: true) }
+
   # 光の時間（current）と闇の時間が両方登録済みか。
   # ポモドーロタイマーの起動可否も、ハンバーガーメニューの記録系リンクの出し分けも、
   # すべてこの状態から導かれる帰結なので、判定はここに一本化する。

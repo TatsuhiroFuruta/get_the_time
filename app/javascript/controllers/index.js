@@ -33,3 +33,6 @@ application.register("mystatus-radar-chart", MystatusRadarChartController)
 
 import ActivityLockController from "./activity_lock_controller"
 application.register("activity-lock", ActivityLockController)
+
+import GuestHeartbeatController from "./guest_heartbeat_controller"
+application.register("guest-heartbeat", GuestHeartbeatController)

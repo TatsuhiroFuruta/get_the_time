@@ -26,9 +26,13 @@
       </div>
 
       <!-- 編集ボタン -->
-      <div class="text-center">
-        <%= link_to "編集する", edit_user_registration_path, class: "inline-block bg-green-700 hover:bg-green-800 px-6 py-2 rounded-full text-white/90 font-semibold transition duration-200 shadow-md" %>
-      </div>
+      <%# アカウント情報画面自体は見せる（guest_xxxx@example.com が表示されることで
+          使い捨てのデモアカウントだと伝わる）。編集への導線だけを消す。 %>
+      <% unless @user.guest? %>
+        <div class="text-center">
+          <%= link_to "編集する", edit_user_registration_path, class: "inline-block bg-green-700 hover:bg-green-800 px-6 py-2 rounded-full text-white/90 font-semibold transition duration-200 shadow-md" %>
+        </div>
+      <% end %>
 
     </div>
   </div>

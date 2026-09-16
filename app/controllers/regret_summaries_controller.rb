@@ -1,6 +1,10 @@
 class RegretSummariesController < ApplicationController
   before_action :set_regret_summary, only: :append_to_dark_time
 
+  # ゲストには生成させない（OpenAI のコストと悪用余地の排除）。代わりにデモ要約を
+  # 事前投入してあるため、要約の見た目と闇の時間への追記は体験できる。
+  before_action :reject_guest, only: :generate
+
   # 生成AIの濫用・コスト対策。ユーザーごとに一定時間内の生成回数を制限する。
   rate_limit to: 5, within: 1.hour,
              by: -> { current_user.id },

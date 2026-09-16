@@ -7,6 +7,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # show を認証必須にするには force: true を明示的に渡す必要がある
   before_action -> { authenticate_user!(force: true) }, only: [ :show ]
 
+  # ゲストはアカウントを編集・削除できない。edit.html.erb が current_password を必須に
+  # しているため、そもそもランダムパスワードを知らないゲストには更新が成功しない。
+  # フォームを見せて失敗させるより、理由を出して塞ぐ。
+  before_action :reject_guest, only: %i[edit update destroy]
+
   # GET /users/account
   # アカウント情報画面
   def show

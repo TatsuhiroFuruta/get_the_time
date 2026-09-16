@@ -100,6 +100,13 @@ export function release() {
   }, undefined)
 }
 
+// 有効なリースが存在するか（持ち主は問わない）。「いま光の時間を計測中か」の判定に使う。
+// heldByOther() は排他制御（他タブに入られていないか）のための問いで、こちらは
+// 「このブラウザで計測が進行中か」を問うので別物。
+export function held() {
+  return safely(() => Boolean(currentLock()), false)
+}
+
 export function heldByOther() {
   return safely(() => {
     const lock = currentLock()

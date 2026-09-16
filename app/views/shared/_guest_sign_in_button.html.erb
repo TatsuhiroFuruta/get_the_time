@@ -1,0 +1,15 @@
+<%# ゲストログインのボタン。omniauth と同じく POST が必要なので button_to を使う。
+    チェックボックスは置かず、規約への同意はボタン下の明記で代える（閲覧者のクリックを増やさないため）。 %>
+<div class="text-center">
+  <%= button_to "ゲストとして試す",
+                guest_sign_in_path,
+                class: "inline-block bg-emerald-600 hover:bg-emerald-700 text-white/90 px-4 py-2 rounded-lg transition duration-200 text-sm md:text-base font-semibold" %>
+
+  <p class="mt-2 text-xs text-zinc-700">
+    ゲストとして試すと
+    <%= link_to "利用規約", terms_path, target: "_blank", rel: "noopener", class: "text-blue-700 hover:text-blue-800 underline" %>
+    と
+    <%= link_to "プライバシーポリシー", privacy_path, target: "_blank", rel: "noopener", class: "text-blue-700 hover:text-blue-800 underline" %>
+    に同意したものとみなします。
+  </p>
+</div>
