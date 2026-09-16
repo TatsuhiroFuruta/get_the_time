@@ -32,7 +32,6 @@ class Users::GuestSessionsController < ApplicationController
              only: :create
 
   def create
-    log_remote_ip_for_diagnosis
     purge_expired_guests
     user = GuestUserBuilder.call
     sign_in(user)
@@ -77,29 +76,10 @@ class Users::GuestSessionsController < ApplicationController
   # 持ち続けることになり、Cloudflare 側の変更で静かに壊れるため採らない。
   #
   # 既知の限界: Render のオリジンへ直接アクセスできる場合、Cloudflare を迂回して
-  # このヘッダを自分で付けられる。ただし現状は枠が全員共有で何も守れていないため
-  # 悪化はしない。レート制限はセキュリティ境界ではなく濫用の緩和と位置づける。
+  # このヘッダを自分で付けられる。ただし対処前は枠が全員共有で何も守れていなかった
+  # ため悪化はしない。レート制限はセキュリティ境界ではなく濫用の緩和と位置づける。
   def rate_limit_key
     request.headers["CF-Connecting-IP"].presence || request.remote_ip
-  end
-
-  # ===== 一時的な診断ログ（確認が済んだら削除する / #287）=====
-  #
-  # #285 の調査で、本番では request.remote_ip が Cloudflare のエッジ IP になって
-  # いることが分かった。その対処として rate_limit_key を CF-Connecting-IP 優先に
-  # 変えたので、実際にヘッダが届いていて意図どおりの単位で数えているかを確認する。
-  #
-  # 判定のしかた:
-  #   source=cf_connecting_ip かつ key が自分のグローバル IP → 想定どおり。ログを削除
-  #   source=remote_ip                                      → ヘッダが届いていない。要調査
-  def log_remote_ip_for_diagnosis
-    source = request.headers["CF-Connecting-IP"].presence ? "cf_connecting_ip" : "remote_ip"
-
-    Rails.logger.info(
-      "[guest_sign_in] rate_limit_key=#{rate_limit_key} source=#{source} " \
-      "remote_ip=#{request.remote_ip} " \
-      "x_forwarded_for=#{request.headers['X-Forwarded-For'].inspect}"
-    )
   end
 
   # 掃除が失敗してもログインは通す。閲覧者にとってはデモが見られることが主目的で、
