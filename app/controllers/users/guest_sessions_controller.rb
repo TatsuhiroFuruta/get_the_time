@@ -32,6 +32,7 @@ class Users::GuestSessionsController < ApplicationController
              only: :create
 
   def create
+    log_remote_ip_for_diagnosis
     purge_expired_guests
     user = GuestUserBuilder.call
     sign_in(user)
@@ -59,6 +60,26 @@ class Users::GuestSessionsController < ApplicationController
 
   def redirect_if_signed_in
     redirect_to mypage_path if user_signed_in?
+  end
+
+  # ===== 一時的な診断ログ（確認が済んだら削除する / #285）=====
+  #
+  # レート制限は request.remote_ip 単位で数えるが、本番の Render が
+  # X-Forwarded-For に何を入れてくるかはコードからは分からない。
+  #
+  # Rails は X-Forwarded-For を逆順にしてから最初の非信頼 IP を採る（右端優先。
+  # プライベート範囲は既定で信頼リストに入る）。したがってプロキシが追記する構成なら
+  # クライアントが偽の値を入れても無視されるが、手前に公開 IP のプロキシがいる場合は
+  # そのプロキシの IP に固定され、全訪問者が 1 つの枠を共有してしまう。
+  #
+  # 判定のしかた:
+  #   自分の回線の IP が出る         → 想定どおり。この診断ログを消すだけでよい
+  #   毎回同じ見知らぬ IP が出る     → 手前にプロキシがいる。対処を検討する
+  def log_remote_ip_for_diagnosis
+    Rails.logger.info(
+      "[guest_sign_in] remote_ip=#{request.remote_ip} " \
+      "x_forwarded_for=#{request.headers['X-Forwarded-For'].inspect}"
+    )
   end
 
   # 掃除が失敗してもログインは通す。閲覧者にとってはデモが見られることが主目的で、
