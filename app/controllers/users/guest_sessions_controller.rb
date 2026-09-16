@@ -66,6 +66,7 @@ class Users::GuestSessionsController < ApplicationController
   def purge_expired_guests
     GuestUserPurger.call(except_id: current_user&.id)
   rescue StandardError => e
-    Rails.logger.error("[GuestUserPurger] #{e.class}: #{e.message}")
+    # ここが失敗を知る唯一の経路なので、バックトレースまで残す。
+    Rails.logger.error("[GuestUserPurger] #{e.full_message(highlight: false)}")
   end
 end

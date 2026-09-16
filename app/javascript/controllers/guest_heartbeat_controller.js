@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { held } from "../lib/activity_lock"
 
 // ゲストが「まだ見ている」ことをサーバへ定期的に伝える。
 //
@@ -29,9 +30,16 @@ export default class extends Controller {
   }
 
   ping() {
-    // 非表示タブでは送らない。ブラウザが setInterval を絞るうえ、見ていない
-    // タブを生かし続ける必要もない。表示に戻れば次の周期で再開する。
-    if (document.visibilityState !== "visible") return
+    // 見えているか、計測中なら送る。
+    //
+    // 非表示というだけで止めてはいけない。ポモドーロは「タイマーを開始して別タブで
+    // 作業する」のが通常の使い方で（activity_lock.js の intensive throttling の
+    // コメントを参照）、そこで ping が止まると last_request_at が凍り、計測中の
+    // ゲストが削除されうる。このコントローラを足した理由そのものが失われる。
+    //
+    // 一方、計測していない放置タブまで生かし続ける必要はない。リースの有無で
+    // 「計測中か」を判定し、放置タブは通常どおり削除対象へ落とす。
+    if (document.visibilityState !== "visible" && !held()) return
 
     const token = document.querySelector('meta[name="csrf-token"]')?.content
 

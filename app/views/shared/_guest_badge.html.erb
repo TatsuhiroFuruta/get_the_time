@@ -18,7 +18,10 @@
 <% if user_signed_in? && current_user.guest? %>
   <div class="relative">
     <div class="absolute top-7 left-56 z-30 pointer-events-none">
-      <span class="inline-block rounded-full bg-zinc-900/80 text-white/90 text-xs px-4 py-2 shadow-lg whitespace-nowrap">
+      <%# 狭い画面では左右の余白を詰める。left-56（224px）から始まるので、px-4 のままだと
+          320px 幅の端末で右へはみ出す。left を小さくすると今度は「← マイページに戻る」
+          （約200px）に重なるため、動かすのではなく縮める。 %>
+      <span class="inline-block rounded-full bg-zinc-900/80 text-white/90 text-xs px-2 md:px-4 py-2 shadow-lg whitespace-nowrap">
         ゲスト利用中
       </span>
     </div>

@@ -47,6 +47,18 @@ RSpec.describe GuestUserBuilder, type: :service do
       expect(user.activity_records.where(desired_self_percentage: nil)).to be_empty
     end
 
+    # activity_records#index は order(created_at: :desc) なので、全件が同じ時刻だと
+    # 並び順が不定になり、★を1つ押しただけで一覧が並び替わる。
+    it "活動記録の created_at が重複しないこと" do
+      created_ats = user.activity_records.pluck(:created_at)
+
+      expect(created_ats.uniq.size).to eq created_ats.size
+    end
+
+    it "活動記録の created_at が ended_at と一致すること" do
+      expect(user.activity_records.where("created_at IS DISTINCT FROM ended_at")).to be_empty
+    end
+
     it "後悔記録と要約が投入されること" do
       aggregate_failures do
         expect(user.regret_records.count).to eq GuestDemoData::REGRETS.size
