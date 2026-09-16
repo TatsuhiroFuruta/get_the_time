@@ -18,6 +18,8 @@ Rails.application.routes.draw do
 
   # ゲストログイン（訪問者ごとに使い捨てのユーザーを発行する）
   post "guest_sign_in", to: "users/guest_sessions#create", as: :guest_sign_in
+  # 計測中のゲストが削除されないようにするための定期 ping
+  post "guest_heartbeat", to: "users/guest_sessions#heartbeat", as: :guest_heartbeat
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

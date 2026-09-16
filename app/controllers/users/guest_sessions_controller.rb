@@ -6,7 +6,8 @@
 # ではなくこのリクエストの中で行う。ゲストを増やす経路と減らす経路が同一なので、
 # 増加と削除が自動的に釣り合う。
 class Users::GuestSessionsController < ApplicationController
-  skip_before_action :authenticate_user!
+  # heartbeat はログイン中のゲストからしか来ないので認証を外さない。
+  skip_before_action :authenticate_user!, only: :create
 
   # ログイン済みの人にはゲストを発行しない。sign_in は Warden のユーザーを無条件に
   # 差し替えるため、別タブでログインしたあとにこの画面へ戻って押す、bfcache から
@@ -31,6 +32,19 @@ class Users::GuestSessionsController < ApplicationController
     session[:guest_sign_in] = true
 
     redirect_to mypage_path, notice: t("users.guest_sessions.flash_message.signed_in")
+  end
+
+  # ゲストが「まだ見ている」ことをサーバへ伝えるだけの空のアクション。
+  #
+  # ポモドーロと浄化タイマーの計測はすべてクライアント側で完結しており、計測中は
+  # サーバへのリクエストが一切発生しない（30秒ごとの heartbeat も localStorage を
+  # 書くだけ）。そのままでは last_request_at が更新されず、計測中のゲストが
+  # GuestUserPurger の削除対象に入ってしまう。
+  #
+  # 実際の更新は ApplicationController#touch_guest_activity が担い、10分に間引かれる。
+  # したがってこの ping の間隔を短くしても DB への書き込みは増えない。
+  def heartbeat
+    head :no_content
   end
 
   private

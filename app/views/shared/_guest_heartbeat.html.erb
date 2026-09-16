@@ -1,0 +1,6 @@
+<%# ゲストの「まだ見ている」をサーバへ定期的に伝えるための、表示を持たない要素。
+    計測画面ごとに仕込むのではなくレイアウトに置く理由は guest_heartbeat_controller.js を参照。
+    バッジ（_guest_badge）とは目的が違うので、同じ要素に相乗りさせず分けている。 %>
+<% if user_signed_in? && current_user.guest? %>
+  <div data-controller="guest-heartbeat" hidden></div>
+<% end %>
