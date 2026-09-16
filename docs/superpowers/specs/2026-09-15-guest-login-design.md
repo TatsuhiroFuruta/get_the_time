@@ -73,7 +73,7 @@ Faker::Lorem.paragraph               → かちゅうがいようたらす。奉
 | 11 | ゲスト表示 | 専用バッジは置かない。マイページのユーザーカードで示す（5.9） |
 | 12 | 入口 | ホーム画面の CTA + ログイン画面 |
 | 13 | ログアウト | ゲストはトップページへ。文言は「ゲストを終了」 |
-| 14 | レート制限 | ゲスト作成 20回/時間/IP |
+| 14 | レート制限 | ゲスト作成 20回/時間。数える単位は `CF-Connecting-IP`（無ければ `remote_ip`）|
 | 15 | 構成 | `GuestDemoData`（文言）/ `GuestUserBuilder`（生成）/ `GuestUserPurger`（削除） |
 | 16 | 時間切れの案内 | `session[:guest_sign_in]` を印に、ログイン画面で専用メッセージを表示 |
 | 17 | 計測中の保護 | クライアントから定期 ping を送り `last_request_at` を更新する（5.11） |
@@ -502,7 +502,13 @@ end
 - **Turbo Frame / Turbo Stream 経由の操作では時間切れの案内が表示されない。** AI要約の生成ボタン（`turbo_frame_tag "regret_summary"` 内）やお気に入りのトグル（`favorite.turbo_stream.erb`）から操作した場合、ログイン画面へのリダイレクトがフレームに吸われ、Turbo の「Content missing」が表示される。猶予を1時間とし操作中のゲストを除外する設計により発生頻度は低いが、完全には防げない。フレーム側の例外処理を全面的に追加するコストに見合わないため、制約として受け入れる
 - **誰もゲストログインを使わない期間は、古いゲストが DB に残る。** リクエスト駆動の削除であるため。残るのは行だけで害はなく、次に誰かが使った瞬間に削除される
 - **`config/recurring.yml` の既存ジョブ（`clear_solid_queue_finished_jobs`）も本番では動いていない。** 本設計の対象外だが、別途対処が必要な既知の事実として記録する
-- **レート制限が数える `request.remote_ip` が本番で何になるかは未確認。** `config.action_dispatch.trusted_proxies` は設定していない。`actionpack-8.1.3.1` の `RemoteIp#calculate_ip` は `X-Forwarded-For` を `reverse!` してから最初の非信頼 IP を採る（つまり**右端優先**。プライベート範囲は既定の信頼リストに入る）。実測:
+- **レート制限は `CF-Connecting-IP` で数える（#287 で対処済み）。** `request.remote_ip` は使えない。本番調査の結果、`X-Forwarded-For` は `[実クライアント, Cloudflare のエッジ, Render 内部（プライベート）]` の3段で、Rails は右端の非プライベート = **Cloudflare のエッジ IP** を採っていた（②の持ち主は ipinfo で `AS13335 Cloudflare, Inc.` と確認）。エッジ IP は訪問者ごとではなく地域ごとなので、同じ地域の訪問者が全員ひとつの枠を共有し、20回/時間が事実上の全体上限になっていた。
+
+  `CF-Connecting-IP` は Cloudflare が付ける実クライアント IP で、クライアントが送ってきた同名ヘッダは Cloudflare が上書きするため、Cloudflare を通る限り偽装できない。`trusted_proxies` に Cloudflare の IP 範囲を設定する案は、範囲の一覧を自前で持ち続けることになり Cloudflare 側の変更で静かに壊れるため採らなかった。
+
+  **残る限界**: Render のオリジンへ直接アクセスできる場合、Cloudflare を迂回してこのヘッダを自分で付けられる。ただし対処前は枠が全員共有で何も守れていなかったため悪化はしない。レート制限はセキュリティ境界ではなく濫用の緩和と位置づける。
+
+  参考として、`actionpack-8.1.3.1` の `RemoteIp#calculate_ip` は `X-Forwarded-For` を `reverse!` してから最初の非信頼 IP を採る（**右端優先**。プライベート範囲は既定の信頼リストに入る）。実測:
 
   | X-Forwarded-For | `remote_ip` |
   |---|---|
@@ -511,5 +517,5 @@ end
   | `1.2.3.4, 203.0.113.9, 10.0.0.9` | `203.0.113.9` |
   | `203.0.113.9, 198.51.100.7`（手前に公開IPのプロキシ） | `198.51.100.7` |
 
-  したがって**プロキシが追記する構成なら偽装は成立しない**。危ないのはむしろ最終行で、手前に公開 IP のプロキシ（CDN 等）が入ると全訪問者が 1 つの枠を共有する。Render が実際に何を送ってくるかはコードからは分からないため、`Users::GuestSessionsController#log_remote_ip_for_diagnosis` に一時的な診断ログを置いている。確認がとれたらこのログを削除し、必要なら `trusted_proxies` の設定を検討する。範囲を誤ると状況が悪化するので、実測せずに設定しない
+  この表の最終行が、まさに本番で起きていた状況にあたる。`Users::GuestSessionsController#log_remote_ip_for_diagnosis` は `CF-Connecting-IP` が実際に届いているかを確認するための一時的な診断ログで、確認がとれたら削除する
 - **`guest_heartbeat_controller.js` の挙動はテストで覆えていない。** このリポジトリに JS のテスト基盤が無いため、`setInterval` の発火や `held()` による分岐は自動テストの対象外。エンドポイント・CSRF・要素の出し分けは request spec で固めてある
