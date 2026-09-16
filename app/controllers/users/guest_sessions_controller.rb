@@ -27,7 +27,7 @@ class Users::GuestSessionsController < ApplicationController
   MAX_SIGN_INS_PER_HOUR = 20
 
   rate_limit to: MAX_SIGN_INS_PER_HOUR, within: 1.hour,
-             by: -> { request.remote_ip },
+             by: -> { rate_limit_key },
              with: -> { redirect_to root_path, alert: t("users.guest_sessions.flash_message.rate_limited") },
              only: :create
 
@@ -62,22 +62,42 @@ class Users::GuestSessionsController < ApplicationController
     redirect_to mypage_path if user_signed_in?
   end
 
-  # ===== 一時的な診断ログ（確認が済んだら削除する / #285）=====
+  # レート制限を数える単位。
   #
-  # レート制限は request.remote_ip 単位で数えるが、本番の Render が
-  # X-Forwarded-For に何を入れてくるかはコードからは分からない。
+  # request.remote_ip は使えない。本番は Cloudflare が前段にいるため
+  # X-Forwarded-For が [実クライアント, Cloudflare, Render内部] となり、Rails の
+  # RemoteIp は右端の非プライベート IP を採るので Cloudflare のエッジ IP になる。
+  # エッジ IP は訪問者ごとではなく地域ごとなので、同じ地域の訪問者が全員ひとつの枠を
+  # 共有してしまい、20 回/時間が事実上の全体上限として効く。
   #
-  # Rails は X-Forwarded-For を逆順にしてから最初の非信頼 IP を採る（右端優先。
-  # プライベート範囲は既定で信頼リストに入る）。したがってプロキシが追記する構成なら
-  # クライアントが偽の値を入れても無視されるが、手前に公開 IP のプロキシがいる場合は
-  # そのプロキシの IP に固定され、全訪問者が 1 つの枠を共有してしまう。
+  # CF-Connecting-IP は Cloudflare が付ける実クライアント IP。クライアントが送って
+  # きた同名ヘッダは Cloudflare が上書きするため、Cloudflare を通る限り偽装できない。
+  #
+  # trusted_proxies に Cloudflare の IP 範囲を設定する手もあるが、範囲の一覧を自前で
+  # 持ち続けることになり、Cloudflare 側の変更で静かに壊れるため採らない。
+  #
+  # 既知の限界: Render のオリジンへ直接アクセスできる場合、Cloudflare を迂回して
+  # このヘッダを自分で付けられる。ただし現状は枠が全員共有で何も守れていないため
+  # 悪化はしない。レート制限はセキュリティ境界ではなく濫用の緩和と位置づける。
+  def rate_limit_key
+    request.headers["CF-Connecting-IP"].presence || request.remote_ip
+  end
+
+  # ===== 一時的な診断ログ（確認が済んだら削除する / #287）=====
+  #
+  # #285 の調査で、本番では request.remote_ip が Cloudflare のエッジ IP になって
+  # いることが分かった。その対処として rate_limit_key を CF-Connecting-IP 優先に
+  # 変えたので、実際にヘッダが届いていて意図どおりの単位で数えているかを確認する。
   #
   # 判定のしかた:
-  #   自分の回線の IP が出る         → 想定どおり。この診断ログを消すだけでよい
-  #   毎回同じ見知らぬ IP が出る     → 手前にプロキシがいる。対処を検討する
+  #   source=cf_connecting_ip かつ key が自分のグローバル IP → 想定どおり。ログを削除
+  #   source=remote_ip                                      → ヘッダが届いていない。要調査
   def log_remote_ip_for_diagnosis
+    source = request.headers["CF-Connecting-IP"].presence ? "cf_connecting_ip" : "remote_ip"
+
     Rails.logger.info(
-      "[guest_sign_in] remote_ip=#{request.remote_ip} " \
+      "[guest_sign_in] rate_limit_key=#{rate_limit_key} source=#{source} " \
+      "remote_ip=#{request.remote_ip} " \
       "x_forwarded_for=#{request.headers['X-Forwarded-For'].inspect}"
     )
   end

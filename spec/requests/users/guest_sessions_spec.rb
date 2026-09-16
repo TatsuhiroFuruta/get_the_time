@@ -48,6 +48,45 @@ RSpec.describe "Users::GuestSessions", type: :request do
       expect(response).to redirect_to(mypage_path)
     end
 
+    # 本番は Cloudflare が前段にいるため、request.remote_ip は Cloudflare の
+    # エッジ IP になる（X-Forwarded-For = [実クライアント, Cloudflare, Render内部]
+    # で、Rails は右端の非プライベート = Cloudflare を採る）。そのままだと同じ地域の
+    # 訪問者が全員ひとつの枠を共有してしまう。
+    describe "数える単位" do
+      # rate_limit のキーは ["rate-limit", scope, name, by] を ":" で繋いだもの。
+      # increment に渡るキーを見れば、何を単位に数えているか分かる。
+      def rate_limit_key_for(headers)
+        captured = nil
+        allow(Users::GuestSessionsController.cache_store)
+          .to receive(:increment) { |key, *| captured = key; nil }
+
+        post guest_sign_in_path, headers: headers
+
+        captured
+      end
+
+      it "Cloudflare 経由なら実クライアント IP で数えること" do
+        key = rate_limit_key_for("CF-Connecting-IP" => "203.0.113.9", "REMOTE_ADDR" => "198.51.100.7")
+
+        aggregate_failures do
+          expect(key).to include("203.0.113.9")
+          expect(key).not_to include("198.51.100.7")
+        end
+      end
+
+      it "ヘッダが無ければ remote_ip にフォールバックすること" do
+        key = rate_limit_key_for("REMOTE_ADDR" => "198.51.100.7")
+
+        expect(key).to include("198.51.100.7")
+      end
+
+      it "ヘッダが空文字なら remote_ip にフォールバックすること" do
+        key = rate_limit_key_for("CF-Connecting-IP" => "", "REMOTE_ADDR" => "198.51.100.7")
+
+        expect(key).to include("198.51.100.7")
+      end
+    end
+
     it "レート制限を超えたらトップページへ戻すこと" do
       # test 環境の cache_store は :null_store で increment が nil を返すため、
       # 回数超過を再現するには increment の戻り値を差し替える。
