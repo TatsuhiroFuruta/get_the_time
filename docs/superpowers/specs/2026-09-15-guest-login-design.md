@@ -76,6 +76,8 @@ Faker::Lorem.paragraph               → かちゅうがいようたらす。奉
 | 14 | レート制限 | ゲスト作成 20回/時間/IP |
 | 15 | 構成 | `GuestDemoData`（文言）/ `GuestUserBuilder`（生成）/ `GuestUserPurger`（削除） |
 | 16 | 時間切れの案内 | `session[:guest_sign_in]` を印に、ログイン画面で専用メッセージを表示 |
+| 17 | 計測中の保護 | クライアントから定期 ping を送り `last_request_at` を更新する（5.11） |
+| 18 | ログイン済みの扱い | ゲストを発行せずマイページへ戻す（5.2） |
 
 ## 5. 設計
 
@@ -113,9 +115,14 @@ scope :guest, -> { where(guest: true) }
 post "guest_sign_in", to: "users/guest_sessions#create", as: :guest_sign_in
 ```
 
+**ログイン済みの人にはゲストを発行しない**（決定18）。`sign_in` は Warden のユーザーを無条件に差し替えるため、別タブでログインしたあとにこの画面へ戻って押す、bfcache から復元された古いトップページで押す、といった経路で、本アカウントから使い捨てのゲストへ黙って入れ替わってしまう。すでにゲストの場合も、既存のデモを捨てて作り直す意味がない。
+
+この `before_action` は `rate_limit` より先に宣言する。順番が逆だと、ゲストを作っていないのにレート制限の枠だけを消費する。
+
 ```ruby
 class Users::GuestSessionsController < ApplicationController
-  skip_before_action :authenticate_user!
+  skip_before_action :authenticate_user!, only: :create
+  before_action :redirect_if_signed_in, only: :create
 
   # ボタン連打によるアカウント量産を防ぐ。RegretSummariesController で
   # 既に rate_limit を使っているので、同じ流儀に揃える。
@@ -223,6 +230,25 @@ def touch_guest_activity
 end
 ```
 
+### 5.11 計測中のゲストを守る定期 ping
+
+5.5 だけでは足りない。**ポモドーロと浄化タイマーの計測は、すべてクライアント側で完結している。**
+
+- `pomodoro_controller.js` の `startTimer` → `onTimerComplete` → `switchToBreakMode` / `switchToWorkMode` に `fetch` は無い
+- 30 秒ごとの heartbeat（`activity_lock.js` の `renew()`）は `localStorage` を書くだけ
+- `fetch` はコントローラ内に 1 箇所だけで、開始前の浄化タイマー確認の一発きり
+
+つまり計測中はサーバへのリクエストがゼロで、`last_request_at` が更新されない。間引き 10 分を差し引くと実質の猶予は約 50 分しかなく、既定の 25 分 + 休憩 5 分 + 25 分 = 55 分で超える。作業時間は最大 90 分まで設定できるので、1 セッションだけでも超える。**この状態では 5.6 の「50〜60 分の無操作で削除」という前提が成立しない。**
+
+そこで `POST /guest_heartbeat` を用意し、`guest_heartbeat_controller.js` から定期的に叩く。アクションは `head :no_content` を返すだけで、更新は 5.5 の `touch_guest_activity` が担う。
+
+- **計測画面ごとに仕込まず、レイアウトから常時動かす。** silent な画面を列挙する方式は、画面が増えたときに漏れる
+- **非表示というだけでは止めない。** ポモドーロは「タイマーを開始して別タブで作業する」のが通常の使い方で、そこで止めると守るべき当のケースを落とす。`activity_lock.js` の `held()`（有効なリースの有無 = 計測中か）で判定し、計測していない放置タブだけを止める
+- 実際の UPDATE は 10 分に間引かれるため、ping の間隔を短くしても DB への書き込みは増えない（実測: ping 1 回あたり 1 クエリ、マイページ 1 回の表示は 9 クエリ）
+- 間隔は 60 秒。5 分前後にすると Neon の autosuspend の境目に当たり、停止と復帰を繰り返してコールドスタートが挟まる。大きく延ばせば compute は減るが、ping が 1 回失敗しただけで猶予を食い潰す
+
+なお `fetch` は HTTP エラーで reject しないため、CSRF トークンが通らなくても 422 が `catch` にすら引っかからず、ハートビートが黙って動かなくなる。`config/environments/test.rb` は `allow_forgery_protection = false` なので通常の spec では検出できない。検証は `spec/requests/guest_activity_spec.rb` で、その spec だけ本番と同じ設定にして行う（トークン無しで 422 になる負のテスト付き）。
+
 ### 5.6 削除
 
 `GuestUserPurger`（`app/services/`）。
@@ -260,6 +286,8 @@ User.where(id: ids).delete_all
 ```
 
 30分設定では、20分席を外しただけの閲覧者（電話、会議、昼食）が消される可能性がある。1時間なら50分必要になり、現実的にはほぼ起きない。
+
+**ただしこの計算は「画面を見ている間はリクエストが飛ぶ」ことを前提にしている。** ポモドーロと浄化タイマーの計測中はその前提が崩れるため、5.11 の定期 ping で補っている。
 
 コストは常駐するゲスト数がおよそ倍になることだが、ゲスト1件は約15.8 KB（7.3 参照）であり、到着200件/時という非現実的な想定でも3MB程度にとどまる。削除のクエリ数も件数によらず8で変わらない。
 
@@ -464,3 +492,5 @@ end
 - **Turbo Frame / Turbo Stream 経由の操作では時間切れの案内が表示されない。** AI要約の生成ボタン（`turbo_frame_tag "regret_summary"` 内）やお気に入りのトグル（`favorite.turbo_stream.erb`）から操作した場合、ログイン画面へのリダイレクトがフレームに吸われ、Turbo の「Content missing」が表示される。猶予を1時間とし操作中のゲストを除外する設計により発生頻度は低いが、完全には防げない。フレーム側の例外処理を全面的に追加するコストに見合わないため、制約として受け入れる
 - **誰もゲストログインを使わない期間は、古いゲストが DB に残る。** リクエスト駆動の削除であるため。残るのは行だけで害はなく、次に誰かが使った瞬間に削除される
 - **`config/recurring.yml` の既存ジョブ（`clear_solid_queue_finished_jobs`）も本番では動いていない。** 本設計の対象外だが、別途対処が必要な既知の事実として記録する
+- **レート制限の `request.remote_ip` は偽装できる。** `config.action_dispatch.trusted_proxies` を設定していないため、Rails の `RemoteIp` ミドルウェアは `X-Forwarded-For` の最も左側の非信頼エントリを採用する。クライアントが自分でこのヘッダを付ければ、リクエストごとに別の枠を得られる。1 リクエストあたり bcrypt 約 212ms を消費するので、行数ではなく CPU が先に問題になる（行は毎回の掃除で頭打ちになる）。ポートフォリオの規模では実害が出る前に気づける想定で受け入れる。塞ぐなら Render のプロキシ範囲を `trusted_proxies` に設定する
+- **`guest_heartbeat_controller.js` の挙動はテストで覆えていない。** このリポジトリに JS のテスト基盤が無いため、`setInterval` の発火や `held()` による分岐は自動テストの対象外。エンドポイント・CSRF・要素の出し分けは request spec で固めてある
