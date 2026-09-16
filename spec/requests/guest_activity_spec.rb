@@ -62,6 +62,48 @@ RSpec.describe "ゲストの最終アクセス時刻", type: :request do
         expect(response).to redirect_to(new_user_session_path)
       end
     end
+
+    # test 環境は allow_forgery_protection = false なので、通常の spec では CSRF を
+    # 検証できない。一方 fetch は HTTP エラーで reject しないため、本番でトークンが
+    # 通らなければ 422 が catch にも引っかからず、ハートビートが黙って動かなくなる。
+    # ここだけ本番と同じ設定にして、meta[csrf-token] と X-CSRF-Token の組み合わせが
+    # 実際に通ることを確かめる。
+    context "CSRF 保護が有効なとき" do
+      around do |example|
+        original = ActionController::Base.allow_forgery_protection
+        ActionController::Base.allow_forgery_protection = true
+        example.run
+        ActionController::Base.allow_forgery_protection = original
+      end
+
+      let(:guest) { create(:user, :guest, last_request_at: 11.minutes.ago) }
+
+      before { sign_in guest }
+
+      it "X-CSRF-Token を付ければ通ること" do
+        get mypage_path
+        token = Nokogiri::HTML(response.body).at('meta[name="csrf-token"]')&.[]("content")
+        expect(token).to be_present
+
+        post guest_heartbeat_path, headers: { "X-CSRF-Token" => token }
+
+        aggregate_failures do
+          expect(response).to have_http_status(:no_content)
+          expect(guest.reload.last_request_at).to eq Time.current
+        end
+      end
+
+      # このテストが無いと、上のテストが「CSRF を有効にできていないだけ」で
+      # 通っている可能性を排除できない。
+      it "トークンが無ければ 422 で弾かれること" do
+        post guest_heartbeat_path
+
+        aggregate_failures do
+          expect(response).to have_http_status(422)
+          expect(guest.reload.last_request_at).to be < 10.minutes.ago
+        end
+      end
+    end
   end
 
   describe "ハートビートの設置" do
