@@ -34,8 +34,13 @@ RSpec.describe "ゲストログイン", type: :system do
       expect(page).to have_content I18n.t("mypages.show.title")
     end
 
-    it "ゲスト利用中バッジが出ること" do
-      expect(page).to have_content "ゲスト利用中"
+    # ゲストであることはマイページのユーザーカードで示す（専用バッジは置かない。
+    # 理由は設計 5.9 を参照）。
+    it "ゲストであることが分かること" do
+      aggregate_failures do
+        expect(page).to have_content "ゲストユーザー"
+        expect(page).to have_link "ゲストを終了"
+      end
     end
 
     it "デモデータが表示され、ポモドーロを開始できる状態であること" do
