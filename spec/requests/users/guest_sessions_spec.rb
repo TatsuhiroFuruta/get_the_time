@@ -99,7 +99,8 @@ RSpec.describe "Users::GuestSessions", type: :request do
       expect { post guest_sign_in_path }.not_to change(User.guest, :count)
 
       aggregate_failures do
-        expect(response).to redirect_to(root_path)
+        # トップページはヘッダーがフラッシュを覆うため、理由が伝わるログイン画面へ戻す
+        expect(response).to redirect_to(new_user_session_path)
         expect(flash[:alert]).to eq I18n.t("users.guest_sessions.flash_message.rate_limited")
       end
     end
@@ -146,13 +147,22 @@ RSpec.describe "Users::GuestSessions", type: :request do
     end
   end
 
+  # ホーム画面のヘッダーは fixed top-0 z-50 で、レイアウト先頭にあるフラッシュを
+  # 覆い隠す。トップページへ戻すと「ログアウトしました。」が見えないため、
+  # 通常のログアウトと同じくログイン画面へ戻す。
   describe "DELETE /users/sign_out（ゲストのログアウト）" do
     before { post guest_sign_in_path }
 
-    it "トップページへ戻すこと" do
+    it "ログイン画面へ戻すこと" do
       delete destroy_user_session_path
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it "ログアウトしたことが伝わること" do
+      delete destroy_user_session_path
+
+      expect(flash[:notice]).to eq I18n.t("devise.sessions.signed_out")
     end
   end
 

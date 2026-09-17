@@ -52,5 +52,33 @@ RSpec.describe "ゲストログイン", type: :system do
 
       expect(page).to have_content I18n.t("mystatuses.show.title")
     end
+
+    # 当初はトップページへ戻していたが、ホーム画面のヘッダーが fixed top-0 z-50 で
+    # レイアウト先頭のフラッシュを覆い隠すため、ログアウトしたことが伝わらなかった。
+    # リダイレクト先だけでなく「実際に読めること」を確かめる。
+    describe "ゲストを終了したとき" do
+      before { click_link "ゲストを終了" }
+
+      it "ログイン画面へ戻ること" do
+        expect(page).to have_current_path(new_user_session_path)
+      end
+
+      it "ログアウトしたことが表示されること" do
+        expect(page).to have_content I18n.t("devise.sessions.signed_out")
+      end
+
+      # 上の have_content ではこの不具合を検出できない。フラッシュは覆われていても
+      # DOM には存在し、かつ spec/support/capybara.rb が
+      # Capybara.ignore_hidden_elements = false を設定しているため見つかってしまう。
+      # Capybara は z-index による重なりを判定できないので、「覆う要素が無い画面か」
+      # を直接確かめる。
+      it "フラッシュを覆う固定ヘッダーが無い画面であること" do
+        expect(page).to have_no_css("nav.fixed")
+      end
+
+      it "その場でもう一度ゲストとして試せること" do
+        expect(page).to have_button "ゲストとして試す"
+      end
+    end
   end
 end
