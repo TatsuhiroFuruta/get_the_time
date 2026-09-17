@@ -28,7 +28,9 @@ class Users::GuestSessionsController < ApplicationController
 
   rate_limit to: MAX_SIGN_INS_PER_HOUR, within: 1.hour,
              by: -> { rate_limit_key },
-             with: -> { redirect_to root_path, alert: t("users.guest_sessions.flash_message.rate_limited") },
+             # 戻り先をトップページにすると、ホーム画面の fixed ヘッダーがフラッシュを
+             # 覆い隠して理由が伝わらない。ログイン画面へ戻す。
+             with: -> { redirect_to new_user_session_path, alert: t("users.guest_sessions.flash_message.rate_limited") },
              only: :create
 
   def create

@@ -13,18 +13,8 @@ class Users::SessionsController < Devise::SessionsController
     super
   end
 
-  # DELETE /resource/sign_out
-  def destroy
-    # sign_out 後は current_user が nil になり、after_sign_out_path_for には
-    # スコープ（:user）しか渡ってこない。判定はここで控えておく。
-    @signing_out_guest = current_user&.guest?
-    super
-  end
-
-  protected
-
-  # ゲストはデモを終えた閲覧者なので、ログイン画面ではなくトップページへ戻す。
-  def after_sign_out_path_for(resource_or_scope)
-    @signing_out_guest ? root_path : super
-  end
+  # ゲストのログアウトも通常どおりログイン画面へ戻す（遷移先を分けない）。
+  # 当初はトップページへ戻していたが、ホーム画面のヘッダーが fixed top-0 z-50 で
+  # レイアウト先頭のフラッシュを覆い隠すため、「ログアウトしました。」が見えなかった。
+  # ログイン画面には「ゲストとして試す」ボタンがあるので、やり直しの導線も保たれる。
 end
