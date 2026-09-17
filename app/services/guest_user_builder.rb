@@ -58,14 +58,24 @@ class GuestUserBuilder
   # ACTIVITY_AT は COALESCE(ended_at, created_at) で ended_at を優先するため、
   # 日次集計や浄化タイマーの判定には影響しない。「セッションが終わった時刻に記録を
   # 送信した」という意味になり、デモの筋書きとしても自然。
+  #
+  # light_time_index はデモデータ上の「何番目の光の時間か」で、activity_records には
+  # その列が無い。insert_all! はハッシュのキーをそのまま列名として扱うため、実 ID へ
+  # 変換したうえでキー自体を落とす必要がある。
+  #
+  # except / merge はどちらも新しいハッシュを返すので、受け取ったハッシュは壊さない。
+  # delete で取り除くと呼び出し元のハッシュを破壊するため、GuestDemoData が毎回新しい
+  # ハッシュを返すという実装に依存してしまう。将来メモ化されると、1 人目は成功して
+  # 2 人目から落ちる（原因は GuestDemoData 側なのに症状はここに出る）。
   def insert_activity_records(user, light_time_ids)
     now = Time.current
     rows = GuestDemoData.activity_records(now).map do |attrs|
-      attrs = attrs.dup
-      light_time_id = light_time_ids.fetch(attrs.delete(:light_time_index))
-      recorded_at = attrs.fetch(:ended_at)
+      light_time_id = light_time_ids.fetch(attrs.fetch(:light_time_index))
+      recorded_at   = attrs.fetch(:ended_at)
 
-      attrs.merge(user_id: user.id, light_time_id: light_time_id, created_at: recorded_at, updated_at: recorded_at)
+      attrs.except(:light_time_index)
+           .merge(user_id: user.id, light_time_id: light_time_id,
+                  created_at: recorded_at, updated_at: recorded_at)
     end
 
     ActivityRecord.insert_all!(rows)

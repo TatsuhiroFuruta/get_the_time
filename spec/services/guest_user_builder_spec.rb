@@ -96,6 +96,28 @@ RSpec.describe GuestUserBuilder, type: :service do
       end
     end
 
+    # GuestDemoData は今のところ呼ばれるたびに新しいハッシュを返すため、受け取った
+    # 側が破壊しても実害は出ない。ただしその前提に寄りかかると、将来メモ化された
+    # 瞬間に「1人目は成功し2人目から落ちる」という追いにくい壊れ方をする。
+    # ここでは同じ配列を返し続ける状況を作って、その依存が無いことを固定する。
+    describe "受け取ったデモデータを壊さないこと" do
+      let(:demo_rows) { GuestDemoData.activity_records(Time.current) }
+
+      before { allow(GuestDemoData).to receive(:activity_records).and_return(demo_rows) }
+
+      it "呼び出し元のハッシュからキーを取り除かないこと" do
+        described_class.call
+
+        expect(demo_rows).to all(include(:light_time_index))
+      end
+
+      it "同じ配列を渡され続けても2人目以降を作れること" do
+        described_class.call
+
+        expect { described_class.call }.to change(User.guest, :count).by(1)
+      end
+    end
+
     it "失敗したときに中途半端なユーザーを残さないこと" do
       allow(RegretRecord).to receive(:insert_all!).and_raise(ActiveRecord::StatementInvalid)
 
