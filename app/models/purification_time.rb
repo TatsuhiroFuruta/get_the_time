@@ -48,14 +48,32 @@ class PurificationTime < ApplicationRecord
     end
   end
 
+  # 浄化タイマーに時間を付与する。保存は呼び出し側（PurificationTimeGranter）が
+  # 払い出し台帳と一緒に 1 回で行うので、ここでは属性の代入だけにとどめる。
+  #
+  # running 中の残り時間は remaining_time ではなく total_time - 経過秒 で計算される
+  # （stop! / counting?）。remaining_time にだけ足すと次の stop! で付与分が消えるため、
+  # 状態に応じて次のように扱う。
+  #   - 計測中: total_time も延ばし、終了予定時刻を後ろへずらす。修正前（#282）の付与で
+  #     remaining_time > total_time になったデータもあるため、本来の残りである
+  #     remaining_time に揃えてから延ばし、running 中の remaining_time == total_time を保つ
+  #   - 期限切れのまま running で残っている: 先に終了扱い（idle・残り 0）に精算してから足す。
+  #     延ばしても期限がまだ過去にあれば結局 0 になるうえ、精算すれば counting? が
+  #     false のままなのでポモドーロもブロックしない
+  def add_time(seconds)
+    if running?
+      if counting?
+        self.total_time = remaining_time + seconds
+      else
+        assign_attributes(finished_attributes)
+      end
+    end
+
+    self.remaining_time += seconds
+  end
+
   def reset!
-    update!(
-      status: :idle,
-      remaining_time: 0,
-      total_time: 0,
-      started_at: nil,
-      paused_at: nil
-    )
+    update!(finished_attributes)
   end
 
   private
@@ -69,12 +87,16 @@ class PurificationTime < ApplicationRecord
   end
 
   def finish!
-    update!(
+    update!(finished_attributes)
+  end
+
+  def finished_attributes
+    {
       status: :idle,
       remaining_time: 0,
       total_time: 0,
       started_at: nil,
       paused_at: nil
-    )
+    }
   end
 end

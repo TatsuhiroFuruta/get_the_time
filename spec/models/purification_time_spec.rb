@@ -173,6 +173,154 @@ RSpec.describe PurificationTime, type: :model do
   end
 
   # =========================================================
+  # #add_time
+  # =========================================================
+  describe "#add_time" do
+    context "idle のとき" do
+      let(:purification_time) { create(:purification_time, :idle_with_time) }
+
+      it "remaining_time に加算され、状態は変わらないこと" do
+        purification_time.add_time(300)
+
+        aggregate_failures do
+          expect(purification_time.remaining_time).to eq 900
+          expect(purification_time.total_time).to eq 0
+          expect(purification_time).to be_idle
+        end
+      end
+    end
+
+    context "paused のとき" do
+      let(:purification_time) { create(:purification_time, :paused) }
+
+      it "remaining_time に加算され、状態は変わらないこと" do
+        purification_time.add_time(300)
+
+        aggregate_failures do
+          expect(purification_time.remaining_time).to eq 600
+          expect(purification_time.total_time).to eq 600
+          expect(purification_time).to be_paused
+        end
+      end
+
+      it "付与後に再開して止めても付与分が残ること" do
+        purification_time.add_time(300)
+        purification_time.save!
+
+        freeze_time do
+          purification_time.start!
+          travel 1.minute
+          purification_time.stop!
+        end
+
+        # 300 + 300 - 60 = 540 秒
+        expect(purification_time.reload.remaining_time).to eq 540
+      end
+    end
+
+    context "保存について" do
+      let(:purification_time) { create(:purification_time, :idle_with_time) }
+
+      # 呼び出し側（PurificationTimeGranter）が台帳と一緒に 1 回で save! するため
+      it "保存はしないこと" do
+        purification_time.add_time(300)
+        expect(purification_time.reload.remaining_time).to eq 600
+      end
+    end
+
+    context "running かつ計測中のとき" do
+      let!(:purification_time) { create(:purification_time, :running) }
+
+      it "stop! したときに付与分が残り時間に反映されること" do
+        travel_to(4.minutes.from_now) { purification_time.add_time(300) }
+        purification_time.save!
+
+        travel_to(6.minutes.from_now) { purification_time.stop! }
+
+        # 600 + 300 - 360 = 540 秒
+        expect(purification_time.reload.remaining_time).to be_within(2).of(540)
+      end
+
+      it "counting? の期限が付与分だけ延びること" do
+        purification_time.add_time(300)
+
+        aggregate_failures do
+          travel_to(12.minutes.from_now) { expect(purification_time.counting?).to be true }
+          travel_to(16.minutes.from_now) { expect(purification_time.counting?).to be false }
+        end
+      end
+
+      # 画面表示（JS）は remaining_time - 経過秒、サーバーは total_time - 経過秒で計算するため
+      it "remaining_time と total_time が等しいまま保たれること" do
+        purification_time.add_time(300)
+        expect(purification_time.remaining_time).to eq purification_time.total_time
+      end
+
+      # 修正前（#282）は running 中の付与が remaining_time にしか入らなかったため、
+      # remaining_time > total_time のデータが残りうる。remaining_time 側が本来の残り
+      it "修正前の付与で remaining_time が total_time より大きくても、remaining_time に揃えて延ばすこと" do
+        purification_time.update!(remaining_time: 900)
+
+        purification_time.add_time(300)
+
+        aggregate_failures do
+          expect(purification_time.remaining_time).to eq 1200
+          expect(purification_time.total_time).to eq 1200
+        end
+      end
+    end
+
+    context "running のまま終了時刻を過ぎているとき" do
+      let!(:purification_time) { create(:purification_time, :running) }
+
+      it "精算されて idle になり、残り時間が付与分になること" do
+        travel_to(60.minutes.from_now) { purification_time.add_time(600) }
+
+        aggregate_failures do
+          expect(purification_time).to be_idle
+          expect(purification_time.remaining_time).to eq 600
+          expect(purification_time.total_time).to eq 0
+          expect(purification_time.started_at).to be_nil
+        end
+      end
+
+      it "精算後もポモドーロをブロックしないこと（counting? が false）" do
+        travel_to(60.minutes.from_now) do
+          purification_time.add_time(600)
+          expect(purification_time.counting?).to be false
+        end
+      end
+
+      # travel_to は秒未満を切り捨てるため、factory の started_at（マイクロ秒付き）から
+      # 期限を求めると期限のわずかに手前へ移動してしまう。秒ちょうどの started_at を置く
+      it "ちょうど期限の瞬間に付与しても精算側に倒れること" do
+        deadline = Time.zone.local(2026, 9, 9, 10, 10, 0)
+        purification_time.update!(started_at: deadline - purification_time.total_time)
+
+        travel_to(deadline) { purification_time.add_time(600) }
+
+        aggregate_failures do
+          expect(purification_time).to be_idle
+          expect(purification_time.remaining_time).to eq 600
+        end
+      end
+    end
+
+    context "running だが started_at が nil の不正データのとき" do
+      let!(:purification_time) { create(:purification_time, :running, started_at: nil) }
+
+      it "例外を出さず、精算されて残り時間が付与分になること" do
+        purification_time.add_time(600)
+
+        aggregate_failures do
+          expect(purification_time).to be_idle
+          expect(purification_time.remaining_time).to eq 600
+        end
+      end
+    end
+  end
+
+  # =========================================================
   # #reset!
   # =========================================================
   describe "#reset!" do

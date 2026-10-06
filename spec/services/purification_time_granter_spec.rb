@@ -189,6 +189,70 @@ RSpec.describe PurificationTimeGranter, type: :service do
       end
     end
 
+    # #282: running 中に remaining_time だけへ加算すると、stop! が total_time から
+    # 残りを計算し直すため付与分が消えていた
+    context "浄化タイマーが running のとき" do
+      let!(:purification_time) do
+        create(:purification_time, user: user,
+                                   status: :running, remaining_time: 600, total_time: 600,
+                                   started_at: Time.zone.local(2026, 9, 9, 10, 0, 0))
+      end
+
+      it "計測中に付与された分が stop! 後も残ること" do
+        travel_to(Time.zone.local(2026, 9, 9, 10, 4, 0)) do
+          granter.call(create_record(30))
+        end
+
+        travel_to(Time.zone.local(2026, 9, 9, 10, 6, 0)) do
+          purification_time.reload.stop!
+        end
+
+        # 600 + 600 - 360 = 840 秒
+        expect(purification_time.reload.remaining_time).to eq 840
+      end
+
+      it "期限切れのまま残ったタイマーに付与された分が stop! 後も残ること" do
+        travel_to(Time.zone.local(2026, 9, 9, 11, 0, 0)) do
+          granter.call(create_record(30))
+        end
+
+        travel_to(Time.zone.local(2026, 9, 9, 11, 5, 0)) do
+          purification_time.reload.stop!
+        end
+
+        aggregate_failures do
+          expect(purification_time.reload.remaining_time).to eq 600
+          expect(purification_time).to be_idle
+        end
+      end
+
+      it "期限切れのタイマーに付与しても払い出し台帳が更新され、同じブロックを再付与しないこと" do
+        travel_to(Time.zone.local(2026, 9, 9, 11, 0, 0)) do
+          first  = granter.call(create_record(30))
+          second = granter.call(create_record(1))
+
+          aggregate_failures do
+            expect(first).to eq 10
+            expect(second).to eq 0
+            expect(purification_time.reload.granted_blocks_for(Date.new(2026, 9, 9))).to eq 1
+          end
+        end
+      end
+
+      it "計測中に付与した直後も remaining_time と total_time が等しいこと（画面表示とサーバーの残りが一致する）" do
+        travel_to(Time.zone.local(2026, 9, 9, 10, 4, 0)) do
+          granter.call(create_record(30))
+        end
+
+        purification_time.reload
+        aggregate_failures do
+          expect(purification_time.remaining_time).to eq 1200
+          expect(purification_time.total_time).to eq 1200
+          expect(purification_time).to be_running
+        end
+      end
+    end
+
     context "PurificationTime がまだ存在しないとき" do
       context "1 ブロック分たまったとき" do
         it "PurificationTime が新規作成されて 600 秒セットされること" do

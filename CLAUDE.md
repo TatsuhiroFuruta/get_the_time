@@ -95,6 +95,8 @@ System Spec が失敗した場合は `tmp/screenshots` のスクリーンショ�
 
 浄化タイマーへの「加算（副作用）」は `PurificationTimeGranter`（`app/services/`）に切り出してあります。`PurificationTimeGranter.new(user).call(activity_record)` が**保存済みの `ActivityRecord` を受け取り**、`user.with_lock` 内でその日の累計を読んで差分ブロック分を `PurificationTime` に加算し、**付与した実分数を返します**。累計の読み取りをロックの外に出すと同時保存で二重付与が起きるため、読み取りから加算までをロック内に閉じています。以前は `after_create :grant_purification_time` コールバックで付与していましたが、付与値を呼び出し側へ返せず、コントローラが表示用に再計算して乱数がズレる不具合があったため、サービスへ移しました（付与は 1 回だけ計算し、その戻り値を表示にも使う）。**`ActivityRecord` を直接 `create` しても付与は走りません。**
 
+`PurificationTime` が `running` の間、残り時間は `remaining_time` ではなく `total_time - 経過秒`（期限は `started_at + total_time`）で計算されます。そのため浄化タイマーへの加算は、`remaining_time` を直接いじらず**必ず `PurificationTime#add_time(seconds)` を経由してください**。`add_time` は、計測中なら `total_time` も延ばし、期限切れのまま `running` で残っていれば先に精算（`idle`・残り 0）してから足します（#282）。保存はせず、呼び出し側が台帳と一緒に `save!` します。
+
 `ActivityRecordForm`（`app/forms/` 配下、`config.autoload_paths << Rails.root.join("app/forms")` でオートロード）がコントローラから使われる書き込み経路です。`ActivityRecord` の作成、関連する `LightTime#characteristic` および `DarkTime#characteristic` の更新、`PurificationTimeGranter` による付与を単一トランザクションでまとめ、付与分数を `granted_purification_minutes` で公開します。**ポモドーロのフローから活動記録を作成する際は、このフォームオブジェクトを必ず経由してください**。直接 `ActivityRecord.create` を呼ぶと特徴量の更新と浄化タイマーの付与が漏れます。
 
 ### ポモドーロ / タイマーのルーティング
