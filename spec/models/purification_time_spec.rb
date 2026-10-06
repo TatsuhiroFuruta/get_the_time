@@ -305,8 +305,10 @@ RSpec.describe PurificationTime, type: :model do
         end
       end
 
-      # Granter を通すと、精算のあとで台帳を上書きするため、精算が台帳を消しても
-      # 気づけない。台帳が消えると同じ 30 分を再付与できてしまうので、add_time を直接確かめる
+      # add_time の精算の経路が台帳に触れないことを守る。台帳が消えると同じ 30 分を
+      # 再付与できてしまう。Granter を通すと精算のあとで台帳を上書きするため気づけず、
+      # reset! / finish! 側（「状態遷移と払い出し台帳」）では精算の経路を通らないので、
+      # add_time を直接確かめる
       it "精算しても払い出し台帳は変わらないこと" do
         purification_time.update!(granted_blocks_date: Date.new(2026, 9, 9), granted_blocks_count: 2)
 
