@@ -255,6 +255,19 @@ RSpec.describe PurificationTime, type: :model do
         purification_time.add_time(300)
         expect(purification_time.remaining_time).to eq purification_time.total_time
       end
+
+      # 修正前（#282）は running 中の付与が remaining_time にしか入らなかったため、
+      # remaining_time > total_time のデータが残りうる。remaining_time 側が本来の残り
+      it "修正前の付与で remaining_time が total_time より大きくても、remaining_time に揃えて延ばすこと" do
+        purification_time.update!(remaining_time: 900)
+
+        purification_time.add_time(300)
+
+        aggregate_failures do
+          expect(purification_time.remaining_time).to eq 1200
+          expect(purification_time.total_time).to eq 1200
+        end
+      end
     end
 
     context "running のまま終了時刻を過ぎているとき" do
