@@ -32,8 +32,8 @@ class PurificationTimeGranter
       next 0 if blocks <= 0
 
       minutes = ActivityRecord.sample_purification_minutes_for(blocks)
-      purification_time.remaining_time      += minutes * 60
-      purification_time.granted_blocks_date  = day
+      purification_time.add_time(minutes * 60)
+      purification_time.granted_blocks_date = day
       purification_time.granted_blocks_count = granted + blocks
       purification_time.save!
       minutes
