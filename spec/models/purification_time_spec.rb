@@ -304,6 +304,20 @@ RSpec.describe PurificationTime, type: :model do
           expect(purification_time.remaining_time).to eq 600
         end
       end
+
+      # Granter を通すと、精算のあとで台帳を上書きするため、精算が台帳を消しても
+      # 気づけない。台帳が消えると同じ 30 分を再付与できてしまうので、add_time を直接確かめる
+      it "精算しても払い出し台帳は変わらないこと" do
+        purification_time.update!(granted_blocks_date: Date.new(2026, 9, 9), granted_blocks_count: 2)
+
+        travel_to(60.minutes.from_now) { purification_time.add_time(600) }
+
+        aggregate_failures do
+          expect(purification_time).to be_idle
+          expect(purification_time.granted_blocks_date).to eq Date.new(2026, 9, 9)
+          expect(purification_time.granted_blocks_count).to eq 2
+        end
+      end
     end
 
     context "running だが started_at が nil の不正データのとき" do
