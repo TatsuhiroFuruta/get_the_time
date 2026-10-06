@@ -432,11 +432,11 @@ git commit -m "fix: 実行中の浄化タイマーに付与された時間が st
 Run: `docker compose exec web bundle exec rspec && docker compose exec web bin/rubocop && docker compose exec web bundle exec brakeman --no-pager`（`bin/brakeman` は最新版チェックで止まるため直接実行する）
 Expected: `0 failures` / `no offenses detected` / Brakeman の警告 0（2026-10-06 確認済み: rspec 799 件 green・rubocop clean・Brakeman 警告 0）
 
-- [ ] **Step 2: コードレビューを通す**
+- [x] **Step 2: コードレビューを通す**
 
 `superpowers:requesting-code-review` で、ブランチ全体の差分（`main...HEAD`）をレビューする。指摘は `superpowers:receiving-code-review` で根拠を確かめてから反映し、反映したら Step 1 を再実行する。
 
-- [ ] **Step 3: push して PR を作る**
+- [x] **Step 3: push して PR を作る**
 
 ```bash
 git push -u origin fix/purification-grant-while-running-282
