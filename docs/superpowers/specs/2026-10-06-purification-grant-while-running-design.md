@@ -65,12 +65,13 @@
 
 | 付与時の状態 | 処理 |
 |---|---|
-| `running` かつ `counting?`（期限前） | `remaining_time` と `total_time` の両方に加算する。期限が後ろへずれ、タイマーが延びる |
+| `running` かつ `counting?`（期限前） | `remaining_time` に加算し、`total_time` を `remaining_time + 付与秒` に揃える。期限が後ろへずれ、タイマーが延びる |
 | `running` だが期限切れ（`counting?` が false） | 先に `finish!` と同じ属性（`idle`・残り 0・`total_time` 0・`started_at` / `paused_at` nil）に精算してから、`remaining_time` に加算する |
 | `idle` / `paused` | 従来どおり `remaining_time` に加算するだけ |
 
 - **保存はしない。** Granter が払い出し台帳（`granted_blocks_date` / `granted_blocks_count`）と一緒に、`with_lock` 内で 1 回だけ `save!` する流れを保つ。保存を連想させないよう、メソッド名に `!` は付けない。
-- `finish!` と精算で同じ属性を使うので、private の `finished_attributes` に切り出して共有する。
+- `finish!`・`reset!`・精算で同じ属性を使うので、private の `finished_attributes` に切り出して共有する。
+- 計測中の分岐で `total_time` に同じ秒数を足すのではなく `remaining_time` に揃えるのは、修正前の付与で `remaining_time > total_time` になったデータがありうるため。修正前は `remaining_time` にだけ付与が入っていたので、`remaining_time` の方が本来の残りになる（コードレビューで指摘を受けて追加）。
 - 精算でも払い出し台帳には触れない（`reset!` / `finish!` と同じ不変条件）。
 
 ### `PurificationTimeGranter` の変更
