@@ -26,8 +26,9 @@ class PurificationReward
     TIME_TABLE.last[:minutes]
   end
 
-  # 累計分数から、消化済みのブロック数を求める。
-  # 余りを翌日へ繰り越さない設計のため、付与済みブロック数は累計だけから導出できる。
+  # 累計分数から、獲得できるブロック数（floor(累計 / 30)）を求める。
+  # 付与済みの数ではない。付与済みの数は台帳（PurificationTime#granted_blocks_for）に保存し、
+  # 実際の付与数はこの戻り値との差で決まる（累計から導出しない理由は grant! を参照）。
   def self.blocks(minutes)
     [ minutes.to_i, 0 ].max / BLOCK_MINUTES
   end

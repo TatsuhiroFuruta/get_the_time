@@ -114,8 +114,9 @@ class ActivityRecordsController < ApplicationController
   end
 
   # 計測結果（started_at / ended_at / total_duration）は編集させない。
-  # 浄化タイマーの付与済みブロック数は当日累計から導出しているため、後から書き換えられると
-  # 同じ活動時間で再度ブロックを獲得できてしまう。編集フォームもこれらは表示のみで送信しない。
+  # 浄化タイマーの付与数は当日累計（ACTIVITY_AT の日付ごとの SUM(total_duration)）と払い出し台帳の
+  # 差で決まるため、後から書き換えられると当日累計を水増しでき、計測していない時間のぶんまで
+  # 次の記録でブロックを獲得できてしまう。編集フォームもこれらは表示のみで送信しない。
   def activity_record_params
     params.require(:activity_record).permit(
     :task, :idle_duration, :satisfaction, :progress,
