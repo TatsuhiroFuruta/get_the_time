@@ -221,7 +221,7 @@ RSpec.describe PurificationTime, type: :model do
     context "保存について" do
       let(:purification_time) { create(:purification_time, :idle_with_time) }
 
-      # 呼び出し側（PurificationTimeGranter）が台帳と一緒に 1 回で save! するため
+      # 呼び出し側（PurificationReward.grant!）が台帳と一緒に 1 回で save! するため
       it "保存はしないこと" do
         purification_time.add_time(300)
         expect(purification_time.reload.remaining_time).to eq 600

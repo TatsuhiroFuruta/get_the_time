@@ -92,7 +92,7 @@ RSpec.describe GuestUserBuilder, type: :service do
           satisfaction: 3, progress: 3, quality: 3, focus: 3, fatigue: 3
         )
 
-        expect(PurificationTimeGranter.new(user).call(record)).to eq 10
+        expect(PurificationReward.grant!(user, record)).to eq 10
       end
     end
 

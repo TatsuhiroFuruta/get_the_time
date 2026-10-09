@@ -20,7 +20,7 @@ RSpec.describe GuestDemoData, type: :service do
       expect(records.size).to be >= 30
     end
 
-    # 今日の記録を入れると PurificationTimeGranter が floor(当日累計 / 30) 個の
+    # 今日の記録を入れると PurificationReward.grant! が floor(当日累計 / 30) 個の
     # ブロックを閲覧者に払い出してしまう。これは設計上の不変条件。
     it "すべて昨日以前の記録であること" do
       today = now.to_date

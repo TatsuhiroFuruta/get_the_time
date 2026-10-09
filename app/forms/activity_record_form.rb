@@ -65,7 +65,7 @@ class ActivityRecordForm
       )
 
       # 浄化タイマーの付与（当日累計から算出。乱数を含むためここで 1 回だけ実行し、実値を保持）
-      @granted_purification_minutes = PurificationTimeGranter.new(user).call(activity_record)
+      @granted_purification_minutes = PurificationReward.grant!(user, activity_record)
     end
 
     true
