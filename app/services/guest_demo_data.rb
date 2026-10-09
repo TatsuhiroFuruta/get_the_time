@@ -9,7 +9,7 @@
 # 画面に出すものなので、文言は手書きする。
 #
 # 活動記録は必ず昨日以前にする。今日の記録を入れると、閲覧者が活動記録を1件作った
-# 瞬間に PurificationTimeGranter が floor(当日累計 / 30) 個のブロックを払い出して
+# 瞬間に PurificationReward.grant! が floor(当日累計 / 30) 個のブロックを払い出して
 # しまう（付与数は「当日累計から求めたブロック数 - 払い出し済み」で決まるため）。
 module GuestDemoData
   module_function

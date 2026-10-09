@@ -197,7 +197,7 @@ RSpec.describe "ActivityRecords", type: :request do
       end
 
       context "total_duration >= 30 のとき" do
-        before { allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10) }
+        before { allow(PurificationReward).to receive(:sample_minutes).and_return(10) }
 
         it "flash[:purification_time] に付与メッセージがセットされること" do
           post activity_records_path, params: valid_params
@@ -219,7 +219,7 @@ RSpec.describe "ActivityRecords", type: :request do
       context "付与分数が乱数で変動するとき（表示と保存の一致）" do
         before do
           # 60 分 = 2 ブロック。1 回しか計算しなければ 8 + 10 = 18 分が確定する。
-          allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(8, 10)
+          allow(PurificationReward).to receive(:sample_minutes).and_return(8, 10)
         end
 
         it "フラッシュの分数と実際に付与された残り時間が一致すること" do

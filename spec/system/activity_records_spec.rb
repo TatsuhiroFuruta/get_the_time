@@ -455,7 +455,7 @@ RSpec.describe "ActivityRecords システムテスト", type: :system do
       end
 
       it "浄化タイマー獲得モーダルが表示され、OKをクリックすると閉じること" do
-        allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10)
+        allow(PurificationReward).to receive(:sample_minutes).and_return(10)
 
         %w[satisfaction progress quality focus fatigue].each do |attr|
           find("input[name='activity_record_form[#{attr}]'][value='3']").choose

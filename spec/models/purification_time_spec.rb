@@ -221,7 +221,7 @@ RSpec.describe PurificationTime, type: :model do
     context "保存について" do
       let(:purification_time) { create(:purification_time, :idle_with_time) }
 
-      # 呼び出し側（PurificationTimeGranter）が台帳と一緒に 1 回で save! するため
+      # 呼び出し側（PurificationReward.grant!）が台帳と一緒に 1 回で save! するため
       it "保存はしないこと" do
         purification_time.add_time(300)
         expect(purification_time.reload.remaining_time).to eq 600
@@ -306,7 +306,7 @@ RSpec.describe PurificationTime, type: :model do
       end
 
       # add_time の精算の経路が台帳に触れないことを守る。台帳が消えると同じ 30 分を
-      # 再付与できてしまう。Granter を通すと精算のあとで台帳を上書きするため気づけず、
+      # 再付与できてしまう。PurificationReward.grant! を通すと精算のあとで台帳を上書きするため気づけず、
       # reset! / finish! 側（「状態遷移と払い出し台帳」）では精算の経路を通らないので、
       # add_time を直接確かめる
       it "精算しても払い出し台帳は変わらないこと" do

@@ -48,7 +48,7 @@ class PurificationTime < ApplicationRecord
     end
   end
 
-  # 浄化タイマーに時間を付与する。保存は呼び出し側（PurificationTimeGranter）が
+  # 浄化タイマーに時間を付与する。保存は呼び出し側（PurificationReward.grant!）が
   # 払い出し台帳と一緒に 1 回で行うので、ここでは属性の代入だけにとどめる。
   #
   # running 中の残り時間は remaining_time ではなく total_time - 経過秒 で計算される

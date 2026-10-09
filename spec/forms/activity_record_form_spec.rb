@@ -165,7 +165,7 @@ RSpec.describe ActivityRecordForm, type: :model do
 
     context "浄化タイマーの付与" do
       # 付与分数は乱数なので 1 ブロック 10 分に固定する
-      before { allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10) }
+      before { allow(PurificationReward).to receive(:sample_minutes).and_return(10) }
 
       it "当日累計が 30 分に満たないときは付与されないこと" do
         form = described_class.new(valid_attributes.merge(total_duration: 25, idle_duration: 0))

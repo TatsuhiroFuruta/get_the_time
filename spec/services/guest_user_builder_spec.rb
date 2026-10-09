@@ -82,7 +82,7 @@ RSpec.describe GuestUserBuilder, type: :service do
       end
 
       it "閲覧者が30分の記録を1件作ったとき、付与は1ブロック分だけであること" do
-        allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10)
+        allow(PurificationReward).to receive(:sample_minutes).and_return(10)
         record = user.activity_records.create!(
           light_time: user.light_times.find_by(is_current: true),
           started_at: 30.minutes.ago,
@@ -92,7 +92,7 @@ RSpec.describe GuestUserBuilder, type: :service do
           satisfaction: 3, progress: 3, quality: 3, focus: 3, fatigue: 3
         )
 
-        expect(PurificationTimeGranter.new(user).call(record)).to eq 10
+        expect(PurificationReward.grant!(user, record)).to eq 10
       end
     end
 
