@@ -7,7 +7,7 @@ RSpec.describe PurificationTimeGranter, type: :service do
   subject(:granter) { described_class.new(user) }
 
   # 付与分数は乱数（重み付き抽選）なので、テストでは 1 ブロック 10 分に固定する
-  before { allow(ActivityRecord).to receive(:sample_purification_minutes).and_return(10) }
+  before { allow(PurificationReward).to receive(:sample_minutes).and_return(10) }
 
   # Granter は保存済みのレコードを受け取る。started_at は ended_at から逆算する。
   def create_record(total_duration, ended_at: Time.current, started_at: nil)
@@ -63,7 +63,7 @@ RSpec.describe PurificationTimeGranter, type: :service do
       context "1 件で複数ブロックをまたぐとき" do
         it "またいだ数だけ抽選が引かれること" do
           granter.call(create_record(90))
-          expect(ActivityRecord).to have_received(:sample_purification_minutes).exactly(3).times
+          expect(PurificationReward).to have_received(:sample_minutes).exactly(3).times
         end
       end
 

@@ -31,7 +31,7 @@ class PurificationTimeGranter
       blocks = unpaid_blocks(day, granted)
       next 0 if blocks <= 0
 
-      minutes = ActivityRecord.sample_purification_minutes_for(blocks)
+      minutes = PurificationReward.sample_minutes_for(blocks)
       purification_time.add_time(minutes * 60)
       purification_time.granted_blocks_date = day
       purification_time.granted_blocks_count = granted + blocks
@@ -47,6 +47,6 @@ class PurificationTimeGranter
   def unpaid_blocks(day, granted)
     total = ActivityRecord.total_light_time_on(@user, day)
 
-    [ ActivityRecord.purification_blocks(total) - granted, 0 ].max
+    [ PurificationReward.blocks(total) - granted, 0 ].max
   end
 end

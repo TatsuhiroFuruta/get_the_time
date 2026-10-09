@@ -89,7 +89,7 @@ System Spec が失敗した場合は `tmp/screenshots` のスクリーンショ�
 
 `ActivityRecord` 作成は単純な INSERT ではありません:
 - `before_save :calculate_desired_self_percentage`（コールバック）— `(total_duration - idle_duration) / total_duration` を算出。
-- 浄化タイマーの付与は**1 セッション単位ではなく、その日の光の時間の累計 30 分ごと**です。計算は `ActivityRecord` のクラスメソッド（純粋関数）に分かれています。`purification_blocks(minutes)` が累計分数から消化済みブロック数（`floor(累計 / 30)`）を求め、`sample_purification_minutes_for(blocks)` がブロック数だけ `sample_purification_minutes`（`PURIFICATION_TIME_TABLE` の重み付き抽選）を引いて合計します。**後者は乱数を含むため、同じ入力でも呼ぶたびに結果が変わります。表示・保存で複数回呼ばないこと。**
+- 浄化タイマーの付与は**1 セッション単位ではなく、その日の光の時間の累計 30 分ごと**です。付与のルールは `PurificationReward`（`app/models/`、テーブルを持たない PORO）のクラスメソッドにまとめてあります。`blocks(minutes)` が累計分数から消化済みブロック数（`floor(累計 / 30)`）を求め、`sample_minutes_for(blocks)` がブロック数だけ `sample_minutes`（`TIME_TABLE` の重み付き抽選）を引いて合計します。**後者は乱数を含むため、同じ入力でも呼ぶたびに結果が変わります。表示・保存で複数回呼ばないこと。**
 - **当日累計は活動記録から導出し、払い出し済みブロック数は `purification_times` に保存します**（`granted_blocks_date` / `granted_blocks_count`）。付与数は `floor(累計 / 30) - 払い出し済み` です。累計は記録が削除されると減るため、払い出し済み数まで導出に頼ると、29 分ためた状態で 1 分の記録を作っては消す操作で 1 分ごとに 1 ブロック稼げてしまいます。**`PurificationTime#reset!` / `finish!` はこの台帳に触れないこと。** 触れると、タイマーをリセットするだけで再付与できる抜け穴になります。
 - 「その活動がどの日のものか」は `ActivityRecord::ACTIVITY_AT`（= `COALESCE(ended_at, created_at)`）に集約されており、`activity_on` / `within_last_days` / `daily_series` がすべてこの式を使います。1 件のレコードから日付を得る Ruby 側は `ActivityRecord.activity_date` で、同じルールなので定数の隣に置いてあります。`created_at` は記録の送信時刻なので日付の判定には使いません。
 
