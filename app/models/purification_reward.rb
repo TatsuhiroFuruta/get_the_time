@@ -26,12 +26,9 @@ class PurificationReward
     TIME_TABLE.last[:minutes]
   end
 
-  # 累計分数から、その日に獲得できるブロック数を求める。余りは翌日へ繰り越さない。
-  #
-  # これは「獲得できる数」であって「付与済みの数」ではない。累計は活動記録の削除で
-  # 減るため、付与済みの数を累計から導出すると、記録を作っては消す操作で同じブロックを
-  # 何度も稼げてしまう。付与済みの数は purification_times の台帳に保存し、実際の付与数は
-  # この戻り値と台帳の差で決まる（grant! を参照）。
+  # 累計分数から、獲得できるブロック数（floor(累計 / 30)）を求める。
+  # 付与済みの数ではない。付与済みの数は台帳（PurificationTime#granted_blocks_for）に保存し、
+  # 実際の付与数はこの戻り値との差で決まる（累計から導出しない理由は grant! を参照）。
   def self.blocks(minutes)
     [ minutes.to_i, 0 ].max / BLOCK_MINUTES
   end
