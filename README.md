@@ -130,7 +130,6 @@ https://github.com/user-attachments/assets/4724f365-1458-4a10-b8e9-73ffee1a5621
 | バックエンド | Ruby 3.3.6 / Ruby on Rails 8.1.3.1 |
 | フロントエンド | Hotwire (Turbo / Stimulus) / esbuild / Tailwind CSS v4 / Chart.js |
 | データベース | PostgreSQL (Neon) |
-| バックグラウンド処理など | Solid Queue / Solid Cache / Solid Cable |
 | 認証 | Devise / OmniAuth (Google ログイン) |
 | 検索・ページネーション | Ransack / Kaminari |
 | 外部 API | OpenAI API（後悔した 1 日の要約） / Resend（メール送信） |
