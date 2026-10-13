@@ -28,17 +28,17 @@ https://get-the-time.com/
 ### 1. マイページからタイマースタート
 マイページには、なりたい自分と避けたい未来が常に表示されます。取り組む光の時間を選んでスタートボタンを押すと、ポモドーロタイマーが始まります。
 
-<!-- VIDEO: transfer_activity_time -->
+https://github.com/user-attachments/assets/010cb55b-ba2d-4e06-bdc8-3ebfa187e718
 
 ### 2. 休憩時間への遷移
 活動時間が終わると、自動で休憩時間のタイマーに切り替わります。活動時間・休憩時間はマイページから設定できます（初期値は活動 25 分・休憩 5 分）。
 
-<!-- VIDEO: transfer_break_time -->
+https://github.com/user-attachments/assets/3e1b9910-4340-4571-b333-df8de3e64902
 
 ### 3. タイマー終了から活動記録の作成
 タイマーを終了すると、活動記録の入力画面に移ります。サボった時間と、満足度・進行度・作業の質・集中度・疲労感の 5 段階評価を記録します。取り組みの中で気づいた「光の時間の特徴」「闇の時間の特徴」もここで更新できます。
 
-<!-- VIDEO: create_activity_record -->
+https://github.com/user-attachments/assets/691bd34a-b465-457b-90fb-138fcc34ffbb
 
 ### 4. 活動記録の詳細で「今日の本来の自分」を振り返る
 記録した活動の詳細画面には、計測時間とサボった時間から算出した「**今日の本来の自分**」を表示しています。その日の自分がどれだけ望む行動に向き合えたかを、記録を見返すたびに振り返れるようにするためです。気づきがあればコメントを追記でき、結果は X でシェアできます。
@@ -48,17 +48,17 @@ https://get-the-time.com/
 ### 5. 浄化タイマー
 その日の光の時間が累計 30 分たまるごとに、8〜15 分の浄化タイマーが付与されます。浄化タイマーの間は、SNS や動画などの娯楽を罪悪感なく楽しめます。累計は 0 時にリセットされ、マイページで次の付与までの残り時間を確認できます。
 
-<!-- VIDEO: purification_time -->
+https://github.com/user-attachments/assets/6ea35381-36fa-4dde-8192-b400ba5b55ab
 
 ### 6. マイステータスの振り返り
 直近 2 週間の記録から、光の時間の推移、本来の自分の平均、評価項目のレーダーチャート、疲労感の平均をグラフで確認できます。本来の自分は X でシェアできます。
 
-<!-- VIDEO: mystatus_reflection -->
+https://github.com/user-attachments/assets/021c3cac-d7d2-4caa-bcef-b0748021f0c7
 
 ### 7. 後悔した 1 日の記録と AI による要約
 「後悔した 1 日を過ごしてしまった」と思ったら、その日のことを書き残せます。お気に入りに登録した記録をもとに、闇の時間に陥りやすい傾向を AI が要約し、ボタン 1 つで闇の時間の特徴へ追記できます。
 
-<!-- VIDEO: regret_summary -->
+https://github.com/user-attachments/assets/4724f365-1458-4a10-b8e9-73ffee1a5621
 
 <img src="app/assets/images/how_to_use/regret_record_show_display.png" alt="後悔した1日の詳細画面" width="720">
 
