@@ -5,25 +5,69 @@
 ## アプリURL
 https://get-the-time.com/
 
-## サービス概要
-**Get The Time** は学校や仕事、家事などで拘束されていない自由時間を
-- 光の時間（本来望んでいる行動をしている時間。例：勉強、副業、読書など）
-- 闇の時間（望んでいないついやってしまう行動をしている時間。例：SNS、動画、アニメ、ゲーム、ネットサーフィンなど）
+ゲストログインから、登録なしですぐにお試しいただけます。
 
-に分けて整理し、本来望んでいる自己像を形成するアプリです。
-具体的には、下記の2ステップで行います：
-1. 本来望んでいる行動の習慣化が実現したら、どのような自分になるのかを明確にします。
-2. ポモドーロ・テクニックを用いて光の時間を計測し、サボった時間を「光の時間内の闇の時間」として記録することで
-光の時間に対する光とサボった時間の差の割合を本来の自分として評価します：
+## サービス概要
+**Get The Time** は、学校や仕事、家事などが終わった後の自由時間を、次の 2 つに分けて整理するアプリです。
+
+- **光の時間**：本来望んでいる行動をしている時間（例：勉強、副業、読書など）
+- **闇の時間**：望んでいないのに、ついやってしまう行動をしている時間（例：SNS、動画、ゲーム、ネットサーフィンなど）
+
+光の時間をポモドーロタイマーで計測し、その中でサボった時間を記録することで、「**本来の自分**」を数値で振り返ります。
 
 ```math
 \text{本来の自分}=\frac{\text{光の時間}-\text{サボった時間}}{\text{光の時間}}.
 ```
-すなわち、**Get The Time** では、本来の自分を「自由時間の中でどのくらい自分自身を裏切らずに向き合ったのか（自己像の形成度合い）を表す指標」と定義して考えていきます。
 
-また、頑張った分だけ「光の時間外の闇の時間」を「浄化タイマー（正当な報酬）」として付与することで、
-娯楽の目安時間を正しく把握することができます。
-このようにして、光と闇の時間のバランスを取ることで望んでいる本来の自分に出会うサービスとなっております。
+本来の自分は、「自由時間の中でどのくらい自分自身を裏切らずに向き合えたか（自己像の形成度合い）」を表す指標です。
+また、頑張った分だけ娯楽に使える「**浄化タイマー**（正当な報酬）」が付与されるため、罪悪感なく休むことができます。
+光と闇の時間のバランスを取りながら、望んでいる本来の自分に出会うためのサービスです。
+
+## 主な機能
+
+### 1. マイページからタイマースタート
+マイページには、なりたい自分と避けたい未来が常に表示されます。取り組む光の時間を選んでスタートボタンを押すと、ポモドーロタイマーが始まります。
+
+<!-- VIDEO: transfer_activity_time -->
+
+### 2. 休憩時間への遷移
+活動時間が終わると、自動で休憩時間のタイマーに切り替わります。活動時間・休憩時間はマイページから設定できます（初期値は活動 25 分・休憩 5 分）。
+
+<!-- VIDEO: transfer_break_time -->
+
+### 3. タイマー終了から活動記録の作成
+タイマーを終了すると、活動記録の入力画面に移ります。サボった時間と、満足度・進行度・作業の質・集中度・疲労感の 5 段階評価を記録します。取り組みの中で気づいた「光の時間の特徴」「闇の時間の特徴」もここで更新できます。
+
+<!-- VIDEO: create_activity_record -->
+
+### 4. 活動記録の詳細で「今日の本来の自分」を振り返る
+記録した活動の詳細画面には、計測時間とサボった時間から算出した「**今日の本来の自分**」を表示しています。その日の自分がどれだけ望む行動に向き合えたかを、記録を見返すたびに振り返れるようにするためです。気づきがあればコメントを追記でき、結果は X でシェアできます。
+
+<img src="app/assets/images/how_to_use/activity_record_show_display.png" alt="活動記録の詳細画面" width="720">
+
+### 5. 浄化タイマー
+その日の光の時間が累計 30 分たまるごとに、8〜15 分の浄化タイマーが付与されます。浄化タイマーの間は、SNS や動画などの娯楽を罪悪感なく楽しめます。累計は 0 時にリセットされ、マイページで次の付与までの残り時間を確認できます。
+
+<!-- VIDEO: purification_time -->
+
+### 6. マイステータスの振り返り
+直近 2 週間の記録から、光の時間の推移、本来の自分の平均、評価項目のレーダーチャート、疲労感の平均をグラフで確認できます。本来の自分は X でシェアできます。
+
+<!-- VIDEO: mystatus_reflection -->
+
+### 7. 後悔した 1 日の記録と AI による要約
+「後悔した 1 日を過ごしてしまった」と思ったら、その日のことを書き残せます。お気に入りに登録した記録をもとに、闇の時間に陥りやすい傾向を AI が要約し、ボタン 1 つで闇の時間の特徴へ追記できます。
+
+<!-- VIDEO: regret_summary -->
+
+<img src="app/assets/images/how_to_use/regret_record_show_display.png" alt="後悔した1日の詳細画面" width="720">
+
+### 8. 光の時間・闇の時間の詳細
+光の時間にはなりたい自分を、闇の時間には避けたい未来を登録します。活動記録や AI の要約を通して書き足した「特徴」がここに蓄積され、自分の行動パターンを見返せます。
+
+| 光の時間の詳細 | 闇の時間の詳細 |
+|---|---|
+| <img src="app/assets/images/how_to_use/light_time_show_display.png" alt="光の時間の詳細画面"> | <img src="app/assets/images/how_to_use/dark_time_show_display.png" alt="闇の時間の詳細画面"> |
 
 ## このサービスへの思い・作りたい理由
 学校が終わった後、「やった！休みだ！この後自由だ！！！」と思って
@@ -54,10 +98,8 @@ https://get-the-time.com/
 「悪習慣と後悔の念を繰り返す日常を失くし、本来望んでいることに時間を有効に活用できる」
 のではないかと思い、**Get The Time** を実現することにしました。
 
-## ユーザー層について
-
-### 共通点：
-### 「本来こうしたいのに誘惑に負けてできない自分」に苦しんでいる人を想定しております。
+## 想定ユーザー
+「**本来こうしたいのに誘惑に負けてできない自分**」に苦しんでいる人を想定しております。
 
 - 学校が終わった後や休日、勉強したいと思ってもできない学生、受験生
 - 仕事や家事が終わって一日の残り時間や休日を自己投資時間に活用したい社会人、主婦、主夫
@@ -66,11 +108,159 @@ https://get-the-time.com/
 - スマホ依存・先延ばしに悩んでいる人
 - 習慣化アプリや日記が続かなかった人
 
-## サービスの利用イメージ
+## サービスの差別化ポイント・推しポイント
+機能を考慮すると、「時間管理」「集中」「習慣化」アプリが類似のサービスとして挙げられます。
+以下の表が、各々の特徴をまとめたものになります：
 
-最初に、このサービスにおける時間の定義について述べます：
+| アプリ | 例 | 解決したい問題 |
+|---|---|---|
+| 時間管理アプリ | Google Calendar | 時間をどのように配分するのか |
+| 集中アプリ | Forest、Focus To-Do、ポモドーロタイマーアプリ | 目の前の作業に集中させる |
+| 習慣化アプリ | Habitica | 行動を継続させる |
 
-### 1.拘束時間
+**Get The Time** のテーマは、「本来望んでいる自己像に結びつく自由時間の正しい使い方とは」です。いずれのアプリとも根本的に解決したい問題が異なっているため、この点で差別化できていると思われます。
+
+## ユーザーの獲得について
+- 「#今日の本来の自分」や「#本来の自分」というハッシュタグで、各々今日の本来の自分、ステータスでの本来の自分をXに投稿できるシェア機能を搭載。
+- noteを使って具体的な活用方法を宣伝する。
+
+## 使用技術
+| カテゴリ | 技術 |
+|---|---|
+| バックエンド | Ruby 3.3.6 / Ruby on Rails 8.1.3.1 |
+| フロントエンド | Hotwire (Turbo / Stimulus) / esbuild / Tailwind CSS v4 / Chart.js |
+| データベース | PostgreSQL (Neon) |
+| バックグラウンド処理など | Solid Queue / Solid Cache / Solid Cable |
+| 認証 | Devise / OmniAuth (Google ログイン) |
+| 検索・ページネーション | Ransack / Kaminari |
+| 外部 API | OpenAI API（後悔した 1 日の要約） / Resend（メール送信） |
+| テスト・静的解析 | RSpec / FactoryBot / Capybara / RuboCop / Brakeman |
+| 開発環境 | Docker (Docker Compose) |
+| CI / デプロイ | GitHub Actions / Render |
+
+## 画面遷移図
+Figma：https://www.figma.com/design/IPuZKnOO8Oj3byb8qIBjl7/Get-The-Time?node-id=0-1&p=f&t=kPar2A1oObmgWZZ5-0
+
+## ER図
+
+```mermaid
+erDiagram
+  users ||--o{ light_times : "登録する"
+  users ||--o| dark_times : "登録する"
+  users ||--o{ activity_records : "記録する"
+  light_times ||--o{ activity_records : "計測される"
+  users ||--o| purification_times : "持つ"
+  users ||--o| pomodoro_settings : "設定する"
+  users ||--o{ regret_records : "書き残す"
+  users ||--o| regret_summaries : "要約される"
+
+  users {
+    bigint id PK
+    string name "ユーザー名"
+    string email "メールアドレス"
+    string encrypted_password "パスワード"
+    string reset_password_token
+    datetime reset_password_sent_at
+    datetime remember_created_at
+    string provider "外部ログインのプロバイダ"
+    string uid "外部ログインのID"
+    boolean guest "ゲストユーザーか"
+    datetime last_request_at
+    datetime created_at
+    datetime updated_at
+  }
+
+  light_times {
+    bigint id PK
+    bigint user_id FK
+    text action "光の時間での行動"
+    text desired_self "なりたい自分"
+    text characteristic "光の時間の特徴"
+    boolean is_current "選択中の光の時間か"
+    datetime created_at
+    datetime updated_at
+  }
+
+  dark_times {
+    bigint id PK
+    bigint user_id FK "ユーザーごとに1件"
+    text behavior "闇の時間での行動"
+    text unwanted_future "避けたい未来"
+    text characteristic "闇の時間の特徴"
+    datetime created_at
+    datetime updated_at
+  }
+
+  activity_records {
+    bigint id PK
+    bigint user_id FK
+    bigint light_time_id FK
+    text task "やること"
+    datetime started_at
+    datetime ended_at
+    integer total_duration "計測時間"
+    integer idle_duration "サボった時間"
+    decimal desired_self_percentage "今日の本来の自分"
+    integer satisfaction "満足度"
+    integer progress "進行度"
+    integer quality "作業の質"
+    integer focus "集中度"
+    integer fatigue "疲労感"
+    text comment "コメント"
+    boolean favorited "お気に入り"
+    datetime created_at
+    datetime updated_at
+  }
+
+  purification_times {
+    bigint id PK
+    bigint user_id FK "ユーザーごとに1件"
+    integer status "idle / running / paused"
+    integer total_time
+    integer remaining_time "残り時間"
+    datetime started_at
+    datetime paused_at
+    date granted_blocks_date "付与済みブロックの日付"
+    integer granted_blocks_count "付与済みブロック数"
+    datetime created_at
+    datetime updated_at
+  }
+
+  pomodoro_settings {
+    bigint id PK
+    bigint user_id FK "ユーザーごとに1件"
+    integer work_duration "活動時間（分）"
+    integer break_duration "休憩時間（分）"
+    datetime created_at
+    datetime updated_at
+  }
+
+  regret_records {
+    bigint id PK
+    bigint user_id FK
+    text title "タイトル"
+    text content "内容"
+    boolean favorited "お気に入り"
+    datetime created_at
+    datetime updated_at
+  }
+
+  regret_summaries {
+    bigint id PK
+    bigint user_id FK "ユーザーごとに1件"
+    text content "AIによる要約"
+    datetime generated_at "要約日時"
+    datetime created_at
+    datetime updated_at
+  }
+```
+
+## 詳細な仕様
+
+<details>
+<summary>このサービスにおける時間の定義</summary>
+
+### 1. 拘束時間
 日常でやらなければならないと認識して取り組んでいる時間。日常でやらなければならないこととして、主に仕事や学校、食事、風呂、歯磨き、睡眠、その他義務的にやっていること等が該当する。原則、アプリを利用しない時間帯である。ただし、宿題等改善したいものがあれば、下記の光の時間として登録することはこの場限りではないものとする。
 
 ### 2. アプリ利用自由時間
@@ -90,6 +280,11 @@ https://get-the-time.com/
 
 ### 3. その他の時間
 このサービスを利用しない自由時間。主に、このサービスに依存しないリラックスやのんびりする時間、このサービスを利用しない間の闇の時間等が該当する。ただし、リラックスやのんびりする時間について、「完璧主義で疲れやすいのを克服したい」、「スマホ依存を改善したい」等の目的で、光の時間として登録することはこの場限りではないものとする。
+
+</details>
+
+<details>
+<summary>利用の流れ</summary>
 
 以下、原則として、拘束時間とその他の時間では利用されず、アプリ利用自由時間内で利用されているものとして説明を行う。
 
@@ -120,36 +315,30 @@ https://get-the-time.com/
 ```math
 \text{今日の本来の自分}=\frac{\text{計測された光の時間}-\text{活動記録に記入されたサボった時間}}{\text{計測された光の時間}}.
 ```
-また、「お気に入り」機能、「後悔する」機能を導入することで、活動記録の中でそれぞれ、お気に入りの活動記録、後悔している活動記録のみで絞ることができる。
+また、「お気に入り」機能を導入することで、活動記録の中でお気に入りの活動記録のみで絞ることができる。
 
-6. ステータス確認画面から、過去14日分から算出された満足度、進行度、作業の質、集中度、疲労感の平均値、本来の自分を確認できる。満足度、進行度、作業の質、集中度、疲労感についてはレーダーチャートで表示する。本来の自分はXでシェアできる。本来の自分の正確な算出方法は
+6. マイステータス画面から、過去14日分の光の時間の推移、満足度、進行度、作業の質、集中度の平均値（レーダーチャート）、疲労感の平均値、本来の自分を確認できる。本来の自分はXでシェアできる。本来の自分の正確な算出方法は
 ```math
 \text{本来の自分}=\frac{\text{過去14日分計測された光の時間の合計}-\text{過去14日分記入されたサボった時間の合計}}{\text{過去14日分計測された光の時間の合計}}.
 ```
-また、ステータスの確認し、「振り返り方」に記載されているアドバイスを参照することにより、次の方針について考えることができる。
+また、ステータスを確認し、「振り返り方」に記載されているアドバイスを参照することにより、次の方針について考えることができる。
 
-### 画面の特徴
+7. 後悔した1日を過ごしてしまったと思ったら、その内容を記録できる。お気に入りに登録した記録をもとに、闇の時間に陥りやすい傾向をAIが要約し、闇の時間の特徴へ追記できる。
+
+</details>
+
+<details>
+<summary>画面の特徴</summary>
+
 - マイページはログインする度に光の時間と闇の時間の内容を確認できる。利用する頻度が多いほど日常で想起できるように、なりたい自分や避けたい未来を表示する。
 - ポモドーロタイマーにおいても、サボりそうになった時に遷移する画面を設けて、避けたい未来を思い出せるように表示する。
 - 注意が分散せず、行動することに集中できるように、活動記録やステータス確認画面はハンバーガーメニューで隠す。
 
-## ユーザーの獲得について
-- 「#今日の本来の自分」や「#本来の自分」というハッシュタグで、各々今日の本来の自分、ステータスでの本来の自分をXに投稿できるシェア機能を搭載。
-- noteを使って具体的な活用方法を宣伝する。
+</details>
 
-## サービスの差別化ポイント・推しポイント
-機能を考慮すると、「時間管理」「集中」「習慣化」アプリが類似のサービスとして挙げられます。
-以下の表が、各々の特徴をまとめたものになります：
+<details>
+<summary>機能一覧（MVP / 本リリース）</summary>
 
-| アプリ | 例 | 解決したい問題 |
-|---|---|---|
-| 時間管理アプリ | Google Calender | 時間をどのように配分するのか |
-| 集中アプリ | Forest、Focus To-Do、ポモドーロタイマーアプリ | 目の前の作業に集中させる |
-| 習慣化アプリ | Habitica | 行動を継続させる |
-
-**Get The Time** のテーマは、「本来望んでいる自己像に結びつく自由時間の正しい使い方とは」です。いずれのアプリとも根本的に解決したい問題が異なっているため、この点で差別化できていると思われます。
-
-## 機能候補
 ### MVPリリース
 
 - アカウント新規登録機能
@@ -180,23 +369,4 @@ https://get-the-time.com/
 
 - 評価指標をカスタマイズできる機能
 
-## 使用する技術スタック
-- Ruby 3.3.6
-- フレームワーク（バックエンド）：Ruby on Rails 8.1.3.1
-- フレームワーク（フロントエンド）：Hotwire
-- CSSフレームワーク：Tailwind CSS
-- データベース：PostgreSQL (Neon)
-- デプロイ先：Render
-- グラフ表示：chart.js
-- 使用済みのライブラリ
-  - devise
-  - ransack
-  - kaminari
-- 使用予定のライブラリ
-  - Resend (本リリース)
-
-## 画面遷移図
-Figma：https://www.figma.com/design/IPuZKnOO8Oj3byb8qIBjl7/Get-The-Time?node-id=0-1&p=f&t=kPar2A1oObmgWZZ5-0
-
-## ER図
-[![Image from Gyazo](https://i.gyazo.com/38664ed115c42a9d45ba33eed6ec5098.png)](https://gyazo.com/38664ed115c42a9d45ba33eed6ec5098)
+</details>
