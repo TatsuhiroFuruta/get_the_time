@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Ruby 3.3.6, Rails 8.1.4
 - PostgreSQL（本番は Neon）、デプロイ先は Render
 - Hotwire (Turbo + Stimulus)、esbuild、Tailwind CSS v4
-- Solid Queue / Solid Cache / Solid Cable
+- Solid Queue / Solid Cache
 - 認証: Devise（+ devise-i18n）、検索: Ransack、ページネーション: Kaminari
 - テスト: RSpec + FactoryBot + Capybara + Selenium
 

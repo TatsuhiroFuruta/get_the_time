@@ -27,6 +27,8 @@ module Myapp
     config.autoload_paths << Rails.root.join("app/forms")
     config.autoload_paths << Rails.root.join("app/services")
     config.i18n.default_locale = :ja
+    # 画像の添付・変換を使っていないため image_processing を入れていない。無効にして起動時の警告を止める
+    config.active_storage.variant_processor = :disabled
 
     # Don't generate system test files.
     config.generators.system_tests = nil
