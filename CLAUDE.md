@@ -114,6 +114,14 @@ Ransack 検索はモデルごとに明示的に許可された属性のみ可能
 
 検索対象カラムを追加するときは、ここに明示的に追記してください。Ransack 6 からは、検索に関わるモデルで `ransackable_associations` も定義が必須です（関連を検索させない場合も `[]` を返す）。定義が無いと検索フォームの描画時にエラーになります。
 
+### バックグラウンドジョブとキャッシュ（Solid Queue / Solid Cache）
+
+本番の `config/environments/production.rb` では、Active Job のアダプタが `solid_queue`、キャッシュの保存先が `solid_cache_store` になっています。ただし**本番では Solid Queue のワーカーが動いていません**（`config/puma.rb` の `plugin :solid_queue` は `SOLID_QUEUE_IN_PUMA` が設定されたときだけ有効で、Render では未設定）。Neon にも `solid_queue_*` テーブルはありません。
+
+そのため、**`deliver_later` / `perform_later` を書くと本番でだけ失敗します**。テストは test アダプタで動くので、CI では気づけません。Devise のメールも `User#send_devise_notification` で `deliver_now`（同期送信）にしてあります。ジョブが必要になったら、ワーカーの動かし方（`SOLID_QUEUE_IN_PUMA` を有効にすると Neon の compute が常時起き続ける問題など。`docs/superpowers/specs/2026-09-15-guest-login-design.md` 参照）から先に決めてください。
+
+Solid Cache は `solid_cache_entries` テーブルがあり使える状態ですが、アプリのコードでは今のところ `Rails.cache` もビューのキャッシュも使っていません。Action Cable のアダプタ（Solid Cable）は #314 で削除済みで、導入は #326 で検討します。
+
 ### ルートパス
 
 ルートパスは 2 つあります:
