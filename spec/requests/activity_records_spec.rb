@@ -60,6 +60,12 @@ RSpec.describe "ActivityRecords", type: :request do
         get activity_records_path, params: { q: { comment_or_light_time_action_cont: "マッチ" } }
         expect(response).to have_http_status(:ok)
       end
+
+      it "検索欄に検索ワードが残っていること" do
+        get activity_records_path, params: { q: { comment_or_light_time_action_cont: "マッチ" } }
+        search_field = Nokogiri::HTML(response.body).at('input[name="q[comment_or_light_time_action_cont]"]')
+        expect(search_field&.[]("value")).to eq("マッチ")
+      end
     end
   end
 
