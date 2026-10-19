@@ -196,4 +196,10 @@ RSpec.describe LightTime, type: :model do
       expect(described_class.ransackable_attributes).to eq [ "action" ]
     end
   end
+
+  describe ".ransackable_associations" do
+    it "検索可能な関連付けが無いこと" do
+      expect(described_class.ransackable_associations).to eq []
+    end
+  end
 end

@@ -56,9 +56,33 @@ RSpec.describe "ActivityRecords", type: :request do
         create(:activity_record, user: user, light_time: light_time, comment: "ヒットしない")
       end
 
-      it "200 を返すこと" do
+      it "コメントに一致する活動記録だけを表示し、検索欄に検索ワードが残っていること" do
         get activity_records_path, params: { q: { comment_or_light_time_action_cont: "マッチ" } }
-        expect(response).to have_http_status(:ok)
+        search_field = Nokogiri::HTML(response.body).at('input[name="q[comment_or_light_time_action_cont]"]')
+
+        aggregate_failures do
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to include("マッチするコメント")
+          expect(response.body).not_to include("ヒットしない")
+          expect(search_field&.[]("value")).to eq("マッチ")
+        end
+      end
+
+      context "活動内容（光の時間）だけが一致するとき" do
+        let(:other_action_light_time) { create(:light_time, user: user, action: "読書") }
+
+        before do
+          create(:activity_record, user: user, light_time: other_action_light_time, comment: "静かに過ごせた")
+        end
+
+        it "光の時間の活動内容で絞り込めること" do
+          get activity_records_path, params: { q: { comment_or_light_time_action_cont: "読書" } }
+
+          aggregate_failures do
+            expect(response.body).to include("静かに過ごせた")
+            expect(response.body).not_to include("マッチするコメント")
+          end
+        end
       end
     end
   end

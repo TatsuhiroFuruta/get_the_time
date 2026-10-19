@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 技術スタック
 
-- Ruby 3.3.6, Rails 8.1.3.1
+- Ruby 3.3.6, Rails 8.1.4
 - PostgreSQL（本番は Neon）、デプロイ先は Render
 - Hotwire (Turbo + Stimulus)、esbuild、Tailwind CSS v4
 - Solid Queue / Solid Cache / Solid Cable
@@ -108,10 +108,11 @@ System Spec が失敗した場合は `tmp/screenshots` のスクリーンショ�
 ### Ransack の許可リスト
 
 Ransack 検索はモデルごとに明示的に許可された属性のみ可能です:
-- `ActivityRecord.ransackable_attributes` → `["comment"]`、`ransackable_associations` → `["light_time"]`
-- `LightTime.ransackable_attributes` → `["action"]`
+- `ActivityRecord.ransackable_attributes` → `["comment", "favorited"]`、`ransackable_associations` → `["light_time"]`
+- `LightTime.ransackable_attributes` → `["action"]`、`ransackable_associations` → `[]`
+- `RegretRecord.ransackable_attributes` → `["favorited"]`、`ransackable_associations` → `[]`
 
-検索対象カラムを追加するときは、ここに明示的に追記してください。
+検索対象カラムを追加するときは、ここに明示的に追記してください。Ransack 6 からは、検索に関わるモデルで `ransackable_associations` も定義が必須です（関連を検索させない場合も `[]` を返す）。定義が無いと検索フォームの描画時にエラーになります。
 
 ### ルートパス
 

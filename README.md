@@ -127,7 +127,7 @@ https://github.com/user-attachments/assets/4724f365-1458-4a10-b8e9-73ffee1a5621
 ## 使用技術
 | カテゴリ | 技術 |
 |---|---|
-| バックエンド | Ruby 3.3.6 / Ruby on Rails 8.1.3.1 |
+| バックエンド | Ruby 3.3.6 / Ruby on Rails 8.1.4 |
 | フロントエンド | Hotwire (Turbo / Stimulus) / esbuild / Tailwind CSS v4 / Chart.js |
 | データベース | PostgreSQL (Neon) |
 | 認証 | Devise / OmniAuth (Google ログイン) |
