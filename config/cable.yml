@@ -8,10 +8,7 @@ development:
 test:
   adapter: test
 
+# Action Cable はまだ使っていないため、solid_cable を入れずに async にしている。
+# 導入するときはアダプタを選び直す（#326）
 production:
-  adapter: solid_cable
-  connects_to:
-    database:
-      writing: cable
-  polling_interval: 0.1.seconds
-  message_retention: 1.day
+  adapter: async

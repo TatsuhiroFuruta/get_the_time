@@ -15,7 +15,7 @@ inherit_mode:
 AllCops:
   Exclude:
     - "db/schema.rb"
-    - "db/*_schema.rb"     # cache_schema.rb, cable_schema.rb など
+    - "db/*_schema.rb"     # cache_schema.rb, queue_schema.rb など
     - "db/migrate/*"        # マイグレーションファイルも除外推奨
 
 # 文字列リテラルはダブルクォートで統一
