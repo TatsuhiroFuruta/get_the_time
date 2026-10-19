@@ -114,6 +114,18 @@ Ransack 検索はモデルごとに明示的に許可された属性のみ可能
 
 検索対象カラムを追加するときは、ここに明示的に追記してください。Ransack 6 からは、検索に関わるモデルで `ransackable_associations` も定義が必須です（関連を検索させない場合も `[]` を返す）。定義が無いと検索フォームの描画時にエラーになります。
 
+### バックグラウンドジョブとキャッシュ（Solid Queue / Solid Cache）
+
+本番の `config/environments/production.rb` では、Active Job のアダプタが `solid_queue`、キャッシュの保存先が `solid_cache_store` になっています。
+
+**Solid Queue: 本番ではワーカーが動いていません。** `config/puma.rb` の `plugin :solid_queue` は `SOLID_QUEUE_IN_PUMA` が設定されたときだけ有効で、Render では未設定です。Neon にも `solid_queue_*` テーブルはありません（2026-10-19 に管理画面で確認）。`config/deploy.yml` の `SOLID_QUEUE_IN_PUMA: true` と `config/recurring.yml` は Kamal 用に生成されたままのもので、Render の本番には効いていません。
+
+そのため、**`deliver_later` / `perform_later` を書くと本番でだけ失敗します**。テストは test アダプタで動くので、CI では気づけません。Devise のメールも `User#send_devise_notification` で `deliver_now`（同期送信）にしてあります。ジョブが必要になったら、ワーカーの動かし方（`SOLID_QUEUE_IN_PUMA` を有効にすると Neon の compute が常時起き続ける問題など。`docs/superpowers/specs/2026-09-15-guest-login-design.md` 参照）から先に決めてください。
+
+**Solid Cache: 本番で使われています。** `rate_limit`（`RegretSummariesController` の要約生成、`Users::GuestSessionsController` のゲストログイン）は回数を `Rails.cache` に記録するため、本番では Solid Cache（Neon の `solid_cache_entries`）が支えています。Solid Cache を外したり `config.cache_store` を変えたりすると、OpenAI の料金対策とゲストログインの乱用対策が効かなくなります。テストは `:null_store` で何も保存しないため、ここでも CI では気づけません。
+
+Action Cable のアダプタ（Solid Cable）は #314 で削除済みで、導入は #326 で検討します。
+
 ### ルートパス
 
 ルートパスは 2 つあります:
