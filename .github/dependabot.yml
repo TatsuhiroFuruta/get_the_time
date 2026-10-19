@@ -1,12 +1,23 @@
 version: 2
 updates:
+# 通常の更新は月 1 回まとめて確認する。脆弱性の修正は Dependabot security updates が周期を待たずに個別の PR を作る
 - package-ecosystem: bundler
   directory: "/"
   schedule:
-    interval: weekly
+    interval: monthly
   open-pull-requests-limit: 10
+  groups:
+    # パッチ・マイナー更新は 1 件にまとめ、メジャー更新は個別の PR にする
+    bundler-minor-and-patch:
+      update-types:
+        - minor
+        - patch
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
-    interval: weekly
+    interval: monthly
   open-pull-requests-limit: 10
+  groups:
+    github-actions:
+      patterns:
+        - "*"
