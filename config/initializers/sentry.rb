@@ -26,4 +26,15 @@ Sentry.init do |config|
   # 許可リストにして、ブラウザや OS の把握に必要な User-Agent だけを残す
   data_collection.http_headers.request.mode = :allow_list
   data_collection.http_headers.request.terms = %w[user-agent]
+
+  # PostgreSQL のエラーメッセージには行の内容やメールアドレスがそのまま入り、上の設定では
+  # 防げない。別の例外に包まれていても消えるよう cause もたどる。例外のクラス名と
+  # スタックトレースは残るので、原因の調査はできる。
+  config.before_send = lambda do |event, hint|
+    exceptions = Sentry::Utils::ExceptionCauseChain.exception_to_array(hint[:exception])
+    if exceptions.any? { |exception| exception.is_a?(ActiveRecord::StatementInvalid) || exception.is_a?(PG::Error) }
+      event.exception&.values&.each { |value| value.value = "[Filtered]" }
+    end
+    event
+  end
 end

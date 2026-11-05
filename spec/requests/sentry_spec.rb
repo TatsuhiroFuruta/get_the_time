@@ -7,6 +7,9 @@ require "sentry/test_helper"
 RSpec.describe "Sentry へのエラー送信", type: :request do
   include Sentry::TestHelper
 
+  # setup_sentry_test はテスト環境を送信対象に加えた設定を残すので、他の spec のために戻す
+  after(:all) { load Rails.root.join("config/initializers/sentry.rb") }
+
   describe "送信される内容" do
     let(:user) { create(:user) }
     let(:private_comment) { "誰にも見せたくない内容" }
@@ -30,7 +33,7 @@ RSpec.describe "Sentry へのエラー送信", type: :request do
 
     def get_privacy_page
       get privacy_path
-    rescue RuntimeError
+    rescue StandardError
       nil
     end
 
@@ -112,6 +115,60 @@ RSpec.describe "Sentry へのエラー送信", type: :request do
       end
     end
 
+    # PostgreSQL のエラーメッセージ（DETAIL）には行の内容がそのまま入る。data_collection の
+    # 設定では防げないので、本物の制約違反を起こして確かめる。
+    context "データベースの制約違反が起きたとき" do
+      let(:regret_record) { create(:regret_record, user: user, content: private_comment) }
+
+      def violate_not_null
+        regret_record.update_column(:user_id, nil)
+      end
+
+      before { sign_in user }
+
+      it "行の内容が送られないこと" do
+        allow_any_instance_of(StaticPagesController).to receive(:privacy) { violate_not_null }
+        get_privacy_page
+
+        aggregate_failures do
+          expect(sentry_events.size).to eq(1)
+          expect(event.to_json).not_to include(private_comment)
+        end
+      end
+
+      it "例外のクラス名は送られること" do
+        allow_any_instance_of(StaticPagesController).to receive(:privacy) { violate_not_null }
+        get_privacy_page
+
+        expect(event.dig(:exception, :values).map { |value| value[:type] }).to include("ActiveRecord::NotNullViolation")
+      end
+
+      it "別の例外に包まれていても、行の内容が送られないこと" do
+        allow_any_instance_of(StaticPagesController).to receive(:privacy) do
+          violate_not_null
+        rescue ActiveRecord::StatementInvalid
+          raise "画面の描画に失敗しました"
+        end
+        get_privacy_page
+
+        expect(event.to_json).not_to include(private_comment)
+      end
+
+      it "重複登録で、他人のメールアドレスが送られないこと" do
+        # スタックトレースにはこのファイルのコード行も入るので、アドレスをここに直接書かない
+        other_user = create(:user)
+        allow_any_instance_of(StaticPagesController).to receive(:privacy) do
+          build(:user, email: other_user.email).save!(validate: false)
+        end
+        get_privacy_page
+
+        aggregate_failures do
+          expect(sentry_events.size).to eq(1)
+          expect(event.to_json).not_to include(other_user.email)
+        end
+      end
+    end
+
     context "ログインしていないときに例外が起きたとき" do
       it "ユーザー情報が送られないこと" do
         get_privacy_page
@@ -147,6 +204,23 @@ RSpec.describe "Sentry へのエラー送信", type: :request do
 
     it "SQL やログを記録しない設定であること" do
       expect(configuration.breadcrumbs_logger).to eq([])
+    end
+
+    it "ローカル変数を送らない設定であること" do
+      expect(configuration.data_collection.stack_frame_variables.mode).to eq(:off)
+    end
+
+    it "SQL の値を送らない設定であること" do
+      expect(configuration.data_collection.database_query_data).to be(false)
+    end
+
+    it "DSN を環境変数から読むこと" do
+      dsn = "https://public@sentry.invalid/1"
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("SENTRY_DSN").and_return(dsn)
+      load Rails.root.join("config/initializers/sentry.rb")
+
+      expect(Sentry.configuration.dsn.to_s).to eq(dsn)
     end
 
     it "パフォーマンス計測を使わない設定であること" do
