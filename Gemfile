@@ -67,6 +67,10 @@ gem "ruby-openai"
 # メール送信（本番のパスワードリセット等）
 gem "resend"
 
+# 本番のエラー監視
+gem "sentry-ruby"
+gem "sentry-rails"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

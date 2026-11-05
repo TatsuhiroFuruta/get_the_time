@@ -126,6 +126,14 @@ Ransack 検索はモデルごとに明示的に許可された属性のみ可能
 
 Action Cable のアダプタ（Solid Cable）は #314 で削除済みで、導入は #326 で検討します。
 
+### エラー監視（Sentry）
+
+本番の Rails サーバー側のエラーを Sentry（無料の Developer プラン、月 5,000 件）へ送ります（`config/initializers/sentry.rb`）。送信は本番環境で `SENTRY_DSN` が設定されているときだけです。ブラウザ側の JavaScript は監視していません。
+
+**送る内容は最小限に絞っています。** 活動記録などには機微な情報が含まれるためです。ユーザー情報は `ApplicationController#set_sentry_user` が渡す ID だけで、リクエスト本文・クエリ文字列・Cookie・IP アドレス・SQL は送りません。ヘッダーは `User-Agent` だけを許可しています。`Referer` には検索語入りの URL が入るため、SDK の初期設定や `send_default_pii = false` では防げません。設定を変えるときは `spec/requests/sentry_spec.rb` で実際の送信内容を確かめ、プライバシーポリシー第6条も見直してください。
+
+コード内で `rescue` したエラーは自動では送られません。送りたい場合は `Sentry.capture_exception` を呼びます。その際、例外メッセージに利用者の入力が含まれないことを確認してください。
+
 ### ルートパス
 
 ルートパスは 2 つあります:

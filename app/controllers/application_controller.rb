@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user! # 全体に適用
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :set_sentry_user
   before_action :touch_guest_activity
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
@@ -24,6 +25,12 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  # エラーの影響人数を Sentry で把握するため、ユーザー ID だけを渡す。
+  # メールアドレスなどの個人情報は外部サービスへ送らない。
+  def set_sentry_user
+    Sentry.set_user(id: current_user.id) if current_user
+  end
 
   # ゲストの最終アクセス時刻を記録する。GuestUserPurger の削除判定にのみ使うため、
   # 削除対象ではない実ユーザーでは更新しない（読まれない値のために毎リクエスト
