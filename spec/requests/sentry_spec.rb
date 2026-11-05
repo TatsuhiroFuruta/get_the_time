@@ -169,6 +169,19 @@ RSpec.describe "Sentry へのエラー送信", type: :request do
       end
     end
 
+    # この例外のメッセージには IP アドレスが入る。発生するのは Rails::Rack::Logger の中で、
+    # Sentry のミドルウェアより外側なので届かない。順序が変わったときに気づけるよう固定する。
+    context "IP アドレスの偽装を検知したとき" do
+      it "Sentry に何も送られないこと" do
+        headers = { "X-Forwarded-For" => "203.0.113.10", "Forwarded" => "for=198.51.100.20" }
+
+        aggregate_failures do
+          expect { get privacy_path, headers: headers }.to raise_error(ActionDispatch::RemoteIp::IpSpoofAttackError)
+          expect(sentry_events).to be_empty
+        end
+      end
+    end
+
     context "ログインしていないときに例外が起きたとき" do
       it "ユーザー情報が送られないこと" do
         get_privacy_page

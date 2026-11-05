@@ -138,6 +138,8 @@ Action Cable のアダプタ（Solid Cable）は #314 で削除済みで、導�
 
 `SENTRY_DSN` を設定すると、Rake タスクと `rails runner` の失敗も送られます。
 
+`Rails::Rack::Logger` より外側で起きたエラーは Sentry に届きません。たとえば、`Forwarded` と `X-Forwarded-For` が矛盾するリクエストの `IpSpoofAttackError` は全ルートで 500 になりますが、Sentry では検知できません（Render のログで確認します）。
+
 ### ルートパス
 
 ルートパスは 2 つあります:
