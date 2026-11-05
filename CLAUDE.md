@@ -126,6 +126,20 @@ Ransack 検索はモデルごとに明示的に許可された属性のみ可能
 
 Action Cable のアダプタ（Solid Cable）は #314 で削除済みで、導入は #326 で検討します。
 
+### エラー監視（Sentry）
+
+本番の Rails サーバー側のエラーを Sentry（無料の Developer プラン、月 5,000 件）へ送ります（`config/initializers/sentry.rb`）。送信は本番環境で `SENTRY_DSN` が設定されているときだけです。ブラウザ側の JavaScript は監視していません。
+
+**送る内容は最小限に絞っています。** 活動記録などには機微な情報が含まれるためです。ユーザー情報は `ApplicationController#set_sentry_user` が渡す ID だけで、リクエスト本文・クエリ文字列・Cookie・IP アドレス・SQL は送りません。ヘッダーは `User-Agent` だけを許可しています。`Referer` には検索語入りの URL が入るため、SDK の初期設定や `send_default_pii = false` では防げません。設定を変えるときは `spec/requests/sentry_spec.rb` で実際の送信内容を確かめ、プライバシーポリシー第6条も見直してください。
+
+**例外メッセージはそのまま送られます。** PostgreSQL のエラーは行の内容やメールアドレスを含むため、`before_send` でメッセージを `[Filtered]` に置き換えています（クラス名とスタックトレースは残ります）。それ以外の例外は対象外なので、`raise` のメッセージに利用者の入力を入れないでください。
+
+コード内で `rescue` したエラーは自動では送られません。送りたい場合は `Sentry.capture_exception` を呼びます。
+
+`SENTRY_DSN` を設定すると、Rake タスクと `rails runner` の失敗も送られます。
+
+`Rails::Rack::Logger` より外側で起きたエラーは Sentry に届きません。たとえば、`Forwarded` と `X-Forwarded-For` が矛盾するリクエストの `IpSpoofAttackError` は全ルートで 500 になりますが、Sentry では検知できません（Render のログで確認します）。
+
 ### ルートパス
 
 ルートパスは 2 つあります:
