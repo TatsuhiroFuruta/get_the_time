@@ -182,6 +182,29 @@ RSpec.describe "Sentry へのエラー送信", type: :request do
       end
     end
 
+    # before_send には例外が渡されない（hint[:exception] が nil になる）。失敗すると
+    # イベントが黙って捨てられ、画面にもエラーが出ないので気づきにくい。
+    context "例外を伴わないメッセージを送ったとき" do
+      it "メッセージがそのまま送られること" do
+        Sentry.capture_message("テスト用の通知")
+
+        aggregate_failures do
+          expect(sentry_events.size).to eq(1)
+          expect(event[:message]).to eq("テスト用の通知")
+        end
+      end
+    end
+
+    # 例外の種類を確かめられないイベントは、DB エラーの可能性があるので送らない
+    context "元の例外を渡さずに、例外入りのイベントを送ったとき" do
+      it "メッセージが送られないこと" do
+        client = Sentry.get_current_client
+        Sentry.capture_event(client.event_from_exception(RuntimeError.new(private_comment)))
+
+        expect(sentry_events).to be_empty
+      end
+    end
+
     context "ログインしていないときに例外が起きたとき" do
       it "ユーザー情報が送られないこと" do
         get_privacy_page

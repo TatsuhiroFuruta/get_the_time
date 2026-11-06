@@ -31,9 +31,14 @@ Sentry.init do |config|
   # 防げない。別の例外に包まれていても消えるよう cause もたどる。例外のクラス名と
   # スタックトレースは残るので、原因の調査はできる。
   config.before_send = lambda do |event, hint|
+    # capture_message のイベントには例外がないので、伏せるものがない
+    next event unless event.exception
+
+    # 元の例外が hint にないイベントは、ここで NoMethodError になり送られない。種類を
+    # 確かめられないものを送らないための動作なので、nil を許容する形に変えないこと。
     exceptions = Sentry::Utils::ExceptionCauseChain.exception_to_array(hint[:exception])
     if exceptions.any? { |exception| exception.is_a?(ActiveRecord::StatementInvalid) || exception.is_a?(PG::Error) }
-      event.exception&.values&.each { |value| value.value = "[Filtered]" }
+      event.exception.values.each { |value| value.value = "[Filtered]" }
     end
     event
   end
