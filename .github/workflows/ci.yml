@@ -5,9 +5,11 @@ on:
   push:
     branches: [ main ]
 
+# ubuntu-26.04 以降では Ruby 3.3.6 を使えない（各シリーズの最新パッチ版だけが提供される）。
+# OS を上げるときは、先に .ruby-version の Ruby を上げること。
 jobs:
   scan_ruby:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -27,7 +29,7 @@ jobs:
           bin/bundler-audit check
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
@@ -53,7 +55,7 @@ jobs:
         run: bin/rubocop -f github
 
   rspec:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
