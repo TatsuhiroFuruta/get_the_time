@@ -45,4 +45,45 @@ RSpec.describe "OmniAuth の allowed_hosts", type: :request do
   it "テスト環境では allowed_hosts を設定しない（本番だけで有効にする）" do
     expect(OmniAuth.config.allowed_hosts).to be_nil
   end
+
+  describe "config/initializers/omniauth.rb（本番での読み込み）" do
+    let(:initializer) { Rails.root.join("config/initializers/omniauth.rb") }
+
+    around do |example|
+      original_allowed_hosts = OmniAuth.config.allowed_hosts
+      example.run
+    ensure
+      OmniAuth.config.allowed_hosts = original_allowed_hosts
+    end
+
+    before do
+      allow(Rails.env).to receive(:production?).and_return(true)
+    end
+
+    def stub_hosts(hosts)
+      allow(Rails.application.config).to receive(:hosts).and_return(hosts)
+    end
+
+    it "config.hosts を allowed_hosts に設定する" do
+      stub_hosts([ "get-the-time.com", "www.get-the-time.com" ])
+
+      load initializer
+
+      expect(OmniAuth.config.allowed_hosts).to eq([ "get-the-time.com", "www.get-the-time.com" ])
+    end
+
+    # OmniAuth は文字列をホスト全体との一致として扱うため、Rails 流のサブドメイン指定は一致しない
+    it "先頭ドットのサブドメイン指定があると、起動時にエラーにする" do
+      stub_hosts([ ".get-the-time.com" ])
+
+      expect { load initializer }.to raise_error(ArgumentError, /allowed_hosts/)
+    end
+
+    # OmniAuth は IPAddr に casecmp? を呼ぶため、そのままだと Google ログインがすべて 500 になる
+    it "IPAddr があると、起動時にエラーにする" do
+      stub_hosts([ "get-the-time.com", IPAddr.new("127.0.0.1") ])
+
+      expect { load initializer }.to raise_error(ArgumentError, /allowed_hosts/)
+    end
+  end
 end
